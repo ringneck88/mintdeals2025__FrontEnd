@@ -1,0 +1,465 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { strapi } from '../../lib/strapi';
+
+// Category icon mapping
+function getCategoryIcon(slug) {
+  const icons = {
+    'flower': '🌿',
+    'pre-rolls': '🚬',
+    'vaporizers': '💨',
+    'concentrates': '🍯',
+    'edibles': '🍭',
+    'topicals': '🧴',
+    'cartridges': '🖊️'
+  };
+  return icons[slug] || '🌿';
+}
+
+// State name mapping
+const stateNames = {
+  'florida': 'Florida',
+  'california': 'California',
+  'colorado': 'Colorado',
+  'nevada': 'Nevada',
+  'arizona': 'Arizona',
+  'new-york': 'New York',
+  'massachusetts': 'Massachusetts',
+  'michigan': 'Michigan',
+  'illinois': 'Illinois',
+  'oregon': 'Oregon',
+  'washington': 'Washington'
+};
+
+// Regions by state
+const regions = {
+  'florida': [
+    { name: 'Miami-Dade', slug: 'miami-dade', type: 'Metro Area' },
+    { name: 'Orlando', slug: 'orlando', type: 'City' },
+    { name: 'Tampa Bay', slug: 'tampa-bay', type: 'Metro Area' },
+    { name: 'Jacksonville', slug: 'jacksonville', type: 'City' },
+    { name: 'South Beach', slug: 'south-beach', type: 'Neighborhood' }
+  ],
+  'california': [
+    { name: 'Los Angeles', slug: 'los-angeles', type: 'City' },
+    { name: 'San Francisco Bay Area', slug: 'bay-area', type: 'Metro Area' },
+    { name: 'San Diego', slug: 'san-diego', type: 'City' },
+    { name: 'Orange County', slug: 'orange-county', type: 'County' },
+    { name: 'Silicon Valley', slug: 'silicon-valley', type: 'Region' },
+    { name: 'Hollywood', slug: 'hollywood', type: 'Neighborhood' }
+  ],
+  'arizona': [
+    { name: 'Phoenix', slug: 'phoenix', type: 'City' },
+    { name: 'The Valley', slug: 'the-valley', type: 'Metro Area' },
+    { name: 'Scottsdale', slug: 'scottsdale', type: 'City' },
+    { name: 'Chandler', slug: 'chandler', type: 'City' },
+    { name: 'Buckeye', slug: 'buckeye', type: 'City' },
+    { name: 'Glendale', slug: 'glendale', type: 'City' },
+    { name: 'Arcadia', slug: 'arcadia', type: 'Neighborhood' }
+  ],
+  'colorado': [
+    { name: 'Denver', slug: 'denver', type: 'City' },
+    { name: 'Denver Metro', slug: 'denver-metro', type: 'Metro Area' },
+    { name: 'Boulder', slug: 'boulder', type: 'City' },
+    { name: 'Colorado Springs', slug: 'colorado-springs', type: 'City' },
+    { name: 'Fort Collins', slug: 'fort-collins', type: 'City' }
+  ],
+  'nevada': [
+    { name: 'Las Vegas', slug: 'las-vegas', type: 'City' },
+    { name: 'Las Vegas Strip', slug: 'las-vegas-strip', type: 'District' },
+    { name: 'Reno', slug: 'reno', type: 'City' },
+    { name: 'Henderson', slug: 'henderson', type: 'City' }
+  ]
+};
+
+// Category descriptions
+const categoryDescriptions = {
+  'flower': 'Premium cannabis flower for smoking and vaporizing. Available in various strains including Indica, Sativa, and Hybrid varieties.',
+  'pre-rolls': 'Ready-to-smoke pre-rolled joints made with high-quality cannabis flower. Convenient and consistent dosing.',
+  'vaporizers': 'Cannabis vaporizer cartridges and pods for clean, efficient consumption. Compatible with various vaping devices.',
+  'concentrates': 'High-potency cannabis concentrates including shatter, wax, live resin, and rosin. For experienced users.',
+  'edibles': 'Cannabis-infused food products including gummies, chocolates, beverages, and baked goods. Precise dosing and long-lasting effects.',
+  'topicals': 'Cannabis-infused topical products including balms, lotions, and salves for localized relief without psychoactive effects.',
+  'cartridges': 'Cannabis oil cartridges for vape pens. Available in various strains and potencies for discrete consumption.'
+};
+
+export async function getStaticPaths() {
+  const categories = ['flower', 'pre-rolls', 'vaporizers', 'concentrates', 'edibles', 'topicals', 'cartridges'];
+  const states = ['florida', 'california', 'colorado', 'nevada', 'arizona', 'new-york', 'massachusetts', 'michigan', 'illinois', 'oregon', 'washington'];
+
+  const paths = [];
+
+  categories.forEach(category => {
+    states.forEach(state => {
+      paths.push({
+        params: {
+          category: category,
+          slug: `${category}-in-${state}`
+        }
+      });
+    });
+  });
+
+  return paths;
+}
+
+const { category, slug } = Astro.params;
+
+// Extract state from slug
+const statePart = slug.split('-in-')[1];
+const stateName = stateNames[statePart] || statePart.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+const categoryName = category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+const pageTitle = `${categoryName} in ${stateName} | Cannabis Products & Dispensaries`;
+const categoryIcon = getCategoryIcon(category);
+const description = categoryDescriptions[category] || 'Cannabis products and dispensaries in your area.';
+
+// Get regions for current state
+const stateRegions = regions[statePart] || [];
+
+// Sample store data for the state (fallback data)
+let storeData = [];
+let deals = [];
+
+try {
+  // Try to fetch real data from Strapi
+  const storesResponse = await strapi.getMany('/stores', {
+    filters: { state: stateName },
+    pagination: { pageSize: 6 }
+  });
+  storeData = storesResponse.data || [];
+
+  const dealsResponse = await strapi.getMany('/deals', {
+    filters: { category: categoryName },
+    pagination: { pageSize: 4 }
+  });
+  deals = dealsResponse.data || [];
+} catch (error) {
+  console.log('Using fallback data for state-specific page');
+
+  // No fallback data - only show content from database
+  storeData = [];
+  deals = [];
+}
+---
+
+<Layout title={pageTitle} description={description}>
+  <!-- Breadcrumb Navigation -->
+  <nav class="bg-slate-50 dark:bg-slate-900 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center space-x-2 text-sm">
+        <a href="/" class="text-emerald-600 hover:text-emerald-800">Home</a>
+        <span class="text-slate-400">/</span>
+        <a href="/categories" class="text-emerald-600 hover:text-emerald-800">Categories</a>
+        <span class="text-slate-400">/</span>
+        <a href={`/learn/${category}`} class="text-emerald-600 hover:text-emerald-800">{categoryName}</a>
+        <span class="text-slate-400">/</span>
+        <span class="text-slate-600 dark:text-slate-400">{categoryName} in {stateName}</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 dark:from-emerald-800 dark:via-emerald-900 dark:to-teal-900">
+    <div class="absolute inset-0 bg-black opacity-20"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+      <div class="text-8xl mb-8">{categoryIcon}</div>
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+        {categoryName} in {stateName}
+      </h1>
+      <p class="text-xl md:text-2xl text-emerald-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+        {description} Find dispensaries and deals near you in {stateName}.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#dispensaries" class="inline-flex items-center px-6 py-3 bg-white text-emerald-700 font-semibold rounded-lg shadow-lg hover:bg-emerald-50 transition-colors duration-200">
+          🏪 Find Dispensaries
+        </a>
+        <a href="#deals" class="inline-flex items-center px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-emerald-700 transition-colors duration-200">
+          🔥 View Deals
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- State-specific Information -->
+  <section class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+            {categoryName} Laws & Regulations in {stateName}
+          </h2>
+          <div class="prose prose-lg max-w-none dark:prose-invert">
+            <p class="text-lg leading-relaxed mb-6">
+              {stateName} has specific regulations regarding {categoryName.toLowerCase()} products.
+              Always ensure you're purchasing from licensed dispensaries and following local consumption laws.
+            </p>
+
+            <div class="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl p-6 mb-8">
+              <h3 class="text-xl font-semibold text-emerald-800 dark:text-emerald-200 mb-4">
+                {categoryName} Guidelines in {stateName}
+              </h3>
+              <ul class="space-y-2 text-sm">
+                <li>✓ Must be 21+ years old to purchase</li>
+                <li>✓ Valid government-issued ID required</li>
+                <li>✓ Purchase only from licensed dispensaries</li>
+                <li>✓ Follow possession limits as defined by state law</li>
+                <li>✓ Consume only in legal, designated areas</li>
+                <li>✓ Keep products in original packaging when transporting</li>
+              </ul>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Popular {categoryName} Strains in {stateName}
+            </h3>
+            <p class="mb-6">
+              Dispensaries in {stateName} typically carry a wide variety of {categoryName.toLowerCase()} products.
+              Popular options include both locally grown and imported selections from trusted cultivators.
+            </p>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+          <div class="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 sticky top-6">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Quick Facts
+            </h3>
+            <div class="space-y-4 text-sm">
+              <div class="flex items-start">
+                <span class="text-emerald-600 mr-2">📍</span>
+                <div>
+                  <span class="font-semibold">State:</span>
+                  <span class="ml-2">{stateName}</span>
+                </div>
+              </div>
+              <div class="flex items-start">
+                <span class="text-emerald-600 mr-2">🌿</span>
+                <div>
+                  <span class="font-semibold">Category:</span>
+                  <span class="ml-2">{categoryName}</span>
+                </div>
+              </div>
+              <div class="flex items-start">
+                <span class="text-emerald-600 mr-2">🏪</span>
+                <div>
+                  <span class="font-semibold">Dispensaries:</span>
+                  <span class="ml-2">{storeData.length}+ locations</span>
+                </div>
+              </div>
+              <div class="flex items-start">
+                <span class="text-emerald-600 mr-2">🔥</span>
+                <div>
+                  <span class="font-semibold">Active Deals:</span>
+                  <span class="ml-2">{deals.length} current offers</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Current Deals Section -->
+  <section id="deals" class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+          Current {categoryName} Deals in {stateName}
+        </h2>
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
+          Save money on {categoryName.toLowerCase()} products from dispensaries in {stateName}
+        </p>
+      </div>
+
+      {deals.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {deals.map(deal => (
+            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 border-l-4 border-emerald-500">
+              <div class="flex items-center justify-between mb-3">
+                <span class="inline-block bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-xs px-2 py-1 rounded font-bold">
+                  {deal.discount}
+                </span>
+                <span class="text-gray-500 dark:text-gray-400 text-xs">
+                  {categoryName}
+                </span>
+              </div>
+
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                {deal.title}
+              </h3>
+
+              <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+                {deal.description}
+              </p>
+
+              <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
+                <span class="text-gray-500 dark:text-gray-400 text-sm">
+                  📍 {deal.store}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <div class="bg-white dark:bg-gray-700 rounded-lg p-8 max-w-md mx-auto">
+            <div class="text-6xl mb-4">{categoryIcon}</div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Active Deals</h3>
+            <p class="text-gray-600 dark:text-gray-300">Check back soon for new {categoryName.toLowerCase()} deals in {stateName}!</p>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Dispensaries Section -->
+  <section id="dispensaries" class="py-16 bg-white dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+          {categoryName} Dispensaries in {stateName}
+        </h2>
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
+          Licensed dispensaries carrying {categoryName.toLowerCase()} products in {stateName}
+        </p>
+      </div>
+
+      {storeData.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {storeData.map((store, index) => (
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow duration-300">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center text-white text-xl mr-4">
+                  🏪
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{store.name}</h3>
+              </div>
+
+              <div class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                <div class="flex items-center">
+                  <span class="w-4 h-4 text-gray-400 mr-2">📍</span>
+                  <span>{store.address}, {store.city}, {store.state}</span>
+                </div>
+                {store.phone && (
+                  <div class="flex items-center">
+                    <span class="w-4 h-4 text-gray-400 mr-2">📞</span>
+                    <span>{store.phone}</span>
+                  </div>
+                )}
+                <div class="flex items-center">
+                  <span class="w-4 h-4 text-gray-400 mr-2">🕒</span>
+                  <span>{store.hours}</span>
+                </div>
+              </div>
+
+              <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <span class="inline-block bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-xs px-2 py-1 rounded">
+                  {categoryName} Available
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 max-w-md mx-auto">
+            <div class="text-6xl mb-4">🏪</div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Finding Dispensaries</h3>
+            <p class="text-gray-600 dark:text-gray-300">We're updating our dispensary database for {stateName}. Check back soon!</p>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Related Categories -->
+  <section class="py-16 bg-emerald-50 dark:bg-emerald-900/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
+          Other Cannabis Categories in {stateName}
+        </h2>
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
+          Explore other cannabis products available in {stateName}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {['flower', 'pre-rolls', 'vaporizers', 'concentrates', 'edibles', 'topicals', 'cartridges']
+          .filter(cat => cat !== category)
+          .slice(0, 6)
+          .map(relatedCategory => {
+            const relatedIcon = getCategoryIcon(relatedCategory);
+            const relatedName = relatedCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            return (
+              <a href={`/${relatedCategory}/${relatedCategory}-in-${statePart}`} class="group bg-white dark:bg-slate-800 rounded-xl p-4 text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+                <div class="text-3xl mb-2 group-hover:scale-110 transition-transform duration-200">
+                  {relatedIcon}
+                </div>
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                  {relatedName}
+                </h3>
+              </a>
+            );
+          })
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Regional Areas Section -->
+  {stateRegions.length > 0 && (
+    <section class="py-16 bg-slate-50 dark:bg-slate-900">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
+            {categoryName} by Region in {stateName}
+          </h2>
+          <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
+            Find local {categoryName.toLowerCase()} dispensaries and deals in specific areas
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {stateRegions.map((region) => (
+            <a
+              href={`/${category}/${slug}/${region.slug}`}
+              class="bg-white dark:bg-slate-800 rounded-xl p-6 text-center hover:shadow-lg hover:-translate-y-2 transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600"
+            >
+              <div class="text-4xl mb-3">📍</div>
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                {region.name}
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                {region.type}
+              </p>
+              <span class="inline-block bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-xs font-medium px-3 py-1 rounded-full">
+                View {categoryName}
+              </span>
+            </a>
+          ))}
+        </div>
+
+        <div class="text-center mt-8">
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Can't find your area? <a href="/contact" class="text-emerald-600 hover:text-emerald-700 font-medium">Let us know</a> and we'll add it.
+          </p>
+        </div>
+      </div>
+    </section>
+  )}
+</Layout>
+
+<style>
+  .prose ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .prose li {
+    margin: 0.5rem 0;
+  }
+</style>

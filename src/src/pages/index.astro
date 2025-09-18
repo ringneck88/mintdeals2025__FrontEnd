@@ -1,0 +1,393 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { strapi } from '../lib/strapi';
+
+let strapiStatus = 'Not connected';
+let strapiUrl = import.meta.env.PUBLIC_STRAPI_URL;
+
+// Category icon mapping
+function getCategoryIcon(slug) {
+  const icons = {
+    'flower': '🌿',
+    'pre-rolls': '🚬',
+    'vaporizers': '💨',
+    'concentrates': '🍯',
+    'edibles': '🍭',
+    'topicals': '🧴',
+    'cartridges': '🖊️'
+  };
+  return icons[slug] || '🌿';
+}
+
+// Initialize data arrays
+let deals = [];
+let stores = [];
+let categories = [];
+let apiError = null;
+
+try {
+  console.log('🚀 Starting API data fetch');
+
+  // Fetch all data in parallel
+  const [dealsResponse, storesResponse, categoriesResponse] = await Promise.allSettled([
+    strapi.getMany('/deals', { pagination: { pageSize: 6 } }),
+    strapi.getMany('/stores', { pagination: { pageSize: 6 } }),
+    strapi.getMany('/dosage-forms', { sort: 'Title:asc', pagination: { pageSize: 8 } })
+  ]);
+
+  strapiStatus = 'Connected';
+
+  // Process deals
+  if (dealsResponse.status === 'fulfilled' && dealsResponse.value?.data?.length > 0) {
+    deals = dealsResponse.value.data.map(deal => ({
+      id: deal.id,
+      documentId: deal.documentId,
+      title: deal.Title || deal.title || 'Special Deal',
+      description: deal.Description || deal.description || 'Great savings available!',
+      discount: deal.Discount || deal.discount || 'Special Pricing',
+      validUntil: deal.ValidUntil || deal.valid_until || deal.validUntil,
+      store: deal.store?.Name || deal.store?.Title || 'Multiple Locations',
+      category: deal.Category || deal.category || 'General',
+      image: deal.image?.url ? `${strapiUrl}${deal.image.url}` : 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=300&fit=crop&q=80',
+      publishedAt: deal.publishedAt
+    })).filter(deal => deal.publishedAt);
+  }
+
+  // Process stores
+  if (storesResponse.status === 'fulfilled' && storesResponse.value?.data?.length > 0) {
+    stores = storesResponse.value.data.map(store => ({
+      id: store.id,
+      documentId: store.documentId,
+      name: store.Name || store.title || 'Dispensary',
+      address: store.Address?.Street || store.Address || store.address || 'Address not available',
+      city: store.Address?.City || store.City || store.city || '',
+      state: store.Address?.State || store.State || store.state || 'FL',
+      phone: store.Phone || store.phone || '',
+      hours: store.Hours || store.hours || 'Call for hours',
+      slug: store.Slug || store.slug || store.documentId,
+      image: store.image?.url ? `${strapiUrl}${store.image.url}` : 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=300&fit=crop&q=80',
+      publishedAt: store.publishedAt
+    })).filter(store => store.publishedAt);
+  }
+
+  // Process categories
+  if (categoriesResponse.status === 'fulfilled' && categoriesResponse.value?.data?.length > 0) {
+    categories = categoriesResponse.value.data.map(category => ({
+      id: category.id,
+      documentId: category.documentId,
+      title: category.Title || category.title || 'Category',
+      description: category.Description || category.description || 'Cannabis product category',
+      slug: category.SEO_Title_Slug || category.slug || category.documentId,
+      icon: getCategoryIcon(category.SEO_Title_Slug),
+      publishedAt: category.publishedAt
+    })).filter(category => category.publishedAt);
+  }
+} catch (error) {
+  console.log('💥 DEBUG: Error occurred:', error);
+  strapiStatus = 'Disconnected - Cannot connect to backend';
+  apiError = error.name === 'AbortError' ? 'Connection timeout' : error.message;
+
+  // No fallback data - only show content from database
+  deals = [];
+  stores = [];
+  categories = [];
+}
+---
+
+<Layout title="FLMintDeals - Cannabis Deals in Florida" description="Find the best cannabis deals and dispensary locations across Florida. Your trusted source for cannabis savings.">
+  <!-- Hero Section -->
+  <div id="hero" class="relative bg-gradient-to-r from-green-600 to-blue-700 text-white overflow-hidden">
+    <!-- Background parallax image -->
+    <div
+      id="parallax-bg"
+      class="absolute inset-0 opacity-30 bg-cover bg-center transition-transform duration-100 ease-out"
+      style="background-image: url('https://mintdeals.com/wp-content/uploads/2024/08/header-FLOWER-mobile@2x.jpg'); transform: scale(1.1);"
+    ></div>
+
+    <div class="relative z-10 px-4 py-8 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <div class="mb-4">
+          <img
+            id="parallax-logo"
+            src="/Mint_Full_Logo_Vector_Bead.png"
+            alt="FLMintDeals"
+            class="h-16 w-auto sm:h-20 lg:h-24 mx-auto transition-transform duration-100 ease-out"
+          />
+        </div>
+        <h1 class="text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+          Florida Cannabis Deals
+        </h1>
+        <p class="mt-4 text-lg text-green-100 max-w-2xl mx-auto">
+          Discover the best cannabis deals and dispensary locations across Florida.
+        </p>
+        <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="#deals" class="inline-flex items-center px-5 py-2.5 border border-transparent text-base font-medium rounded-md text-green-700 bg-white hover:bg-green-50 transition-colors duration-200">
+            🔥 View Current Deals
+          </a>
+          <a href="/stores" class="inline-flex items-center px-5 py-2.5 border-2 border-white text-base font-medium rounded-md text-white hover:bg-white hover:text-green-700 transition-colors duration-200">
+            📍 Find Dispensaries
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Deals Section -->
+  <div id="deals" class="py-16 bg-white dark:bg-gray-900">
+    <div class="px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Current Deals</h2>
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">Limited time offers from dispensaries across Florida</p>
+      </div>
+
+      {deals.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          {deals.map(deal => (
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-gray-900/50 overflow-hidden hover:shadow-lg dark:hover:shadow-gray-900/75 transition-shadow duration-300 border-l-4 border-red-500">
+              <div class="aspect-w-16 aspect-h-9">
+                <img
+                  src={deal.image}
+                  alt={deal.title}
+                  class="w-full h-48 object-cover"
+                />
+              </div>
+              <div class="p-6">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="inline-block bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs px-2 py-1 rounded font-bold">
+                    {deal.discount}
+                  </span>
+                  <span class="text-gray-500 dark:text-gray-400 text-xs">
+                    {deal.category}
+                  </span>
+                </div>
+
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  {deal.title}
+                </h3>
+
+                <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm line-clamp-2">
+                  {deal.description}
+                </p>
+
+                <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500 dark:text-gray-400">
+                      📍 {deal.store}
+                    </span>
+                    {deal.validUntil && (
+                      <span class="text-red-600 dark:text-red-400 font-medium">
+                        Until {new Date(deal.validUntil).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-8 max-w-md mx-auto">
+            <svg class="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Deals Available</h3>
+            <p class="text-gray-600 dark:text-gray-300">Check back soon for new deals and promotions!</p>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- Cannabis Categories Section -->
+  <div class="py-16 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-900/20 dark:via-teal-900/20 dark:to-cyan-900/20">
+    <div class="px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Cannabis Education</h2>
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">Learn about different cannabis products and consumption methods</p>
+      </div>
+
+      {categories.length > 0 ? (
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 max-w-7xl mx-auto">
+          {categories.map(category => (
+            <a href={`/learn/${category.slug}`} class="group bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center border border-emerald-200/50 dark:border-emerald-700/50 hover:border-emerald-300 dark:hover:border-emerald-600">
+              <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                {category.icon}
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">
+                {category.title}
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">
+                {category.description}
+              </p>
+              <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium group-hover:text-emerald-700 dark:group-hover:text-emerald-300">
+                Learn More →
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <div class="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto border border-emerald-200/50 dark:border-emerald-700/50">
+            <div class="text-6xl mb-4">🌿</div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Educational Content Coming Soon</h3>
+            <p class="text-gray-600 dark:text-gray-300">Cannabis education resources will be available here.</p>
+          </div>
+        </div>
+      )}
+
+      <div class="text-center mt-12">
+        <a href="/categories" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors duration-200">
+          View All Categories
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured Stores Section -->
+  <div class="py-16 bg-gray-50 dark:bg-gray-800">
+    <div class="px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Featured Dispensaries</h2>
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">Trusted cannabis dispensaries across Florida</p>
+      </div>
+
+      {stores.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          {stores.slice(0, 4).map(store => (
+            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+              <img
+                src={store.image}
+                alt={store.name}
+                class="w-full h-32 object-cover rounded-lg mb-4"
+              />
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{store.name}</h3>
+              <p class="text-gray-600 dark:text-gray-300 text-sm mb-2">
+                📍 {store.address}, {store.city}, {store.state}
+              </p>
+              {store.phone && (
+                <p class="text-gray-600 dark:text-gray-300 text-sm mb-2">
+                  📞 {store.phone}
+                </p>
+              )}
+              <p class="text-gray-500 dark:text-gray-400 text-xs">
+                🕒 {store.hours}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <p class="text-gray-600 dark:text-gray-300">Store information will be displayed here.</p>
+        </div>
+      )}
+
+      <div class="text-center mt-8">
+        <a href="/stores" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 transition-colors duration-200">
+          View All Dispensaries
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Section -->
+  <div id="about" class="py-16 bg-white dark:bg-gray-900">
+    <div class="px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl mb-8">
+          About FLMintDeals
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="text-center">
+            <div class="bg-green-100 dark:bg-green-900 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Best Deals</h3>
+            <p class="text-gray-600 dark:text-gray-300 text-sm">Find the best cannabis deals and promotions across Florida dispensaries.</p>
+          </div>
+
+          <div class="text-center">
+            <div class="bg-blue-100 dark:bg-blue-900 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Store Locator</h3>
+            <p class="text-gray-600 dark:text-gray-300 text-sm">Easily find dispensaries near you with detailed location information.</p>
+          </div>
+
+          <div class="text-center">
+            <div class="bg-purple-100 dark:bg-purple-900 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Education</h3>
+            <p class="text-gray-600 dark:text-gray-300 text-sm">Learn about different cannabis products, consumption methods, and dosing guides.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const hero = document.getElementById('hero');
+    const parallaxBg = document.getElementById('parallax-bg');
+    const parallaxLogo = document.getElementById('parallax-logo');
+
+    if (!hero || !parallaxBg || !parallaxLogo) return;
+
+    let ticking = false;
+
+    function updateParallax(x, y) {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          // Get hero dimensions
+          const rect = hero.getBoundingClientRect();
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+
+          // Calculate mouse position relative to hero center
+          const mouseX = x - rect.left - centerX;
+          const mouseY = y - rect.top - centerY;
+
+          // Calculate movement as percentage of hero size
+          const moveX = (mouseX / centerX) * 15; // Max 15px movement
+          const moveY = (mouseY / centerY) * 15; // Max 15px movement
+
+          // Apply transforms
+          parallaxBg.style.transform = `scale(1.1) translate(${moveX * 0.5}px, ${moveY * 0.5}px)`;
+          parallaxLogo.style.transform = `translate(${moveX * 0.3}px, ${moveY * 0.3}px)`;
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    // Mouse move event
+    hero.addEventListener('mousemove', function(e) {
+      updateParallax(e.clientX, e.clientY);
+    });
+
+    // Reset on mouse leave
+    hero.addEventListener('mouseleave', function() {
+      parallaxBg.style.transform = 'scale(1.1) translate(0px, 0px)';
+      parallaxLogo.style.transform = 'translate(0px, 0px)';
+    });
+  });
+</script>

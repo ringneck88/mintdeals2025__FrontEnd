@@ -1,0 +1,660 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Your deals website powered by Kelly" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <script>
+      // Prevent flash of wrong theme
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors relative">
+    <!-- Animated Smoke Background -->
+    <div class="smoke-container">
+      <div class="smoke smoke1"></div>
+      <div class="smoke smoke2"></div>
+      <div class="smoke smoke3"></div>
+      <div class="smoke smoke4"></div>
+      <div class="smoke smoke5"></div>
+    </div>
+
+    <header class="bg-white dark:bg-gray-800 shadow-lg dark:shadow-gray-700 relative z-[100]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-6">
+          <div class="flex items-center">
+            <a href="/">
+              <img src="/Mint_Full_Logo_Vector_Bead.png" alt="Mint Cannabis Logo" class="h-12 w-auto hover:opacity-80 transition-opacity" />
+            </a>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <nav class="hidden md:flex space-x-8">
+              <a href="/" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                Home
+              </a>
+
+              <!-- Store Locations Dropdown -->
+              <div class="relative group">
+                <button class="flex items-center text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  Store Locations
+                  <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div class="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[200]">
+                  <div class="py-2">
+                    <a href="/stores" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                      🏪 All Locations
+                    </a>
+                    <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                    <a href="/stores/mint-cannabis-tempe" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                      📍 Mint Cannabis - Tempe
+                    </a>
+                    <a href="/stores/mint-cannabis-phoenix" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                      📍 Mint Cannabis - Phoenix
+                    </a>
+                    <a href="/stores/mint-cannabis-mesa" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                      📍 Mint Cannabis - Mesa
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Categories Dropdown -->
+              <div class="relative group">
+                <button class="flex items-center text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  Categories
+                  <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div class="absolute left-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[200]">
+                  <div class="py-2">
+                    <a href="/categories" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400">
+                      📚 All Categories
+                    </a>
+                    <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+
+                    <!-- Two Column Layout -->
+                    <div class="grid grid-cols-2 gap-1 px-2">
+                      <!-- General Education Links -->
+                      <div>
+                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1">Education</div>
+                        <a href="/learn/flower" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🌿 Flower
+                        </a>
+                        <a href="/learn/edibles" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🍭 Edibles
+                        </a>
+                        <a href="/learn/concentrates" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🍯 Concentrates
+                        </a>
+                        <a href="/learn/vaporizers" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          💨 Vaporizers
+                        </a>
+                        <a href="/learn/pre-rolls" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🚬 Pre-Rolls
+                        </a>
+                        <a href="/learn/topicals" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🧴 Topicals
+                        </a>
+                        <a href="/learn/cartridges" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🖊️ Cartridges
+                        </a>
+                      </div>
+
+                      <!-- State-specific Links -->
+                      <div>
+                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1">By State</div>
+                        <a href="/flower/flower-in-florida" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🌴 Florida Products
+                        </a>
+                        <a href="/edibles/edibles-in-california" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          ☀️ California Products
+                        </a>
+                        <a href="/concentrates/concentrates-in-colorado" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🏔️ Colorado Products
+                        </a>
+                        <a href="/vaporizers/vaporizers-in-nevada" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🎰 Nevada Products
+                        </a>
+                        <a href="/pre-rolls/pre-rolls-in-arizona" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🌵 Arizona Products
+                        </a>
+                        <a href="/topicals/topicals-in-oregon" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          🌲 Oregon Products
+                        </a>
+                        <a href="/cartridges/cartridges-in-washington" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
+                          ⛰️ Washington Products
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <a href="/states" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                States
+              </a>
+              <a href="/events" class="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                Events
+              </a>
+              <a href="#deals" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                Deals
+              </a>
+              <a href="#about" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                About
+              </a>
+            </nav>
+            
+            <!-- Theme Toggle Button -->
+            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <svg id="theme-toggle-dark-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+              </svg>
+              <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Mobile menu button -->
+          <div class="md:hidden">
+            <button id="mobile-menu-button" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200 dark:border-gray-600 pt-4 pb-3 relative z-[150]">
+          <a href="/" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium">
+            Home
+          </a>
+
+          <!-- Mobile Store Locations -->
+          <div>
+            <button id="mobile-stores-toggle" class="flex items-center justify-between w-full px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
+              Store Locations
+              <svg id="mobile-stores-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div id="mobile-stores-menu" class="hidden pl-6 pb-2">
+              <a href="/stores" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">
+                🏪 All Locations
+              </a>
+              <a href="/stores/mint-cannabis-tempe" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">
+                📍 Mint Cannabis - Tempe
+              </a>
+              <a href="/stores/mint-cannabis-phoenix" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">
+                📍 Mint Cannabis - Phoenix
+              </a>
+              <a href="/stores/mint-cannabis-mesa" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">
+                📍 Mint Cannabis - Mesa
+              </a>
+            </div>
+          </div>
+
+          <!-- Mobile Categories -->
+          <div>
+            <button id="mobile-categories-toggle" class="flex items-center justify-between w-full px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 text-sm font-medium">
+              Categories
+              <svg id="mobile-categories-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div id="mobile-categories-menu" class="hidden pl-6 pb-2">
+              <a href="/categories" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
+                📚 All Categories
+              </a>
+              <a href="/learn/flower" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
+                🌿 Flower
+              </a>
+              <a href="/learn/edibles" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
+                🍭 Edibles
+              </a>
+              <a href="/learn/concentrates" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
+                🍯 Concentrates
+              </a>
+              <a href="/learn/vaporizers" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
+                💨 Vaporizers
+              </a>
+              <a href="/learn/pre-rolls" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
+                🚬 Pre-Rolls
+              </a>
+              <a href="/learn/topicals" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
+                🧴 Topicals
+              </a>
+              <a href="/learn/cartridges" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400">
+                🖊️ Cartridges
+              </a>
+            </div>
+          </div>
+
+          <a href="/states" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium">
+            States
+          </a>
+          <a href="/events" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 text-sm font-medium">
+            Events
+          </a>
+          <a href="#deals" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
+            Deals
+          </a>
+          <a href="#about" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
+            About
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="relative z-10">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 dark:bg-gray-900 text-white relative z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <!-- Company Info -->
+          <div class="col-span-1">
+            <div class="flex items-center mb-4">
+              <img src="/Mint_Full_Logo_Vector_Bead.png" alt="FLMintDeals" class="h-8 w-auto mr-3" />
+              <h3 class="text-lg font-bold">FLMintDeals</h3>
+            </div>
+            <p class="text-gray-300 text-sm">
+              Your trusted source for cannabis deals and dispensary information in Florida.
+            </p>
+          </div>
+
+          <!-- Quick Links -->
+          <div>
+            <h4 class="text-md font-semibold mb-4">Quick Links</h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a></li>
+              <li><a href="/stores" class="text-gray-300 hover:text-white transition-colors">Store Locations</a></li>
+              <li><a href="/categories" class="text-gray-300 hover:text-white transition-colors">Categories</a></li>
+              <li><a href="#deals" class="text-gray-300 hover:text-white transition-colors">Current Deals</a></li>
+              <li><a href="#about" class="text-gray-300 hover:text-white transition-colors">About Us</a></li>
+            </ul>
+          </div>
+
+          <!-- Educational Resources -->
+          <div>
+            <h4 class="text-md font-semibold mb-4">Educational Resources</h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="/dosage-guide" class="text-gray-300 hover:text-white transition-colors">Dosage Guide</a></li>
+              <li><a href="/dosage-guide#dosage-forms" class="text-gray-300 hover:text-white transition-colors">Dosage Forms</a></li>
+              <li><a href="/dosage-guide#products" class="text-gray-300 hover:text-white transition-colors">Product Information</a></li>
+              <li><a href="#safety" class="text-gray-300 hover:text-white transition-colors">Safety Guidelines</a></li>
+            </ul>
+          </div>
+
+          <!-- Legal & Support -->
+          <div>
+            <h4 class="text-md font-semibold mb-4">Legal & Support</h4>
+            <ul class="space-y-2 text-sm">
+              <li><a href="#privacy" class="text-gray-300 hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="#terms" class="text-gray-300 hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="#contact" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+              <li><a href="#disclaimer" class="text-gray-300 hover:text-white transition-colors">Medical Disclaimer</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="border-t border-gray-700 dark:border-gray-600 mt-8 pt-8 text-center">
+          <p class="text-gray-400 text-sm">
+            © 2025 FLMintDeals. All rights reserved. This website is for informational purposes only.
+          </p>
+          <p class="text-gray-400 text-xs mt-2">
+            Please consume cannabis responsibly and in accordance with Florida state laws.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('Theme toggle script loaded');
+        
+        // Theme toggle functionality
+        function toggleTheme() {
+          console.log('Toggle theme clicked');
+          const html = document.documentElement;
+          const isDark = html.classList.contains('dark');
+          
+          if (isDark) {
+            html.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            console.log('Switched to light mode');
+          } else {
+            html.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            console.log('Switched to dark mode');
+          }
+          
+          // Update button icons
+          updateIcons();
+        }
+        
+        function updateIcons() {
+          const isDark = document.documentElement.classList.contains('dark');
+          const lightIcon = document.getElementById('theme-toggle-light-icon');
+          const darkIcon = document.getElementById('theme-toggle-dark-icon');
+          
+          if (isDark) {
+            lightIcon?.classList.remove('hidden');
+            darkIcon?.classList.add('hidden');
+          } else {
+            lightIcon?.classList.add('hidden');
+            darkIcon?.classList.remove('hidden');
+          }
+        }
+        
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+        updateIcons();
+        
+        // Add event listener
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+          themeToggle.addEventListener('click', toggleTheme);
+          console.log('Theme toggle button found and listener added');
+        } else {
+          console.log('Theme toggle button NOT found');
+        }
+        
+        // Mobile menu functionality
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuButton && mobileMenu) {
+          mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+          });
+        }
+
+        // Mobile dropdown functionality
+        function setupMobileDropdown(toggleId, menuId, iconId) {
+          const toggle = document.getElementById(toggleId);
+          const menu = document.getElementById(menuId);
+          const icon = document.getElementById(iconId);
+
+          if (toggle && menu && icon) {
+            toggle.addEventListener('click', function() {
+              menu.classList.toggle('hidden');
+              icon.classList.toggle('rotate-180');
+            });
+          }
+        }
+
+        // Setup mobile dropdowns
+        setupMobileDropdown('mobile-stores-toggle', 'mobile-stores-menu', 'mobile-stores-icon');
+        setupMobileDropdown('mobile-categories-toggle', 'mobile-categories-menu', 'mobile-categories-icon');
+      });
+    </script>
+
+    <style>
+      /* Smoke Animation CSS */
+      .smoke-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+      }
+
+      .smoke {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 20%, rgba(255,255,255,0.08) 40%, rgba(255,255,255,0.03) 60%, transparent 80%);
+        border-radius: 50%;
+        opacity: 0;
+        animation-timing-function: ease-out;
+        animation-iteration-count: infinite;
+        filter: blur(25px);
+      }
+
+      .smoke1 {
+        left: -200px;
+        top: 85%;
+        animation: smokeFlow1 45s infinite;
+        animation-delay: 0s;
+      }
+
+      .smoke2 {
+        left: -250px;
+        top: 90%;
+        animation: smokeFlow2 50s infinite;
+        animation-delay: 8s;
+        transform: scale(0.7);
+      }
+
+      .smoke3 {
+        left: -180px;
+        top: 80%;
+        animation: smokeFlow3 48s infinite;
+        animation-delay: 16s;
+        transform: scale(1.1);
+      }
+
+      .smoke4 {
+        left: -300px;
+        top: 95%;
+        animation: smokeFlow4 42s infinite;
+        animation-delay: 24s;
+        transform: scale(0.9);
+      }
+
+      .smoke5 {
+        left: -220px;
+        top: 88%;
+        animation: smokeFlow5 55s infinite;
+        animation-delay: 32s;
+        transform: scale(1.3);
+      }
+
+      @keyframes smokeFlow1 {
+        0% {
+          left: -300px;
+          opacity: 0;
+          transform: translateY(0) scale(0.3) rotate(0deg);
+        }
+        15% {
+          opacity: 0.4;
+          transform: translateY(-50px) scale(0.6) rotate(15deg);
+        }
+        30% {
+          opacity: 0.7;
+          transform: translateY(-120px) scale(0.9) rotate(45deg);
+        }
+        50% {
+          opacity: 0.8;
+          transform: translateY(-200px) scale(1.3) rotate(90deg);
+        }
+        70% {
+          opacity: 0.6;
+          transform: translateY(-300px) scale(1.8) rotate(150deg);
+        }
+        85% {
+          opacity: 0.3;
+          transform: translateY(-400px) scale(2.5) rotate(200deg);
+        }
+        100% {
+          left: 120%;
+          opacity: 0;
+          transform: translateY(-500px) scale(3.5) rotate(270deg);
+        }
+      }
+
+      @keyframes smokeFlow2 {
+        0% {
+          left: -350px;
+          opacity: 0;
+          transform: translateY(0) scale(0.2) rotate(0deg);
+        }
+        20% {
+          opacity: 0.3;
+          transform: translateY(-80px) scale(0.5) rotate(25deg);
+        }
+        35% {
+          opacity: 0.6;
+          transform: translateY(-160px) scale(0.8) rotate(60deg);
+        }
+        55% {
+          opacity: 0.7;
+          transform: translateY(-280px) scale(1.2) rotate(120deg);
+        }
+        75% {
+          opacity: 0.5;
+          transform: translateY(-420px) scale(1.9) rotate(180deg);
+        }
+        90% {
+          opacity: 0.2;
+          transform: translateY(-580px) scale(2.8) rotate(240deg);
+        }
+        100% {
+          left: 120%;
+          opacity: 0;
+          transform: translateY(-700px) scale(3.8) rotate(300deg);
+        }
+      }
+
+      @keyframes smokeFlow3 {
+        0% {
+          left: -280px;
+          opacity: 0;
+          transform: translateY(0) scale(0.4) rotate(0deg);
+        }
+        18% {
+          opacity: 0.35;
+          transform: translateY(-90px) scale(0.7) rotate(30deg);
+        }
+        40% {
+          opacity: 0.65;
+          transform: translateY(-190px) scale(1.0) rotate(75deg);
+        }
+        60% {
+          opacity: 0.75;
+          transform: translateY(-320px) scale(1.5) rotate(135deg);
+        }
+        78% {
+          opacity: 0.45;
+          transform: translateY(-480px) scale(2.2) rotate(200deg);
+        }
+        92% {
+          opacity: 0.15;
+          transform: translateY(-650px) scale(3.1) rotate(260deg);
+        }
+        100% {
+          left: 120%;
+          opacity: 0;
+          transform: translateY(-780px) scale(4.0) rotate(320deg);
+        }
+      }
+
+      @keyframes smokeFlow4 {
+        0% {
+          left: -320px;
+          opacity: 0;
+          transform: translateY(0) scale(0.25) rotate(0deg);
+        }
+        25% {
+          opacity: 0.4;
+          transform: translateY(-100px) scale(0.6) rotate(40deg);
+        }
+        45% {
+          opacity: 0.7;
+          transform: translateY(-220px) scale(0.95) rotate(85deg);
+        }
+        65% {
+          opacity: 0.8;
+          transform: translateY(-360px) scale(1.4) rotate(140deg);
+        }
+        80% {
+          opacity: 0.5;
+          transform: translateY(-520px) scale(2.0) rotate(190deg);
+        }
+        95% {
+          opacity: 0.2;
+          transform: translateY(-700px) scale(2.9) rotate(250deg);
+        }
+        100% {
+          left: 120%;
+          opacity: 0;
+          transform: translateY(-820px) scale(3.6) rotate(290deg);
+        }
+      }
+
+      @keyframes smokeFlow5 {
+        0% {
+          left: -400px;
+          opacity: 0;
+          transform: translateY(0) scale(0.35) rotate(0deg);
+        }
+        22% {
+          opacity: 0.3;
+          transform: translateY(-70px) scale(0.65) rotate(35deg);
+        }
+        42% {
+          opacity: 0.6;
+          transform: translateY(-170px) scale(1.1) rotate(80deg);
+        }
+        62% {
+          opacity: 0.75;
+          transform: translateY(-300px) scale(1.7) rotate(145deg);
+        }
+        80% {
+          opacity: 0.55;
+          transform: translateY(-460px) scale(2.4) rotate(210deg);
+        }
+        95% {
+          opacity: 0.25;
+          transform: translateY(-640px) scale(3.2) rotate(275deg);
+        }
+        100% {
+          left: 120%;
+          opacity: 0;
+          transform: translateY(-800px) scale(4.2) rotate(360deg);
+        }
+      }
+
+      /* Dark mode adjustments */
+      .dark .smoke {
+        background: radial-gradient(circle, rgba(200,200,200,0.3) 0%, rgba(150,150,150,0.15) 30%, rgba(100,100,100,0.08) 50%, transparent 70%);
+      }
+    </style>
+  </body>
+</html>
