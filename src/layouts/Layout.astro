@@ -14,7 +14,7 @@ let logoUrl = null;
 
 try {
   // Try to fetch brand data
-  const response = await fetch('http://localhost:1337/api/brand?populate=*');
+  const response = await fetch('http://localhost:1337/api/brands?populate=*');
 
   console.log('Brand API Response Status:', response.status);
 
@@ -26,21 +26,15 @@ try {
     brandData = Array.isArray(data?.data) ? data?.data?.[0] : data?.data;
     console.log('Processed Brand Data:', brandData);
 
-    // Get logo URL - try multiple possible field structures
+    // Get logo URL - the logo is directly in the data structure
     let logo = null;
 
-    if (brandData?.attributes) {
-      // Collection type structure
-      logo = brandData.attributes?.logo?.data?.attributes ||
-             brandData.attributes?.Logo?.data?.attributes ||
-             brandData.attributes?.brandLogo?.data?.attributes ||
-             brandData.attributes?.image?.data?.attributes;
-    } else if (brandData?.logo) {
-      // Single type structure
-      logo = brandData.logo?.data?.attributes ||
-             brandData.Logo?.data?.attributes ||
-             brandData.brandLogo?.data?.attributes ||
-             brandData.image?.data?.attributes;
+    if (brandData?.Logo) {
+      // Direct logo structure (no data wrapper for media fields in this case)
+      logo = brandData.Logo;
+    } else if (brandData?.attributes?.Logo) {
+      // Nested structure
+      logo = brandData.attributes.Logo;
     }
 
     console.log('Logo data:', logo);
@@ -358,8 +352,20 @@ try {
           <!-- Company Info -->
           <div class="col-span-1">
             <div class="flex items-center mb-4">
-              <img src="/Mint_Full_Logo_Vector_Bead.png" alt="FLMintDeals" class="h-8 w-auto mr-3" />
-              <h3 class="text-lg font-bold">FLMintDeals</h3>
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={brandData?.Name || "Brand Logo"}
+                  class="h-8 w-auto mr-3 object-contain"
+                />
+              ) : (
+                <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-full p-1.5 mr-3">
+                  <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                  </svg>
+                </div>
+              )}
+              <h3 class="text-lg font-bold">{brandData?.Name || "FLMintDeals"}</h3>
             </div>
             <p class="text-gray-300 text-sm">
               Your trusted source for cannabis deals and dispensary information in Florida.
