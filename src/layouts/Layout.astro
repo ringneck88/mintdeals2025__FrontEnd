@@ -7,6 +7,58 @@ export interface Props {
 }
 
 const { title, description = "Your deals website powered by Kelly" } = Astro.props;
+
+// Fetch brand data from Strapi
+let brandData = null;
+let logoUrl = null;
+
+try {
+  // Try to fetch brand data
+  const response = await fetch('http://localhost:1337/api/brand?populate=*');
+
+  console.log('Brand API Response Status:', response.status);
+
+  if (response.ok) {
+    const data = await response.json();
+    console.log('Brand Data:', JSON.stringify(data, null, 2));
+
+    // For collection type, use data array; for single type, use data directly
+    brandData = Array.isArray(data?.data) ? data?.data?.[0] : data?.data;
+    console.log('Processed Brand Data:', brandData);
+
+    // Get logo URL - try multiple possible field structures
+    let logo = null;
+
+    if (brandData?.attributes) {
+      // Collection type structure
+      logo = brandData.attributes?.logo?.data?.attributes ||
+             brandData.attributes?.Logo?.data?.attributes ||
+             brandData.attributes?.brandLogo?.data?.attributes ||
+             brandData.attributes?.image?.data?.attributes;
+    } else if (brandData?.logo) {
+      // Single type structure
+      logo = brandData.logo?.data?.attributes ||
+             brandData.Logo?.data?.attributes ||
+             brandData.brandLogo?.data?.attributes ||
+             brandData.image?.data?.attributes;
+    }
+
+    console.log('Logo data:', logo);
+
+    if (logo?.url) {
+      // Prepend Strapi URL if it's a relative path
+      logoUrl = logo.url.startsWith('http')
+        ? logo.url
+        : `http://localhost:1337${logo.url}`;
+      console.log('Final logo URL:', logoUrl);
+    }
+  } else {
+    const errorData = await response.json();
+    console.log('Brand API Error:', errorData);
+  }
+} catch (error) {
+  console.log('Could not fetch brand data:', error);
+}
 ---
 
 <!DOCTYPE html>
@@ -43,8 +95,32 @@ const { title, description = "Your deals website powered by Kelly" } = Astro.pro
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center py-6">
           <div class="flex items-center">
-            <a href="/">
-              <img src="/Mint_Full_Logo_Vector_Bead.png" alt="Mint Cannabis Logo" class="h-12 w-auto hover:opacity-80 transition-opacity" />
+            <a href="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              {logoUrl ? (
+                <!-- Brand logo from Strapi -->
+                <img
+                  src={logoUrl}
+                  alt={brandData?.attributes?.name || "Brand Logo"}
+                  class="h-12 w-auto object-contain"
+                />
+              ) : (
+                <!-- Fallback styled logo -->
+                <div class="flex items-center">
+                  <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-full p-2">
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                      {brandData?.attributes?.name || "MINT"}
+                    </h1>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 -mt-1">
+                      {brandData?.attributes?.tagline || "Cannabis"}
+                    </p>
+                  </div>
+                </div>
+              )}
             </a>
           </div>
           

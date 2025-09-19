@@ -48,19 +48,41 @@ class StrapiClient {
 
   async getMany<T = StrapiItem[]>(
     endpoint: string,
-    populate?: string | string[]
-  ): Promise<T> {
+    params?: Record<string, any>
+  ): Promise<StrapiResponse<T>> {
     let url = endpoint;
 
-    if (populate) {
-      const populateParam = Array.isArray(populate)
-        ? populate.join(',')
-        : populate;
-      url += `?populate=${encodeURIComponent(populateParam)}`;
+    if (params) {
+      const queryParams = new URLSearchParams();
+
+      Object.entries(params).forEach(([key, value]) => {
+        if (key === 'populate') {
+          if (Array.isArray(value)) {
+            queryParams.append('populate', value.join(','));
+          } else if (value === '*') {
+            queryParams.append('populate', '*');
+          } else {
+            queryParams.append('populate', value);
+          }
+        } else if (key === 'sort') {
+          queryParams.append('sort', value);
+        } else if (key === 'pagination') {
+          Object.entries(value).forEach(([paginationKey, paginationValue]) => {
+            queryParams.append(`pagination[${paginationKey}]`, String(paginationValue));
+          });
+        } else {
+          queryParams.append(key, String(value));
+        }
+      });
+
+      const queryString = queryParams.toString();
+      if (queryString) {
+        url += `?${queryString}`;
+      }
     }
 
     const response = await this.fetchApi<T>(url);
-    return response.data;
+    return response;
   }
 
   async getOne<T = StrapiItem>(
