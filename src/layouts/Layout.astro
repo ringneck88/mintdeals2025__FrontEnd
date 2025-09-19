@@ -70,7 +70,7 @@ try {
 
     <!-- Theme detection script -->
     <script is:inline>
-      // Check for saved theme or default to light
+      // Prevent flash of wrong theme - this must run immediately
       (function() {
         const savedTheme = localStorage.getItem('theme');
         const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -87,16 +87,6 @@ try {
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    <script>
-      // Prevent flash of wrong theme
-      (function() {
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-          document.documentElement.classList.add('dark');
-        }
-      })();
-    </script>
   </head>
   <body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors relative">
     <!-- Animated Smoke Background -->
@@ -517,45 +507,60 @@ try {
           console.log('Toggle theme clicked');
           const html = document.documentElement;
           const isDark = html.classList.contains('dark');
-          
+
+          console.log('Current state - isDark:', isDark);
+          console.log('Current classes:', html.className);
+
           if (isDark) {
             html.classList.remove('dark');
             localStorage.setItem('theme', 'light');
             console.log('Switched to light mode');
+            console.log('New classes:', html.className);
           } else {
             html.classList.add('dark');
             localStorage.setItem('theme', 'dark');
             console.log('Switched to dark mode');
+            console.log('New classes:', html.className);
           }
-          
+
           // Update button icons
           updateIcons();
+
+          // Force a more comprehensive style recalculation
+          setTimeout(() => {
+            console.log('Final state check - isDark:', document.documentElement.classList.contains('dark'));
+            console.log('Final classes:', document.documentElement.className);
+
+            // Verify body background is updating
+            const body = document.body;
+            const computedStyle = window.getComputedStyle(body);
+            console.log('Body background color:', computedStyle.backgroundColor);
+          }, 100);
         }
         
         function updateIcons() {
           const isDark = document.documentElement.classList.contains('dark');
           const lightIcon = document.getElementById('theme-toggle-light-icon');
           const darkIcon = document.getElementById('theme-toggle-dark-icon');
-          
+
+          console.log('Updating icons - isDark:', isDark);
+          console.log('Light icon found:', !!lightIcon);
+          console.log('Dark icon found:', !!darkIcon);
+
           if (isDark) {
+            // Show sun icon (light mode) when in dark mode
             lightIcon?.classList.remove('hidden');
             darkIcon?.classList.add('hidden');
+            console.log('Showing light icon (sun)');
           } else {
+            // Show moon icon (dark mode) when in light mode
             lightIcon?.classList.add('hidden');
             darkIcon?.classList.remove('hidden');
+            console.log('Showing dark icon (moon)');
           }
         }
         
-        // Initialize theme and ensure consistency
-        const savedTheme = localStorage.getItem('theme');
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        const currentTheme = savedTheme || systemTheme;
-
-        if (currentTheme === 'dark') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
+        // Update icons based on current theme state (don't change theme here)
         updateIcons();
         
         // Add event listener
@@ -868,6 +873,49 @@ try {
         visibility: visible;
         transform: translateY(0);
         transition-delay: 0ms;
+      }
+
+      /* Force dark mode styles to work */
+      html.dark {
+        color-scheme: dark;
+      }
+
+      html.dark body {
+        background-color: rgb(17 24 39) !important; /* gray-900 */
+        color: rgb(243 244 246) !important; /* gray-100 */
+      }
+
+      html:not(.dark) body {
+        background-color: rgb(249 250 251) !important; /* gray-50 */
+        color: rgb(17 24 39) !important; /* gray-900 */
+      }
+
+      /* Debug: Visual indicator for dark mode */
+      html.dark::before {
+        content: "🌙 DARK MODE";
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        z-index: 9999;
+        font-size: 12px;
+      }
+
+      html:not(.dark)::before {
+        content: "☀️ LIGHT MODE";
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(255,255,255,0.8);
+        color: black;
+        padding: 5px 10px;
+        border-radius: 5px;
+        z-index: 9999;
+        font-size: 12px;
+        border: 1px solid #ccc;
       }
     </style>
   </body>

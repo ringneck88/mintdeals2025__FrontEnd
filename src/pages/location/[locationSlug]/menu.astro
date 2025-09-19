@@ -151,152 +151,93 @@ const breadcrumbs = [
 
           <div class="p-6">
             <!-- Menu container -->
-            <div id={`dutchie-menu-${locationSlug}`} class="min-h-96">
-              <!-- Loading placeholder -->
-              <div class="flex items-center justify-center py-16" id={`menu-loading-${locationSlug}`}>
-                <div class="text-center">
-                  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-                  <p class="text-gray-600 dark:text-gray-300">Loading menu...</p>
+            <div id="dutchie-menu-container" class="min-h-96">
+              <!-- The Dutchie script will be inserted here -->
+              {locationData.DutchieScript ? (
+                <div set:html={locationData.DutchieScript} />
+              ) : (
+                <div class="flex items-center justify-center py-16">
+                  <div class="text-center">
+                    <p class="text-gray-600 dark:text-gray-300">Menu not available</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
-            <!-- Menu integration script -->
-            <script is:inline define:vars={{ dutchieScript: locationData.DutchieScript, locationSlug, locationName: locationData.Name }}>
+            <!-- Script to relocate Dutchie menu if it appears at bottom -->
+            <script is:inline>
               (function() {
-                function initEmbed() {
-                  try {
-                    const container = document.getElementById(`dutchie-menu-${locationSlug}`);
-                    const loading = document.getElementById(`menu-loading-${locationSlug}`);
+                // Wait for Dutchie to load and then move it if needed
+                function checkAndRelocateDutchie() {
+                  const container = document.getElementById('dutchie-menu-container');
+                  if (!container) return;
 
-                    console.log('🛒 Starting embed for:', locationName);
-                    console.log('📦 Container found:', !!container);
-                    console.log('📄 Script data:', dutchieScript ? 'Found' : 'Missing');
+                  // Look for Dutchie elements that might have been created at the bottom
+                  const dutchieIframe = document.querySelector('iframe[src*="dutchie.com"]');
+                  const dutchieDiv = document.querySelector('div[id*="se4ekt2e7rH5pspyn"]');
 
-                    if (!container) {
-                      console.error('❌ Container not found!');
-                      return;
-                    }
+                  // Also check for the actual ID used by Dutchie
+                  const dutchieMainDiv = document.getElementById('se4ekt2e7rH5pspyn');
 
-                    if (loading) loading.style.display = 'none';
+                  if (dutchieIframe && !container.contains(dutchieIframe)) {
+                    console.log('🎯 Found Dutchie iframe at bottom, moving to container');
+                    container.innerHTML = '';
+                    // Ensure iframe has proper styling
+                    dutchieIframe.style.width = '100%';
+                    dutchieIframe.style.minHeight = '800px';
+                    dutchieIframe.style.border = 'none';
+                    container.appendChild(dutchieIframe);
+                  }
 
-                    if (dutchieScript && dutchieScript.includes('dutchie.com')) {
-                      console.log('✅ Loading Dutchie script...');
-
-                      // Try different approaches based on the script content
-
-                      // Approach 1: Direct script execution for Dutchie embed
-                      if (dutchieScript.includes('embedded-menu')) {
-                        console.log('🚀 Using Dutchie embedded menu approach');
-
-                        // Clear container and add a specific ID that Dutchie might expect
-                        container.innerHTML = '';
-                        container.setAttribute('data-dutchie-embed', 'true');
-
-                        // Extract the script URL from the HTML string
-                        const scriptMatch = dutchieScript.match(/src="([^"]+)"/);
-                        if (scriptMatch && scriptMatch[1]) {
-                          const scriptUrl = scriptMatch[1];
-                          console.log('📍 Extracted script URL:', scriptUrl);
-
-                          // Create and load the script
-                          const script = document.createElement('script');
-                          script.src = scriptUrl;
-                          script.async = true;
-                          script.id = 'dutchie--embed__script';
-
-                          script.onload = () => {
-                            console.log('✅ Dutchie script loaded!');
-
-                            // Check for Dutchie global object
-                            setTimeout(() => {
-                              if (window.Dutchie) {
-                                console.log('🎯 Dutchie global object found!');
-                              }
-
-                              // Check if content was added
-                              if (container.children.length > 0 || container.innerHTML.length > 100) {
-                                console.log('🎉 Dutchie widget rendered successfully!');
-                              } else {
-                                console.log('⏳ Waiting for Dutchie to render...');
-
-                                // Try creating a placeholder div with the expected ID
-                                const embedId = scriptUrl.split('/').pop().replace('.js', '');
-                                console.log('🔧 Creating placeholder with ID:', embedId);
-
-                                const placeholder = document.createElement('div');
-                                placeholder.id = `dutchie-embed-${embedId}`;
-                                container.appendChild(placeholder);
-                              }
-                            }, 2000);
-                          };
-
-                          script.onerror = () => {
-                            console.error('❌ Failed to load Dutchie script');
-                            container.innerHTML = `
-                              <div style="padding: 2rem; text-align: center; background: #fef2f2; border: 2px solid #ef4444; border-radius: 8px;">
-                                <h3 style="color: #dc2626; margin-bottom: 1rem;">Menu Temporarily Unavailable</h3>
-                                <p style="color: #7f1d1d;">Please call the store for current products and pricing.</p>
-                              </div>
-                            `;
-                          };
-
-                          // Append to document body instead of head
-                          document.body.appendChild(script);
-                        }
-                      } else {
-                        // Fallback: inject HTML as-is
-                        console.log('📝 Injecting HTML directly');
-                        container.innerHTML = dutchieScript;
-
-                        // Re-execute any scripts
-                        const scripts = container.querySelectorAll('script');
-                        scripts.forEach(oldScript => {
-                          const newScript = document.createElement('script');
-                          Array.from(oldScript.attributes).forEach(attr => {
-                            newScript.setAttribute(attr.name, attr.value);
-                          });
-                          newScript.textContent = oldScript.textContent;
-                          oldScript.parentNode.replaceChild(newScript, oldScript);
-                        });
-                      }
-
-                    } else {
-                      console.log('📋 Showing demo content');
-                      container.innerHTML = `
-                        <div style="padding: 2rem; text-align: center; border: 2px dashed #10b981; border-radius: 8px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
-                          <h3 style="color: #15803d; margin-bottom: 1rem; font-size: 1.5rem; font-weight: bold;">🛒 Demo Menu</h3>
-                          <p style="color: #166534; margin-bottom: 1.5rem;">Live menu for <strong>${locationName}</strong> would appear here.</p>
-                          <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 1rem;">
-                            <strong style="color: #92400e;">⚙️ Setup:</strong>
-                            <p style="color: #92400e; margin: 0.5rem 0 0 0; font-size: 0.875rem;">
-                              Add the DutchieScript field to this location in Strapi with your actual Dutchie embed code.
-                            </p>
-                          </div>
-                        </div>
-                      `;
-                    }
-                  } catch (error) {
-                    console.error('❌ Menu embed error:', error);
-                    const container = document.getElementById(`dutchie-menu-${locationSlug}`);
-                    if (container) {
-                      container.innerHTML = `
-                        <div style="padding: 2rem; text-align: center; border: 2px solid #ef4444; border-radius: 8px; background: #fef2f2; color: #dc2626;">
-                          <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">⚠️ Error</h3>
-                          <p style="margin-bottom: 1rem;">An error occurred while loading the menu.</p>
-                          <p style="font-size: 0.875rem; color: #991b1b;">Please refresh the page or contact support.</p>
-                        </div>
-                      `;
-                    }
+                  if (dutchieMainDiv && !container.contains(dutchieMainDiv)) {
+                    console.log('🎯 Found Dutchie main div at bottom, moving to container');
+                    container.innerHTML = '';
+                    container.appendChild(dutchieMainDiv);
+                  } else if (dutchieDiv && !container.contains(dutchieDiv)) {
+                    console.log('🎯 Found Dutchie div at bottom, moving to container');
+                    container.innerHTML = '';
+                    container.appendChild(dutchieDiv);
                   }
                 }
 
-                // Initialize immediately if DOM is ready
-                if (document.readyState === 'loading') {
-                  document.addEventListener('DOMContentLoaded', initEmbed);
-                } else {
-                  setTimeout(initEmbed, 100); // Small delay to ensure everything is ready
-                }
+                // Check multiple times as Dutchie loads asynchronously
+                setTimeout(checkAndRelocateDutchie, 1000);
+                setTimeout(checkAndRelocateDutchie, 2000);
+                setTimeout(checkAndRelocateDutchie, 3000);
+                setTimeout(checkAndRelocateDutchie, 5000);
+
+                // Also use MutationObserver as a backup
+                const observer = new MutationObserver((mutations) => {
+                  for (const mutation of mutations) {
+                    for (const node of mutation.addedNodes) {
+                      if (node.nodeType === 1) {
+                        // Check if this is a Dutchie element
+                        if ((node.id && node.id.includes('se4ekt2e7rH5pspyn')) ||
+                            (node.tagName === 'IFRAME' && node.src && node.src.includes('dutchie.com'))) {
+                          const container = document.getElementById('dutchie-menu-container');
+                          if (container && !container.contains(node)) {
+                            console.log('🎯 MutationObserver caught Dutchie element, moving to container');
+                            container.innerHTML = '';
+                            if (node.tagName === 'IFRAME') {
+                              node.style.width = '100%';
+                              node.style.minHeight = '800px';
+                              node.style.border = 'none';
+                            }
+                            container.appendChild(node);
+                            observer.disconnect();
+                            break;
+                          }
+                        }
+                      }
+                    }
+                  }
+                });
+
+                // Start observing
+                observer.observe(document.body, { childList: true, subtree: true });
+
+                // Stop after 10 seconds
+                setTimeout(() => observer.disconnect(), 10000);
               })();
             </script>
           </div>
