@@ -1,27 +1,86 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-// Fetch regions from Strapi
+// Fetch locations and build regions from existing data
+let locationsData = [];
 let regionsData = [];
+let categoriesData = [];
 let apiError = null;
 
 try {
-  console.log('🚀 Fetching regions from Strapi');
+  console.log('🚀 Fetching locations and categories from Strapi');
 
-  // Using the Region content type
-  const response = await fetch('http://localhost:1337/api/region?populate=*&pagination[pageSize]=100');
+  // Fetch locations and categories in parallel
+  const [locationsResponse, categoriesResponse] = await Promise.allSettled([
+    fetch('http://localhost:1337/api/locations?populate=*&pagination[pageSize]=100'),
+    fetch('http://localhost:1337/api/product-categories?populate=*&pagination[pageSize]=20')
+  ]);
 
-  if (response.ok) {
-    const data = await response.json();
-    regionsData = data?.data || [];
-    console.log('✅ Regions loaded:', regionsData.length);
-  } else {
-    const errorData = await response.json();
-    console.error('❌ Regions API Error:', errorData);
-    apiError = errorData.error?.message || 'Failed to fetch regions';
+  // Process locations
+  if (locationsResponse.status === 'fulfilled' && locationsResponse.value.ok) {
+    const data = await locationsResponse.value.json();
+    locationsData = data?.data || [];
+    console.log('✅ Locations loaded:', locationsData.length);
   }
+
+  // Process categories
+  if (categoriesResponse.status === 'fulfilled' && categoriesResponse.value.ok) {
+    const data = await categoriesResponse.value.json();
+    categoriesData = data?.data || [];
+    console.log('✅ Categories loaded:', categoriesData.length);
+  }
+
+  // Build regions from location data
+  const stateGroups = {};
+  locationsData.forEach(location => {
+    if (location.Address?.state && location.Address?.city) {
+      const state = location.Address.state.toUpperCase();
+      const city = location.Address.city;
+
+      if (!stateGroups[state]) {
+        stateGroups[state] = {
+          name: state === 'AZ' ? 'Arizona' : state === 'NV' ? 'Nevada' : state,
+          code: state,
+          cities: {},
+          locations: [],
+          totalLocations: 0
+        };
+      }
+
+      if (!stateGroups[state].cities[city]) {
+        stateGroups[state].cities[city] = {
+          name: city,
+          locations: [],
+          categories: new Set()
+        };
+      }
+
+      stateGroups[state].cities[city].locations.push(location);
+      stateGroups[state].locations.push(location);
+      stateGroups[state].totalLocations++;
+
+      // Add categories for this location
+      if (location.product_categories) {
+        location.product_categories.forEach(cat => {
+          stateGroups[state].cities[city].categories.add(cat.Name);
+        });
+      }
+    }
+  });
+
+  // Convert to array for easier rendering
+  regionsData = Object.values(stateGroups).map(state => ({
+    ...state,
+    cities: Object.values(state.cities).map(city => ({
+      ...city,
+      categories: Array.from(city.categories)
+    }))
+  }));
+
+  console.log('✅ Regions built:', regionsData.length);
+
 } catch (error) {
-  console.error('❌ Error fetching regions:', error);
+  console.error('❌ Error fetching data:', error);
   apiError = error.message;
 }
 ---
@@ -54,75 +113,142 @@ try {
         </p>
       </div>
     ) : (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {regionsData.map(region => (
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-            {/* Region Image */}
-            {region.attributes?.RegionImage?.data?.attributes?.url && (
-              <img
-                src={`http://localhost:1337${region.attributes.RegionImage.data.attributes.url}`}
-                alt={region.attributes?.Name || region.attributes?.title}
-                class="w-full h-48 object-cover"
-              />
-            )}
-
-            <div class="p-6">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                {region.attributes?.Name || region.attributes?.title || 'Region Name'}
-              </h3>
-
-              {/* Description */}
-              {region.attributes?.Description && (
-                <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                  {region.attributes.Description}
-                </p>
-              )}
-
-              {/* Store Count */}
-              {region.attributes?.stores?.data && (
-                <div class="flex items-center mb-4">
-                  <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                  </svg>
-                  <span class="text-gray-600 dark:text-gray-300">
-                    {region.attributes.stores.data.length} store{region.attributes.stores.data.length !== 1 ? 's' : ''}
+      <div>
+        <!-- Region Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {regionsData.map(region => (
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              {/* State Header */}
+              <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
+                <h2 class="text-2xl font-bold mb-2">{region.name}</h2>
+                <div class="flex items-center justify-between">
+                  <span class="text-blue-100">
+                    {region.totalLocations} dispensar{region.totalLocations !== 1 ? 'ies' : 'y'}
+                  </span>
+                  <span class="text-blue-100">
+                    {region.cities.length} cit{region.cities.length !== 1 ? 'ies' : 'y'}
                   </span>
                 </div>
-              )}
+              </div>
 
-              {/* Active Status */}
-              {region.attributes?.IsActive !== undefined && (
-                <div class="mb-4">
-                  <span class={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                    region.attributes.IsActive
-                      ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-                  }`}>
-                    {region.attributes.IsActive ? 'Active' : 'Inactive'}
-                  </span>
+              {/* Cities List */}
+              <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cities & Areas</h3>
+                <div class="space-y-3">
+                  {region.cities.map(city => (
+                    <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-medium text-gray-900 dark:text-white">{city.name}</h4>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                          {city.locations.length} location{city.locations.length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+
+                      {/* Available Categories */}
+                      {city.categories.length > 0 && (
+                        <div class="flex flex-wrap gap-1 mt-2">
+                          {city.categories.slice(0, 3).map(category => (
+                            <span class="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs">
+                              {category}
+                            </span>
+                          ))}
+                          {city.categories.length > 3 && (
+                            <span class="inline-block bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded text-xs">
+                              +{city.categories.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Quick Links */}
+                      <div class="flex space-x-2 mt-3">
+                        {categoriesData.slice(0, 2).map(category => (
+                          <a
+                            href={`/${category.Slug}/${category.Slug}-in-${region.code.toLowerCase() === 'az' ? 'arizona' : region.code.toLowerCase() === 'nv' ? 'nevada' : region.code.toLowerCase()}/${category.Slug}-in-${city.name.toLowerCase().replace(/\s+/g, '-')}`}
+                            class="text-xs bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 px-2 py-1 rounded hover:bg-emerald-200 dark:hover:bg-emerald-800 transition-colors"
+                          >
+                            {category.Name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
 
-              <div class="flex space-x-2">
-                {/* View Stores Button */}
-                <a
-                  href={`/regions/${region.documentId}`}
-                  class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
-                >
-                  View Stores
-                </a>
-
-                {/* View on Map Button */}
-                <a
-                  href={`/regions/${region.documentId}/map`}
-                  class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                >
-                  Map
-                </a>
+                {/* View All Link */}
+                <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                  <a
+                    href={`/locations?state=${region.code}`}
+                    class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
+                  >
+                    View All {region.name} Locations
+                  </a>
+                </div>
               </div>
             </div>
+          ))}
+        </div>
+
+        <!-- Quick Category Navigation -->
+        {categoriesData.length > 0 && (
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+              Browse by Category
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {categoriesData.map(category => (
+                <div class="text-center">
+                  <a
+                    href={`/${category.Slug}`}
+                    class="block p-6 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
+                  >
+                    <div class="text-3xl mb-2">
+                      {category.Slug === 'flower' ? '🌿' :
+                       category.Slug === 'concentrates' ? '💎' :
+                       category.Slug === 'pre-rolls' ? '🚬' :
+                       category.Slug === 'vaporizers' ? '💨' : '🌱'}
+                    </div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                      {category.Name}
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Available in {regionsData.length} region{regionsData.length !== 1 ? 's' : ''}
+                    </p>
+                  </a>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+        )}
+
+        <!-- Popular Destinations -->
+        <div class="mt-16 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 rounded-lg p-8">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+            Popular Destinations
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {regionsData.flatMap(region =>
+              region.cities.filter(city => city.locations.length > 0).slice(0, 3)
+            ).slice(0, 6).map(city => (
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{city.name}</h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                  {city.locations.length} dispensar{city.locations.length !== 1 ? 'ies' : 'y'} • {city.categories.length} categor{city.categories.length !== 1 ? 'ies' : 'y'}
+                </p>
+                <div class="grid grid-cols-2 gap-2">
+                  {categoriesData.slice(0, 2).map(category => (
+                    <a
+                      href={`/${category.Slug}/${category.Slug}-in-${regionsData.find(r => r.cities.includes(city))?.code.toLowerCase() === 'az' ? 'arizona' : 'nevada'}/${category.Slug}-in-${city.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      class="text-center bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-2 rounded text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                    >
+                      {category.Name}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     )}
   </div>

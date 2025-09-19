@@ -1,0 +1,434 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+
+// Parse the dynamic slug
+const slugParams = Astro.params.slug ? Astro.params.slug.split('/') : [];
+
+// URL Structure: /[category]/[category-in-state]/[category-in-city]/[category-in-district]/[location]/[menu]
+// Example: /flower/flower-in-nevada/flower-in-las-vegas/flower-on-the-strip/mint-cannabis-las-vegas-strip/menu
+
+let pageData = {
+  category: null,
+  state: null,
+  city: null,
+  district: null,
+  location: null,
+  isMenu: false,
+  breadcrumbs: [],
+  title: 'Page Not Found',
+  description: 'The page you are looking for could not be found.'
+};
+
+let pageContent = null;
+let locations = [];
+let products = [];
+let apiError = null;
+
+try {
+  console.log('🚀 Processing slug:', slugParams);
+
+  // Parse URL structure
+  if (slugParams.length >= 1) {
+    pageData.category = slugParams[0];
+  }
+
+  if (slugParams.length >= 2) {
+    // Extract state from "category-in-state" format
+    const stateSegment = slugParams[1];
+    const stateMatch = stateSegment.match(/^(.+)-in-(.+)$/);
+    if (stateMatch) {
+      pageData.state = stateMatch[2];
+    }
+  }
+
+  if (slugParams.length >= 3) {
+    // Extract city from "category-in-city" format
+    const citySegment = slugParams[2];
+    const cityMatch = citySegment.match(/^(.+)-in-(.+)$/);
+    if (cityMatch) {
+      pageData.city = cityMatch[2];
+    }
+  }
+
+  if (slugParams.length >= 4) {
+    // Extract district from "category-in-district" or "category-on-district" format
+    const districtSegment = slugParams[3];
+    const districtMatch = districtSegment.match(/^(.+)-(in|on)-(.+)$/);
+    if (districtMatch) {
+      pageData.district = districtMatch[3];
+    }
+  }
+
+  if (slugParams.length >= 5) {
+    pageData.location = slugParams[4];
+  }
+
+  if (slugParams.length >= 6 && slugParams[5] === 'menu') {
+    pageData.isMenu = true;
+  }
+
+  console.log('📍 Parsed data:', pageData);
+
+  // Fetch data based on parsing
+  if (pageData.category && pageData.location && pageData.isMenu) {
+    // This is a location menu page - fetch location and products
+    console.log('🏪 Fetching location menu data');
+
+    const [locationResponse, productsResponse] = await Promise.allSettled([
+      fetch(`http://localhost:1337/api/locations?filters[Slug][$eq]=${pageData.location}&populate=*`),
+      fetch(`http://localhost:1337/api/dosage-products?populate=*&filters[category][Slug][$eq]=${pageData.category}&pagination[pageSize]=100`)
+    ]);
+
+    // Process location data
+    if (locationResponse.status === 'fulfilled' && locationResponse.value.ok) {
+      const locationData = await locationResponse.value.json();
+      if (locationData?.data?.length > 0) {
+        pageContent = locationData.data[0];
+        pageData.title = `${pageData.category} Menu - ${pageContent.Name}`;
+        pageData.description = `Browse ${pageData.category} products at ${pageContent.Name}`;
+      }
+    }
+
+    // Process products data
+    if (productsResponse.status === 'fulfilled' && productsResponse.value.ok) {
+      const productsData = await productsResponse.value.json();
+      products = productsData?.data || [];
+    }
+
+  } else if (pageData.category && pageData.location) {
+    // This is a location page - show location details
+    console.log('🏪 Fetching location data');
+
+    const locationResponse = await fetch(`http://localhost:1337/api/locations?filters[Slug][$eq]=${pageData.location}&populate=*`);
+
+    if (locationResponse.ok) {
+      const locationData = await locationResponse.json();
+      if (locationData?.data?.length > 0) {
+        pageContent = locationData.data[0];
+        pageData.title = `${pageContent.Name} - ${pageData.category}`;
+        pageData.description = `Visit ${pageContent.Name} for ${pageData.category} products`;
+      }
+    }
+
+  } else if (pageData.category && (pageData.state || pageData.city || pageData.district)) {
+    // This is a regional category page - show locations in that region
+    console.log('🗺️ Fetching regional locations');
+
+    let locationFilters = [];
+    if (pageData.state) {
+      // Convert state slug back to state code (nevada -> NV, arizona -> AZ)
+      const stateMap = {
+        'nevada': 'NV',
+        'arizona': 'AZ',
+        'california': 'CA',
+        'colorado': 'CO',
+        'florida': 'FL'
+      };
+      const stateCode = stateMap[pageData.state] || pageData.state.toUpperCase();
+      locationFilters.push(`filters[Address][state][$eq]=${stateCode}`);
+    }
+
+    if (pageData.city) {
+      // Convert city slug to proper name (las-vegas -> Las Vegas, tempe -> Tempe)
+      const cityName = pageData.city.split('-').map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+      locationFilters.push(`filters[Address][city][$eq]=${cityName}`);
+    }
+
+    const filterQuery = locationFilters.length > 0 ? `&${locationFilters.join('&')}` : '';
+    const locationsResponse = await fetch(`http://localhost:1337/api/locations?populate=*${filterQuery}`);
+
+    if (locationsResponse.ok) {
+      const locationsData = await locationsResponse.json();
+      locations = locationsData?.data || [];
+
+      pageData.title = `${pageData.category} in ${pageData.city || pageData.state}`;
+      pageData.description = `Find ${pageData.category} dispensaries in ${pageData.city || pageData.state}`;
+    }
+  }
+
+  // Build breadcrumbs
+  pageData.breadcrumbs = [];
+  if (pageData.category) {
+    pageData.breadcrumbs.push({ label: pageData.category, url: `/${pageData.category}` });
+  }
+  if (pageData.state) {
+    pageData.breadcrumbs.push({
+      label: `${pageData.category} in ${pageData.state}`,
+      url: `/${pageData.category}/${pageData.category}-in-${pageData.state}`
+    });
+  }
+  if (pageData.city) {
+    pageData.breadcrumbs.push({
+      label: `${pageData.category} in ${pageData.city}`,
+      url: `/${pageData.category}/${pageData.category}-in-${pageData.state}/${pageData.category}-in-${pageData.city}`
+    });
+  }
+  if (pageData.district) {
+    pageData.breadcrumbs.push({
+      label: `${pageData.category} on ${pageData.district}`,
+      url: `/${pageData.category}/${pageData.category}-in-${pageData.state}/${pageData.category}-in-${pageData.city}/${pageData.category}-on-${pageData.district}`
+    });
+  }
+  if (pageData.location) {
+    pageData.breadcrumbs.push({
+      label: pageContent?.Name || pageData.location,
+      url: `/${slugParams.slice(0, -1).join('/')}`
+    });
+  }
+
+} catch (error) {
+  console.error('❌ Error processing dynamic route:', error);
+  apiError = error.message;
+}
+---
+
+<Layout title={pageData.title} description={pageData.description}>
+  <!-- Breadcrumb Navigation -->
+  <div class="bg-gray-100 dark:bg-gray-800 py-4">
+    <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm">
+          <li>
+            <a href="/" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Home</a>
+          </li>
+          {pageData.breadcrumbs.map((crumb, index) => (
+            <li class="flex items-center">
+              <svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              {index === pageData.breadcrumbs.length - 1 ? (
+                <span class="text-gray-900 dark:text-white font-medium">{crumb.label}</span>
+              ) : (
+                <a href={crumb.url} class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">{crumb.label}</a>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12">
+    {pageData.isMenu && pageContent ? (
+      <!-- Location Menu Page -->
+      <div>
+        <div class="text-center mb-12">
+          <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {pageData.category} Menu
+          </h1>
+          <p class="text-xl text-gray-600 dark:text-gray-300">
+            Available at {pageContent.Name}
+          </p>
+          {pageContent.Address && (
+            <p class="text-gray-500 dark:text-gray-400">
+              {pageContent.Address.street}, {pageContent.Address.city}, {pageContent.Address.state}
+            </p>
+          )}
+        </div>
+
+        {products.length === 0 ? (
+          <div class="text-center py-16">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">No products found</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              No {pageData.category} products are available at this location.
+            </p>
+          </div>
+        ) : (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map(product => (
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                {product.Image?.data?.attributes?.url ? (
+                  <img
+                    src={`http://localhost:1337${product.Image.data.attributes.url}`}
+                    alt={product.Name || 'Product'}
+                    class="w-full h-48 object-cover"
+                  />
+                ) : (
+                  <div class="h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                  </div>
+                )}
+
+                <div class="p-6">
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    {product.Name || 'Product Name'}
+                  </h3>
+
+                  {product.Discription && (
+                    <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                      {product.Discription}
+                    </p>
+                  )}
+
+                  {product.QuantityPerPKG && (
+                    <div class="flex items-center mb-3">
+                      <span class="text-sm text-gray-600 dark:text-gray-300">
+                        Qty: {product.QuantityPerPKG}
+                      </span>
+                    </div>
+                  )}
+
+                  <div class="flex space-x-2">
+                    <a
+                      href={`/products/${product.documentId}`}
+                      class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
+                    >
+                      View Details
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+    ) : pageContent ? (
+      <!-- Location Detail Page -->
+      <div>
+        <div class="text-center mb-12">
+          <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {pageContent.Name}
+          </h1>
+          <p class="text-xl text-gray-600 dark:text-gray-300">
+            Cannabis Dispensary
+          </p>
+          {pageContent.Address && (
+            <p class="text-gray-500 dark:text-gray-400">
+              {pageContent.Address.street}, {pageContent.Address.city}, {pageContent.Address.state}
+            </p>
+          )}
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Location Information</h2>
+            <div class="space-y-4">
+              {pageContent.Phone && (
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                  </svg>
+                  <span class="text-gray-900 dark:text-white">{pageContent.Phone}</span>
+                </div>
+              )}
+
+              <div class="mt-6">
+                <a
+                  href={`/${slugParams.join('/')}/menu`}
+                  class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  View {pageData.category} Menu
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Available Categories</h2>
+            <div class="grid grid-cols-2 gap-4">
+              {pageContent.product_categories?.map(category => (
+                <a
+                  href={`/${category.Slug}/${slugParams.slice(1).join('/')}`}
+                  class="p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <h3 class="font-medium text-gray-900 dark:text-white">{category.Name}</h3>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    ) : locations.length > 0 ? (
+      <!-- Regional Locations Page -->
+      <div>
+        <div class="text-center mb-12">
+          <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {pageData.title}
+          </h1>
+          <p class="text-xl text-gray-600 dark:text-gray-300">
+            {locations.length} location{locations.length !== 1 ? 's' : ''} found
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {locations.map(location => (
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              {location.HeroImage?.url && (
+                <img
+                  src={`http://localhost:1337${location.HeroImage.url}`}
+                  alt={location.Name}
+                  class="w-full h-48 object-cover"
+                />
+              )}
+
+              <div class="p-6">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  {location.Name}
+                </h3>
+
+                {location.Address && (
+                  <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    {location.Address.street}, {location.Address.city}, {location.Address.state}
+                  </p>
+                )}
+
+                <div class="flex space-x-2">
+                  <a
+                    href={`/${pageData.category}/${pageData.category}-in-${pageData.state}/${pageData.category}-in-${pageData.city || location.Address.city.toLowerCase()}/${location.Slug}`}
+                    class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
+                  >
+                    View Location
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    ) : (
+      <!-- 404 Page -->
+      <div class="text-center py-16">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.034 0-3.9.785-5.291 2.09M6.343 6.343A8 8 0 1117.657 17.657 8 8 0 016.343 6.343z"/>
+        </svg>
+        <h1 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">Page not found</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          {apiError ? `Error: ${apiError}` : 'The page you are looking for could not be found.'}
+        </p>
+        <div class="mt-6">
+          <a
+            href="/"
+            class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Go back home
+          </a>
+        </div>
+      </div>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

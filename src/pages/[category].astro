@@ -64,15 +64,40 @@ try {
 ---
 
 <Layout title={`${categoryName} - Cannabis Products | Mint Deals`} description={`Browse ${categoryName} cannabis products and find the best deals from Florida dispensaries.`}>
+  <!-- Breadcrumb Navigation -->
+  <div class="bg-gray-100 dark:bg-gray-800 py-4">
+    <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm">
+          <li>
+            <a href="/" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Home</a>
+          </li>
+          <li class="flex items-center">
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <a href="/categories" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Categories</a>
+          </li>
+          <li class="flex items-center">
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-gray-900 dark:text-white font-medium">{categoryName}</span>
+          </li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
   <!-- Hero Section -->
   <div class="bg-gradient-to-br from-purple-800 via-purple-700 to-indigo-700 text-white py-16">
     <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <div class="text-center">
-        <!-- Category Image -->
-        {categoryData?.Image?.data?.attributes?.url && (
+        <!-- Category Hero Image -->
+        {categoryData?.HeroImage?.url && (
           <div class="mb-8">
             <img
-              src={`http://localhost:1337${categoryData.Image.data.attributes.url}`}
+              src={`http://localhost:1337${categoryData.HeroImage.url}`}
               alt={categoryName}
               class="w-32 h-32 mx-auto rounded-full object-cover border-4 border-white/20"
             />
@@ -89,20 +114,6 @@ try {
           </p>
         )}
 
-        <!-- Breadcrumb -->
-        <nav class="mt-8">
-          <ol class="flex items-center justify-center space-x-2 text-sm">
-            <li>
-              <a href="/" class="text-purple-200 hover:text-white transition-colors">Home</a>
-            </li>
-            <li class="text-purple-300">/</li>
-            <li>
-              <a href="/categories" class="text-purple-200 hover:text-white transition-colors">Categories</a>
-            </li>
-            <li class="text-purple-300">/</li>
-            <li class="text-white font-medium">{categoryName}</li>
-          </ol>
-        </nav>
       </div>
     </div>
   </div>
@@ -235,6 +246,33 @@ try {
             </div>
           </div>
         ))}
+      </div>
+    )}
+
+    <!-- Article Content Section -->
+    {categoryData?.Content && (
+      <div class="mt-16">
+        <div class="max-w-4xl mx-auto">
+          {categoryData?.Title && (
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+              {categoryData.Title}
+            </h2>
+          )}
+
+          {categoryData?.HeroImage?.url && (
+            <div class="mb-8">
+              <img
+                src={`http://localhost:1337${categoryData.HeroImage.url}`}
+                alt={categoryData.Title || categoryName}
+                class="w-full h-64 md:h-80 object-cover rounded-lg shadow-lg"
+              />
+            </div>
+          )}
+
+          <div class="prose prose-lg dark:prose-invert max-w-none">
+            <div set:html={categoryData.Content}></div>
+          </div>
+        </div>
       </div>
     )}
 

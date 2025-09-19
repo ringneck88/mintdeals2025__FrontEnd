@@ -1,0 +1,375 @@
+---
+export const prerender = false;
+
+import Layout from '../../../layouts/Layout.astro';
+
+// Get the location slug from URL
+const { locationSlug } = Astro.params;
+
+let locationData = null;
+let productsData = [];
+let categoriesData = [];
+let apiError = null;
+
+try {
+  console.log('🚀 Fetching menu for location:', locationSlug);
+
+  // Fetch location data and products
+  const [locationResponse, productsResponse, categoriesResponse] = await Promise.allSettled([
+    fetch(`http://localhost:1337/api/locations?filters[Slug][$eq]=${locationSlug}&populate=*`),
+    fetch('http://localhost:1337/api/dosage-products?populate=*&pagination[pageSize]=100'),
+    fetch('http://localhost:1337/api/product-categories?populate=*&pagination[pageSize]=20')
+  ]);
+
+  // Process location data
+  if (locationResponse.status === 'fulfilled' && locationResponse.value.ok) {
+    const data = await locationResponse.value.json();
+    if (data?.data?.length > 0) {
+      locationData = data.data[0];
+      console.log('✅ Location found:', locationData.Name);
+      console.log('📋 DutchieScript field:', locationData.DutchieScript ? 'Found' : 'Not found');
+    } else {
+      console.log('❌ Location not found:', locationSlug);
+      return Astro.redirect('/404', 404);
+    }
+  } else {
+    return Astro.redirect('/404', 404);
+  }
+
+  // Process products
+  if (productsResponse.status === 'fulfilled' && productsResponse.value.ok) {
+    const data = await productsResponse.value.json();
+    productsData = data?.data || [];
+    console.log('✅ Products loaded:', productsData.length);
+  }
+
+  // Process categories
+  if (categoriesResponse.status === 'fulfilled' && categoriesResponse.value.ok) {
+    const data = await categoriesResponse.value.json();
+    categoriesData = data?.data || [];
+  }
+
+} catch (error) {
+  console.error('❌ Error fetching menu data:', error);
+  apiError = error.message;
+  return Astro.redirect('/404', 404);
+}
+
+// Group products by category
+const productsByCategory = {};
+categoriesData.forEach(category => {
+  productsByCategory[category.Name] = productsData.filter(product =>
+    product.category?.Name === category.Name ||
+    product.product_categories?.some(cat => cat.Name === category.Name)
+  );
+});
+
+// Build breadcrumbs
+const breadcrumbs = [
+  { label: 'Home', url: '/' },
+  { label: 'Locations', url: '/locations' },
+  { label: locationData?.Name || 'Location', url: `/location/${locationSlug}` },
+  { label: 'Menu', url: `/location/${locationSlug}/menu` }
+];
+---
+
+<Layout title={`${locationData?.Name} - Menu | Mint Deals`} description={`Browse the full menu at ${locationData?.Name}. Premium cannabis products available.`}>
+  <!-- Breadcrumb Navigation -->
+  <div class="bg-gray-100 dark:bg-gray-800 py-4">
+    <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm">
+          {breadcrumbs.map((crumb, index) => (
+            <li class="flex items-center">
+              {index > 0 && (
+                <svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
+              )}
+              {index === breadcrumbs.length - 1 ? (
+                <span class="text-gray-900 dark:text-white font-medium">{crumb.label}</span>
+              ) : (
+                <a href={crumb.url} class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">{crumb.label}</a>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  {locationData && (
+    <div>
+      <!-- Header Section -->
+      <div class="bg-gradient-to-br from-green-800 via-green-700 to-emerald-700 text-white py-12">
+        <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+              {locationData.Name} Menu
+            </h1>
+
+            {locationData.Address && (
+              <p class="text-xl text-green-100 mb-6">
+                {locationData.Address.city}, {locationData.Address.state}
+              </p>
+            )}
+
+            <div class="flex flex-wrap justify-center gap-4">
+              {locationData.Online_order_URL && (
+                <a
+                  href={locationData.Online_order_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                >
+                  Order Online
+                </a>
+              )}
+
+              <a
+                href={`/location/${locationSlug}`}
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Store Details
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu Content -->
+      <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12">
+
+        <!-- Dutchie Integration Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-8">
+          <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
+            <h2 class="text-2xl font-bold mb-2">🛒 Shop Our Menu</h2>
+            <p class="text-green-100">
+              Browse products, add to cart, and complete your order online
+            </p>
+          </div>
+
+          <div class="p-6">
+            <!-- Menu container -->
+            <div id={`dutchie-menu-${locationSlug}`} class="min-h-96">
+              <!-- Loading placeholder -->
+              <div class="flex items-center justify-center py-16" id={`menu-loading-${locationSlug}`}>
+                <div class="text-center">
+                  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                  <p class="text-gray-600 dark:text-gray-300">Loading menu...</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Menu integration script -->
+            <script is:inline define:vars={{ dutchieScript: locationData.DutchieScript, locationSlug, locationName: locationData.Name }}>
+              (function() {
+                function initEmbed() {
+                  try {
+                    const container = document.getElementById(`dutchie-menu-${locationSlug}`);
+                    const loading = document.getElementById(`menu-loading-${locationSlug}`);
+
+                    console.log('🛒 Starting embed for:', locationName);
+                    console.log('📦 Container found:', !!container);
+                    console.log('📄 Script data:', dutchieScript ? 'Found' : 'Missing');
+
+                    if (!container) {
+                      console.error('❌ Container not found!');
+                      return;
+                    }
+
+                    if (loading) loading.style.display = 'none';
+
+                    if (dutchieScript && dutchieScript.includes('dutchie.com')) {
+                      console.log('✅ Loading Dutchie script...');
+
+                      // Try different approaches based on the script content
+
+                      // Approach 1: Direct script execution for Dutchie embed
+                      if (dutchieScript.includes('embedded-menu')) {
+                        console.log('🚀 Using Dutchie embedded menu approach');
+
+                        // Clear container and add a specific ID that Dutchie might expect
+                        container.innerHTML = '';
+                        container.setAttribute('data-dutchie-embed', 'true');
+
+                        // Extract the script URL from the HTML string
+                        const scriptMatch = dutchieScript.match(/src="([^"]+)"/);
+                        if (scriptMatch && scriptMatch[1]) {
+                          const scriptUrl = scriptMatch[1];
+                          console.log('📍 Extracted script URL:', scriptUrl);
+
+                          // Create and load the script
+                          const script = document.createElement('script');
+                          script.src = scriptUrl;
+                          script.async = true;
+                          script.id = 'dutchie--embed__script';
+
+                          script.onload = () => {
+                            console.log('✅ Dutchie script loaded!');
+
+                            // Check for Dutchie global object
+                            setTimeout(() => {
+                              if (window.Dutchie) {
+                                console.log('🎯 Dutchie global object found!');
+                              }
+
+                              // Check if content was added
+                              if (container.children.length > 0 || container.innerHTML.length > 100) {
+                                console.log('🎉 Dutchie widget rendered successfully!');
+                              } else {
+                                console.log('⏳ Waiting for Dutchie to render...');
+
+                                // Try creating a placeholder div with the expected ID
+                                const embedId = scriptUrl.split('/').pop().replace('.js', '');
+                                console.log('🔧 Creating placeholder with ID:', embedId);
+
+                                const placeholder = document.createElement('div');
+                                placeholder.id = `dutchie-embed-${embedId}`;
+                                container.appendChild(placeholder);
+                              }
+                            }, 2000);
+                          };
+
+                          script.onerror = () => {
+                            console.error('❌ Failed to load Dutchie script');
+                            container.innerHTML = `
+                              <div style="padding: 2rem; text-align: center; background: #fef2f2; border: 2px solid #ef4444; border-radius: 8px;">
+                                <h3 style="color: #dc2626; margin-bottom: 1rem;">Menu Temporarily Unavailable</h3>
+                                <p style="color: #7f1d1d;">Please call the store for current products and pricing.</p>
+                              </div>
+                            `;
+                          };
+
+                          // Append to document body instead of head
+                          document.body.appendChild(script);
+                        }
+                      } else {
+                        // Fallback: inject HTML as-is
+                        console.log('📝 Injecting HTML directly');
+                        container.innerHTML = dutchieScript;
+
+                        // Re-execute any scripts
+                        const scripts = container.querySelectorAll('script');
+                        scripts.forEach(oldScript => {
+                          const newScript = document.createElement('script');
+                          Array.from(oldScript.attributes).forEach(attr => {
+                            newScript.setAttribute(attr.name, attr.value);
+                          });
+                          newScript.textContent = oldScript.textContent;
+                          oldScript.parentNode.replaceChild(newScript, oldScript);
+                        });
+                      }
+
+                    } else {
+                      console.log('📋 Showing demo content');
+                      container.innerHTML = `
+                        <div style="padding: 2rem; text-align: center; border: 2px dashed #10b981; border-radius: 8px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                          <h3 style="color: #15803d; margin-bottom: 1rem; font-size: 1.5rem; font-weight: bold;">🛒 Demo Menu</h3>
+                          <p style="color: #166534; margin-bottom: 1.5rem;">Live menu for <strong>${locationName}</strong> would appear here.</p>
+                          <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 1rem;">
+                            <strong style="color: #92400e;">⚙️ Setup:</strong>
+                            <p style="color: #92400e; margin: 0.5rem 0 0 0; font-size: 0.875rem;">
+                              Add the DutchieScript field to this location in Strapi with your actual Dutchie embed code.
+                            </p>
+                          </div>
+                        </div>
+                      `;
+                    }
+                  } catch (error) {
+                    console.error('❌ Menu embed error:', error);
+                    const container = document.getElementById(`dutchie-menu-${locationSlug}`);
+                    if (container) {
+                      container.innerHTML = `
+                        <div style="padding: 2rem; text-align: center; border: 2px solid #ef4444; border-radius: 8px; background: #fef2f2; color: #dc2626;">
+                          <h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">⚠️ Error</h3>
+                          <p style="margin-bottom: 1rem;">An error occurred while loading the menu.</p>
+                          <p style="font-size: 0.875rem; color: #991b1b;">Please refresh the page or contact support.</p>
+                        </div>
+                      `;
+                    }
+                  }
+                }
+
+                // Initialize immediately if DOM is ready
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', initEmbed);
+                } else {
+                  setTimeout(initEmbed, 100); // Small delay to ensure everything is ready
+                }
+              })();
+            </script>
+          </div>
+        </div>
+
+        <!-- Fallback Menu Categories -->
+        {Object.keys(productsByCategory).length > 0 && (
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-500 to-gray-600 text-white p-6">
+              <h2 class="text-2xl font-bold mb-2">📋 Product Categories</h2>
+              <p class="text-gray-100">
+                Browse our product categories and dosage information
+              </p>
+            </div>
+
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.entries(productsByCategory).map(([categoryName, products]) => (
+                  products.length > 0 && (
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                        {categoryName}
+                      </h3>
+                      <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                        {products.length} product{products.length !== 1 ? 's' : ''} available
+                      </p>
+                      <a
+                        href={`/${categoryName.toLowerCase()}`}
+                        class="inline-flex items-center text-green-600 hover:text-green-700 font-medium text-sm"
+                      >
+                        Learn More
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                      </a>
+                    </div>
+                  )
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <!-- Contact Information -->
+        <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📞 Need Help?</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {locationData.Phone && (
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                </svg>
+                <a href={`tel:${locationData.Phone}`} class="text-green-600 dark:text-green-400 hover:underline">
+                  Call us: {locationData.Phone}
+                </a>
+              </div>
+            )}
+
+            {locationData.Address && (
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="text-gray-600 dark:text-gray-300">
+                  {locationData.Address.city}, {locationData.Address.state}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )}
+</Layout>

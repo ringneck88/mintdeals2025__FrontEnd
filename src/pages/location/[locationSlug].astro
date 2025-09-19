@@ -1,0 +1,470 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+
+// Get the location slug from URL
+const { locationSlug } = Astro.params;
+
+let locationData = null;
+let productsData = [];
+let categoriesData = [];
+let nearbyLocations = [];
+let apiError = null;
+
+try {
+  console.log('🚀 Fetching location data for:', locationSlug);
+
+  // Fetch location data and related information
+  const [locationResponse, categoriesResponse] = await Promise.allSettled([
+    fetch(`http://localhost:1337/api/locations?filters[Slug][$eq]=${locationSlug}&populate=*`),
+    fetch('http://localhost:1337/api/product-categories?populate=*&pagination[pageSize]=20')
+  ]);
+
+  // Process location data
+  if (locationResponse.status === 'fulfilled' && locationResponse.value.ok) {
+    const data = await locationResponse.value.json();
+    if (data?.data?.length > 0) {
+      locationData = data.data[0];
+      console.log('✅ Location found:', locationData.Name);
+
+      // Fetch products for this location (if available)
+      try {
+        const productsResponse = await fetch(`http://localhost:1337/api/dosage-products?populate=*&pagination[pageSize]=20`);
+        if (productsResponse.ok) {
+          const productsData_response = await productsResponse.json();
+          productsData = productsData_response?.data || [];
+        }
+      } catch (error) {
+        console.log('Could not fetch products:', error);
+      }
+
+      // Fetch nearby locations in the same state
+      if (locationData.Address?.state) {
+        try {
+          const nearbyResponse = await fetch(`http://localhost:1337/api/locations?filters[Address][state][$eq]=${locationData.Address.state}&populate=*&pagination[pageSize]=10`);
+          if (nearbyResponse.ok) {
+            const nearbyData = await nearbyResponse.json();
+            nearbyLocations = (nearbyData?.data || []).filter(loc => loc.documentId !== locationData.documentId);
+          }
+        } catch (error) {
+          console.log('Could not fetch nearby locations:', error);
+        }
+      }
+    } else {
+      console.log('❌ Location not found:', locationSlug);
+      return Astro.redirect('/404', 404);
+    }
+  } else {
+    console.error('❌ Location API Error');
+    return Astro.redirect('/404', 404);
+  }
+
+  // Process categories
+  if (categoriesResponse.status === 'fulfilled' && categoriesResponse.value.ok) {
+    const data = await categoriesResponse.value.json();
+    categoriesData = data?.data || [];
+  }
+
+} catch (error) {
+  console.error('❌ Error fetching location data:', error);
+  apiError = error.message;
+  return Astro.redirect('/404', 404);
+}
+
+// Generate page title and description
+const pageTitle = locationData ? `${locationData.Name} - Cannabis Dispensary` : 'Location Not Found';
+const pageDescription = locationData ?
+  `Visit ${locationData.Name} for premium cannabis products in ${locationData.Address?.city}, ${locationData.Address?.state}. View our menu, hours, and directions.` :
+  'Location not found';
+
+// Build breadcrumbs
+const breadcrumbs = [
+  { label: 'Home', url: '/' },
+  { label: 'Locations', url: '/locations' },
+  { label: locationData?.Name || 'Location', url: `/location/${locationSlug}` }
+];
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <!-- Breadcrumb Navigation -->
+  <div class="bg-gray-100 dark:bg-gray-800 py-4">
+    <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2 text-sm">
+          {breadcrumbs.map((crumb, index) => (
+            <li class="flex items-center">
+              {index > 0 && (
+                <svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
+              )}
+              {index === breadcrumbs.length - 1 ? (
+                <span class="text-gray-900 dark:text-white font-medium">{crumb.label}</span>
+              ) : (
+                <a href={crumb.url} class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">{crumb.label}</a>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  {locationData && (
+    <div>
+      <!-- Hero Section -->
+      <div class="relative">
+        {/* Hero Image */}
+        {locationData.HeroImage?.url ? (
+          <div class="h-96 bg-cover bg-center relative" style={`background-image: url('http://localhost:1337${locationData.HeroImage.url}')`}>
+            <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+          </div>
+        ) : (
+          <div class="h-96 bg-gradient-to-br from-green-800 via-green-700 to-emerald-700"></div>
+        )}
+
+        {/* Hero Content Overlay */}
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="text-center text-white px-4">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">
+              {locationData.Name}
+            </h1>
+
+            {locationData.Address && (
+              <p class="text-xl md:text-2xl text-green-100 mb-6">
+                {locationData.Address.city}, {locationData.Address.state}
+              </p>
+            )}
+
+            {/* Status and Quick Info */}
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+              <span class={`px-4 py-2 rounded-full text-sm font-semibold ${
+                locationData.is_active
+                  ? 'bg-green-500 text-white'
+                  : 'bg-red-500 text-white'
+              }`}>
+                {locationData.is_active ? '🟢 Open' : '🔴 Closed'}
+              </span>
+
+              {locationData.over21 && (
+                <span class="px-4 py-2 bg-red-500 text-white rounded-full text-sm font-semibold">
+                  21+ Only
+                </span>
+              )}
+
+              {locationData.LocationCode && (
+                <span class="px-4 py-2 bg-blue-500 text-white rounded-full text-sm font-semibold">
+                  {locationData.LocationCode}
+                </span>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div class="flex flex-wrap justify-center gap-4">
+              {locationData.Menu_url && (
+                <a
+                  href={locationData.Menu_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
+                >
+                  View Menu
+                </a>
+              )}
+
+              {locationData.Online_order_URL && (
+                <a
+                  href={locationData.Online_order_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
+                >
+                  Order Online
+                </a>
+              )}
+
+              {locationData.Address && (
+                <a
+                  href={`https://maps.google.com/?q=${encodeURIComponent(`${locationData.Address.street}, ${locationData.Address.city}, ${locationData.Address.state}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold text-lg transition-colors"
+                >
+                  Get Directions
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+          <!-- Left Column - Store Information -->
+          <div class="lg:col-span-2">
+
+            <!-- Store Details Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Store Information</h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Contact Information */}
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contact</h3>
+
+                  {locationData.Address && (
+                    <div class="flex items-start mb-3">
+                      <svg class="w-5 h-5 mr-3 mt-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                      <div>
+                        <p class="text-gray-900 dark:text-white">{locationData.Address.street}</p>
+                        <p class="text-gray-600 dark:text-gray-300">{locationData.Address.city}, {locationData.Address.state} {locationData.Address.zipCode}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {locationData.Phone && (
+                    <div class="flex items-center mb-3">
+                      <svg class="w-5 h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                      </svg>
+                      <a href={`tel:${locationData.Phone}`} class="text-green-600 dark:text-green-400 hover:underline">
+                        {locationData.Phone}
+                      </a>
+                    </div>
+                  )}
+
+                  {locationData.Email && (
+                    <div class="flex items-center mb-3">
+                      <svg class="w-5 h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                      </svg>
+                      <a href={`mailto:${locationData.Email}`} class="text-green-600 dark:text-green-400 hover:underline">
+                        {locationData.Email}
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                <!-- Hours -->
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Hours</h3>
+                  {locationData.Hours && locationData.Hours.length > 0 ? (
+                    <div class="space-y-2">
+                      {locationData.Hours.map(hour => (
+                        <div class="flex justify-between">
+                          <span class="text-gray-600 dark:text-gray-300 capitalize">
+                            {hour.dayOfWeek || 'Daily'}:
+                          </span>
+                          <span class="text-gray-900 dark:text-white">
+                            {hour.is_24hour ?
+                              '24 Hours' :
+                              hour.isClosed ?
+                                'Closed' :
+                                `${hour.openTime || ''} - ${hour.closeTime || ''}`
+                            }
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p class="text-gray-600 dark:text-gray-300">Hours not available</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Categories Section -->
+            {locationData.product_categories && locationData.product_categories.length > 0 && (
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Available Products</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {locationData.product_categories.map(category => (
+                    <a
+                      href={`/${category.Slug}`}
+                      class="p-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-green-500 dark:hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all text-center group"
+                    >
+                      <div class="text-2xl mb-2">
+                        {category.Slug === 'flower' ? '🌿' :
+                         category.Slug === 'concentrates' ? '💎' :
+                         category.Slug === 'pre-rolls' ? '🚬' :
+                         category.Slug === 'vaporizers' ? '💨' : '🌱'}
+                      </div>
+                      <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">
+                        {category.Name}
+                      </h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        View products
+                      </p>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Amenities Section -->
+            {locationData.Amenities && locationData.Amenities.length > 0 && (
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Amenities & Services</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {locationData.Amenities.map(amenity => (
+                    <div class="flex items-center">
+                      <svg class="w-5 h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                      <span class="text-gray-900 dark:text-white">{amenity.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Location Description -->
+            {locationData.Description && (
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">About This Location</h2>
+                <div class="prose prose-lg dark:prose-invert max-w-none">
+                  <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {locationData.Description}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <!-- Featured Products (if available) -->
+            {productsData.length > 0 && (
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Featured Products</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {productsData.slice(0, 6).map(product => (
+                    <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      {product.Image?.data?.attributes?.url && (
+                        <img
+                          src={`http://localhost:1337${product.Image.data.attributes.url}`}
+                          alt={product.Name}
+                          class="w-full h-32 object-cover rounded-lg mb-3"
+                        />
+                      )}
+                      <h3 class="font-semibold text-gray-900 dark:text-white mb-2">{product.Name}</h3>
+                      {product.dosing_form?.data?.attributes?.Name && (
+                        <span class="inline-block bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-xs">
+                          {product.dosing_form.data.attributes.Name}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {locationData.Menu_url && (
+                  <div class="mt-6 text-center">
+                    <a
+                      href={locationData.Menu_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      View Full Menu
+                      <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"/>
+                      </svg>
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <!-- Right Column - Sidebar -->
+          <div class="lg:col-span-1">
+
+            <!-- Quick Actions -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+              <div class="space-y-3">
+                <a
+                  href={`/location/${locationSlug}/menu`}
+                  class="block w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-center font-medium transition-colors"
+                >
+                  📋 View Full Menu
+                </a>
+
+                <a
+                  href={`/location/${locationSlug}/deals`}
+                  class="block w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-lg text-center font-medium transition-colors"
+                >
+                  🔥 View Deals
+                </a>
+
+                {locationData.Menu_url && (
+                  <a
+                    href={locationData.Menu_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg text-center font-medium transition-colors"
+                  >
+                    🌐 External Menu
+                  </a>
+                )}
+
+                {locationData.Online_order_URL && (
+                  <a
+                    href={locationData.Online_order_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg text-center font-medium transition-colors"
+                  >
+                    🛒 Order Online
+                  </a>
+                )}
+
+                <a
+                  href={`tel:${locationData.Phone}`}
+                  class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg text-center font-medium transition-colors"
+                >
+                  📞 Call Store
+                </a>
+
+                {locationData.Address && (
+                  <a
+                    href={`https://maps.google.com/?q=${encodeURIComponent(`${locationData.Address.street}, ${locationData.Address.city}, ${locationData.Address.state}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg text-center font-medium transition-colors"
+                  >
+                    🗺️ Get Directions
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <!-- Nearby Locations -->
+            {nearbyLocations.length > 0 && (
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Other Locations</h3>
+                <div class="space-y-3">
+                  {nearbyLocations.slice(0, 3).map(location => (
+                    <a
+                      href={`/location/${location.Slug}`}
+                      class="block p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <h4 class="font-medium text-gray-900 dark:text-white">{location.Name}</h4>
+                      {location.Address && (
+                        <p class="text-sm text-gray-600 dark:text-gray-300">
+                          {location.Address.city}, {location.Address.state}
+                        </p>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+</Layout>

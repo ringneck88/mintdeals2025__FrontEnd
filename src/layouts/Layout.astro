@@ -50,10 +50,10 @@ try {
 
     if (data?.data) {
       navigationCategories = data.data.map(category => ({
-        name: category.attributes?.Name || '',
-        slug: category.attributes?.Slug || category.attributes?.Name?.toLowerCase().replace(/\s+/g, '-') || category.documentId,
-        description: category.attributes?.Description || '',
-        isActive: category.attributes?.IsActive !== false
+        name: category.Name || '',
+        slug: category.Slug || category.Name?.toLowerCase().replace(/\s+/g, '-') || category.documentId,
+        description: category.Description || category.Discription || '',
+        isActive: category.IsActive !== false
       })).filter(cat => cat.name && cat.isActive);
     }
   }
@@ -67,6 +67,22 @@ try {
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Theme detection script -->
+    <script is:inline>
+      // Check for saved theme or default to light
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const theme = savedTheme || systemTheme;
+
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
@@ -131,56 +147,88 @@ try {
                 Home
               </a>
 
-              <!-- Store Locations Dropdown -->
-              <div class="relative group">
-                <button class="flex items-center text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                  Store Locations
-                  <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </button>
-                <div class="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[200]">
-                  <div class="py-2">
-                    <a href="/locations" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
-                      🏪 All Locations
-                    </a>
-                    <a href="/regions" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
-                      🗺️ Browse by Region
-                    </a>
-                    <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
-                    <a href="/stores" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
-                      📍 Store Details
-                    </a>
-                  </div>
-                </div>
-              </div>
-
               <!-- Categories Dropdown -->
-              <div class="relative group">
+              <div class="dropdown-group">
                 <button class="flex items-center text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                   Categories
                   <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
-                <div class="absolute left-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[200]">
+                <div class="dropdown-menu absolute left-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 z-[200]">
                   <div class="py-2">
                     <a href="/categories" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400">
                       📚 All Categories
                     </a>
                     <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
 
-                    <!-- Dynamic Categories from Strapi -->
+                    <!-- Category Overview -->
                     {navigationCategories.length > 0 ? (
-                      <div class="max-h-64 overflow-y-auto">
+                      <div class="max-h-80 overflow-y-auto">
                         {navigationCategories.map(category => (
-                          <a
-                            href={`/${category.slug}`}
-                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400"
-                            title={category.description}
-                          >
-                            {category.name}
-                          </a>
+                          <div class="px-2 py-1">
+                            <!-- Category Header -->
+                            <div class="mb-2">
+                              <a
+                                href={`/${category.slug}`}
+                                class="block px-2 py-1 text-sm font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded"
+                                title={category.description}
+                              >
+                                🌿 {category.name}
+                              </a>
+                            </div>
+
+                            <!-- State/Region Links for this category -->
+                            <div class="ml-4 space-y-1">
+                              <a
+                                href={`/${category.slug}/${category.slug}-in-arizona`}
+                                class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                              >
+                                📍 {category.name} in Arizona
+                              </a>
+                              <div class="ml-4 space-y-1">
+                                <a
+                                  href={`/${category.slug}/${category.slug}-in-arizona/${category.slug}-in-tempe`}
+                                  class="block px-2 py-1 text-xs text-gray-500 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                                >
+                                  • Tempe
+                                </a>
+                                <a
+                                  href={`/${category.slug}/${category.slug}-in-arizona/${category.slug}-in-phoenix`}
+                                  class="block px-2 py-1 text-xs text-gray-500 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                                >
+                                  • Phoenix
+                                </a>
+                              </div>
+
+                              <a
+                                href={`/${category.slug}/${category.slug}-in-nevada`}
+                                class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                              >
+                                📍 {category.name} in Nevada
+                              </a>
+                              <div class="ml-4 space-y-1">
+                                <a
+                                  href={`/${category.slug}/${category.slug}-in-nevada/${category.slug}-in-las-vegas`}
+                                  class="block px-2 py-1 text-xs text-gray-500 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                                >
+                                  • Las Vegas
+                                </a>
+                                <div class="ml-4">
+                                  <a
+                                    href={`/${category.slug}/${category.slug}-in-nevada/${category.slug}-in-las-vegas/${category.slug}-on-the-strip`}
+                                    class="block px-2 py-1 text-xs text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                                  >
+                                    ◦ The Strip
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+
+                            {category !== navigationCategories[navigationCategories.length - 1] && (
+                              <div class="border-t border-gray-100 dark:border-gray-700 my-2"></div>
+                            )}
+                          </div>
                         ))}
                       </div>
                     ) : (
@@ -192,19 +240,88 @@ try {
                 </div>
               </div>
 
-              <a href="/states" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                States
-              </a>
-              <a href="/events" class="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Events
-              </a>
-              <a href="#deals" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <!-- Locations Dropdown -->
+              <div class="dropdown-group">
+                <button class="flex items-center text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  Locations
+                  <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                <div class="dropdown-menu absolute left-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 z-[200]">
+                  <div class="py-2">
+                    <a href="/locations" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                      🏪 All Locations
+                    </a>
+                    <a href="/regions" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                      🗺️ Browse by Region
+                    </a>
+                    <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+
+                    <!-- Arizona Region -->
+                    <div class="px-2 py-1">
+                      <div class="mb-2">
+                        <a
+                          href="/locations?state=AZ"
+                          class="block px-2 py-1 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded"
+                        >
+                          🌵 Arizona
+                        </a>
+                      </div>
+                      <div class="ml-4 space-y-1">
+                        <a
+                          href="/locations?state=AZ&city=Tempe"
+                          class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                        >
+                          📍 Tempe
+                        </a>
+                        <a
+                          href="/locations?state=AZ&city=Phoenix"
+                          class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                        >
+                          📍 Phoenix
+                        </a>
+                      </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 dark:border-gray-700 my-2"></div>
+
+                    <!-- Nevada Region -->
+                    <div class="px-2 py-1">
+                      <div class="mb-2">
+                        <a
+                          href="/locations?state=NV"
+                          class="block px-2 py-1 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded"
+                        >
+                          🎰 Nevada
+                        </a>
+                      </div>
+                      <div class="ml-4 space-y-1">
+                        <a
+                          href="/locations?state=NV&city=Las Vegas"
+                          class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                        >
+                          📍 Las Vegas
+                        </a>
+                        <div class="ml-4">
+                          <a
+                            href="/locations?state=NV&city=Las Vegas&district=Strip"
+                            class="block px-2 py-1 text-xs text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                          >
+                            ◦ The Strip
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <a href="/deals" class="text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Deals
               </a>
-              <a href="/dosage-guide" class="text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Dosage Guide
-              </a>
-              <a href="#about" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+
+              <a href="#about" class="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 About
               </a>
             </nav>
@@ -429,10 +546,15 @@ try {
           }
         }
         
-        // Initialize theme
+        // Initialize theme and ensure consistency
         const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const currentTheme = savedTheme || systemTheme;
+
+        if (currentTheme === 'dark') {
           document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
         }
         updateIcons();
         
@@ -707,6 +829,45 @@ try {
       /* Dark mode adjustments */
       .dark .smoke {
         background: radial-gradient(circle, rgba(200,200,200,0.3) 0%, rgba(150,150,150,0.15) 30%, rgba(100,100,100,0.08) 50%, transparent 70%);
+      }
+
+      /* Better dropdown hover behavior */
+      .dropdown-group {
+        position: relative;
+      }
+
+      .dropdown-group:hover .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        transition-delay: 0ms;
+      }
+
+      .dropdown-menu {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 300ms ease-in-out;
+        transition-delay: 150ms;
+      }
+
+      /* Add invisible bridge to prevent dropdown from closing */
+      .dropdown-group::before {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        height: 8px;
+        z-index: 199;
+      }
+
+      /* Keep dropdown open when hovering the menu itself */
+      .dropdown-menu:hover {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        transition-delay: 0ms;
       }
     </style>
   </body>

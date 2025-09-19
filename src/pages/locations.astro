@@ -1,27 +1,73 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-// Fetch stores/locations from Strapi
+// Fetch stores/locations and categories from Strapi
 let storesData = [];
+let categoriesData = [];
+let statsData = {
+  totalStores: 0,
+  totalStates: 0,
+  totalCities: 0,
+  stateGroups: {}
+};
 let apiError = null;
 
 try {
-  console.log('🚀 Fetching stores from Strapi');
+  console.log('🚀 Fetching stores and categories from Strapi');
 
-  // Using the Location content type
-  const response = await fetch('http://localhost:1337/api/locations?populate=*&pagination[pageSize]=100');
+  const [storesResponse, categoriesResponse] = await Promise.allSettled([
+    fetch('http://localhost:1337/api/locations?populate=*&pagination[pageSize]=100'),
+    fetch('http://localhost:1337/api/product-categories?populate=*&pagination[pageSize]=20')
+  ]);
 
-  if (response.ok) {
-    const data = await response.json();
+  // Process stores
+  if (storesResponse.status === 'fulfilled' && storesResponse.value.ok) {
+    const data = await storesResponse.value.json();
     storesData = data?.data || [];
     console.log('✅ Stores loaded:', storesData.length);
+
+    // Build statistics
+    statsData.totalStores = storesData.length;
+    const states = new Set();
+    const cities = new Set();
+
+    storesData.forEach(store => {
+      if (store.Address?.state) {
+        const state = store.Address.state.toUpperCase();
+        const city = store.Address.city;
+
+        states.add(state);
+        if (city) cities.add(`${state}-${city}`);
+
+        if (!statsData.stateGroups[state]) {
+          statsData.stateGroups[state] = {
+            name: state === 'AZ' ? 'Arizona' : state === 'NV' ? 'Nevada' : state,
+            count: 0,
+            cities: new Set()
+          };
+        }
+        statsData.stateGroups[state].count++;
+        if (city) statsData.stateGroups[state].cities.add(city);
+      }
+    });
+
+    statsData.totalStates = states.size;
+    statsData.totalCities = cities.size;
   } else {
-    const errorData = await response.json();
+    const errorData = await storesResponse.value.json();
     console.error('❌ Stores API Error:', errorData);
     apiError = errorData.error?.message || 'Failed to fetch stores';
   }
+
+  // Process categories
+  if (categoriesResponse.status === 'fulfilled' && categoriesResponse.value.ok) {
+    const data = await categoriesResponse.value.json();
+    categoriesData = data?.data || [];
+    console.log('✅ Categories loaded:', categoriesData.length);
+  }
+
 } catch (error) {
-  console.error('❌ Error fetching stores:', error);
+  console.error('❌ Error fetching data:', error);
   apiError = error.message;
 }
 ---
@@ -41,6 +87,30 @@ try {
     </div>
   </div>
 
+  <!-- Statistics Section -->
+  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div>
+          <div class="text-3xl font-bold text-green-600">{statsData.totalStores}</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">Total Dispensaries</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-blue-600">{statsData.totalStates}</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">States Served</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-purple-600">{statsData.totalCities}</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">Cities</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-indigo-600">{categoriesData.length}</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">Product Categories</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main Content -->
   <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12">
     {storesData.length === 0 ? (
@@ -55,82 +125,209 @@ try {
         </p>
       </div>
     ) : (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {storesData.map(store => (
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-            {/* Store Image */}
-            {store.attributes?.StoreImage?.data?.attributes?.url && (
-              <img
-                src={`http://localhost:1337${store.attributes.StoreImage.data.attributes.url}`}
-                alt={store.attributes?.Name || store.attributes?.title}
-                class="w-full h-48 object-cover"
-              />
-            )}
+      <div>
+        <!-- State Groups -->
+        {Object.values(statsData.stateGroups).map(stateGroup => (
+          <div class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                {stateGroup.name}
+              </h2>
+              <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm font-medium">
+                {stateGroup.count} dispensar{stateGroup.count !== 1 ? 'ies' : 'y'}
+              </span>
+            </div>
 
-            <div class="p-6">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                {store.attributes?.Name || store.attributes?.title || 'Store Name'}
-              </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {storesData
+                .filter(store => store.Address?.state?.toUpperCase() === Object.keys(statsData.stateGroups).find(k => statsData.stateGroups[k] === stateGroup))
+                .map(store => (
+                  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                    {/* Store Image */}
+                    {store.HeroImage?.url && (
+                      <img
+                        src={`http://localhost:1337${store.HeroImage.url}`}
+                        alt={store.Name || 'Store'}
+                        class="w-full h-48 object-cover"
+                      />
+                    )}
 
-              {/* Address */}
-              {store.attributes?.Address && (
-                <p class="text-gray-600 dark:text-gray-300 mb-2 flex items-start">
-                  <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                  {store.attributes.Address}
-                </p>
-              )}
+                    <div class="p-6">
+                      <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        {store.Name || 'Store Name'}
+                      </h3>
 
-              {/* Phone */}
-              {store.attributes?.Phone && (
-                <p class="text-gray-600 dark:text-gray-300 mb-2 flex items-center">
-                  <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                  </svg>
-                  {store.attributes.Phone}
-                </p>
-              )}
+                      {/* Location Code */}
+                      {store.LocationCode && (
+                        <span class="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium mb-2">
+                          {store.LocationCode}
+                        </span>
+                      )}
 
-              {/* Hours */}
-              {store.attributes?.Hours && (
-                <p class="text-gray-600 dark:text-gray-300 mb-4 flex items-start">
-                  <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  {store.attributes.Hours}
-                </p>
-              )}
+                      {/* Address */}
+                      {store.Address && (
+                        <p class="text-gray-600 dark:text-gray-300 mb-2 flex items-start">
+                          <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          </svg>
+                          {store.Address.street}, {store.Address.city}, {store.Address.state} {store.Address.zipCode}
+                        </p>
+                      )}
 
-              {/* Region */}
-              {store.attributes?.region?.data?.attributes?.Name && (
-                <span class="inline-block bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-sm font-medium mb-4">
-                  {store.attributes.region.data.attributes.Name}
-                </span>
-              )}
+                      {/* Phone */}
+                      {store.Phone && (
+                        <p class="text-gray-600 dark:text-gray-300 mb-2 flex items-center">
+                          <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                          </svg>
+                          <a href={`tel:${store.Phone}`} class="hover:text-green-600 dark:hover:text-green-400">
+                            {store.Phone}
+                          </a>
+                        </p>
+                      )}
 
-              <div class="flex space-x-2">
-                {/* View Details Button */}
-                <a
-                  href={`/stores/${store.documentId}`}
-                  class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
-                >
-                  View Details
-                </a>
+                      {/* Hours */}
+                      {store.Hours && store.Hours.length > 0 && (
+                        <div class="mb-3">
+                          <div class="flex items-center text-gray-600 dark:text-gray-300 mb-1">
+                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span class="text-sm font-medium">Hours:</span>
+                          </div>
+                          {store.Hours.slice(0, 2).map(hour => (
+                            <div class="text-sm text-gray-500 dark:text-gray-400 ml-7">
+                              {hour.dayOfWeek && (
+                                <span class="capitalize">{hour.dayOfWeek}: </span>
+                              )}
+                              {hour.is_24hour ?
+                                '24 Hours' :
+                                hour.isClosed ?
+                                  'Closed' :
+                                  `${hour.openTime || ''} - ${hour.closeTime || ''}`
+                              }
+                            </div>
+                          ))}
+                          {store.Hours.length > 2 && (
+                            <div class="text-xs text-gray-400 ml-7">+{store.Hours.length - 2} more</div>
+                          )}
+                        </div>
+                      )}
 
-                {/* Directions Button */}
-                {store.attributes?.Address && (
-                  <a
-                    href={`https://maps.google.com/?q=${encodeURIComponent(store.attributes.Address)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                  >
-                    Directions
-                  </a>
-                )}
-              </div>
+                      {/* Product Categories */}
+                      {store.product_categories && store.product_categories.length > 0 && (
+                        <div class="mb-4">
+                          <div class="flex flex-wrap gap-1">
+                            {store.product_categories.slice(0, 3).map(category => (
+                              <span class="inline-block bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-xs">
+                                {category.Name}
+                              </span>
+                            ))}
+                            {store.product_categories.length > 3 && (
+                              <span class="inline-block bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded text-xs">
+                                +{store.product_categories.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Status and Actions */}
+                      <div class="flex items-center justify-between mb-4">
+                        <span class={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                          store.is_active
+                            ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                            : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                        }`}>
+                          {store.is_active ? 'Open' : 'Closed'}
+                        </span>
+
+                        {/* Age Requirements */}
+                        <div class="flex space-x-1">
+                          {store.over18 && (
+                            <span class="inline-block bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded text-xs">
+                              18+
+                            </span>
+                          )}
+                          {store.over21 && (
+                            <span class="inline-block bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded text-xs">
+                              21+
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div class="flex space-x-2">
+                        {/* Store Homepage Button */}
+                        {store.Slug && (
+                          <a
+                            href={`/location/${store.Slug}`}
+                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
+                          >
+                            View Store
+                          </a>
+                        )}
+
+                        {/* View Menu Button */}
+                        {store.Menu_url && (
+                          <a
+                            href={store.Menu_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
+                          >
+                            Menu
+                          </a>
+                        )}
+
+                        {/* Directions Button */}
+                        {store.Address && (
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(`${store.Address.street}, ${store.Address.city}, ${store.Address.state}`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                          >
+                            Directions
+                          </a>
+                        )}
+                      </div>
+
+                      {/* Quick Category Links */}
+                      {store.product_categories && store.product_categories.length > 0 && (
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                          <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">Browse products:</div>
+                          <div class="flex flex-wrap gap-1">
+                            {store.product_categories.slice(0, 2).map(category => {
+                              const stateSlug = store.Address?.state?.toLowerCase() === 'az' ? 'arizona' :
+                                                store.Address?.state?.toLowerCase() === 'nv' ? 'nevada' :
+                                                store.Address?.state?.toLowerCase();
+                              const citySlug = store.Address?.city?.toLowerCase().replace(/\s+/g, '-');
+                              const districtSlug = store.LocationCode?.toLowerCase().replace(/\s+/g, '-');
+
+                              let categoryUrl = `/${category.Slug}/${category.Slug}-in-${stateSlug}/${category.Slug}-in-${citySlug}`;
+                              if (districtSlug) {
+                                categoryUrl += `/${category.Slug}-on-${districtSlug}`;
+                              }
+                              categoryUrl += `/${store.Slug}/menu`;
+
+                              return (
+                                <a
+                                  href={categoryUrl}
+                                  class="text-xs bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 px-2 py-1 rounded hover:bg-emerald-200 dark:hover:bg-emerald-800 transition-colors"
+                                >
+                                  {category.Name}
+                                </a>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              }
             </div>
           </div>
         ))}
