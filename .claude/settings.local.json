@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for endpoint in \"locations\" \"store\" \"region\" \"product-categories\" \"product-category\" \"category\")",
+      "Bash(do echo \"Testing $endpoint:\")",
+      "Bash(done)",
+      "Bash(curl:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,138 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Fetch regions from Strapi
+let regionsData = [];
+let apiError = null;
+
+try {
+  console.log('🚀 Fetching regions from Strapi');
+
+  // Using the Region content type
+  const response = await fetch('http://localhost:1337/api/region?populate=*&pagination[pageSize]=100');
+
+  if (response.ok) {
+    const data = await response.json();
+    regionsData = data?.data || [];
+    console.log('✅ Regions loaded:', regionsData.length);
+  } else {
+    const errorData = await response.json();
+    console.error('❌ Regions API Error:', errorData);
+    apiError = errorData.error?.message || 'Failed to fetch regions';
+  }
+} catch (error) {
+  console.error('❌ Error fetching regions:', error);
+  apiError = error.message;
+}
+---
+
+<Layout title="Regions - FLMintDeals" description="Browse cannabis dispensaries by region and area">
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-700 text-white py-16">
+    <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div class="text-center">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
+          Regions
+        </h1>
+        <p class="text-xl lg:text-2xl text-blue-100 max-w-3xl mx-auto">
+          Explore cannabis dispensaries and retailers by region
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12">
+    {regionsData.length === 0 ? (
+      <div class="text-center py-16">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+        </svg>
+        <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">No regions found</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          {apiError ? `Error: ${apiError}` : 'No regions are available at this time.'}
+        </p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {regionsData.map(region => (
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            {/* Region Image */}
+            {region.attributes?.RegionImage?.data?.attributes?.url && (
+              <img
+                src={`http://localhost:1337${region.attributes.RegionImage.data.attributes.url}`}
+                alt={region.attributes?.Name || region.attributes?.title}
+                class="w-full h-48 object-cover"
+              />
+            )}
+
+            <div class="p-6">
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                {region.attributes?.Name || region.attributes?.title || 'Region Name'}
+              </h3>
+
+              {/* Description */}
+              {region.attributes?.Description && (
+                <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                  {region.attributes.Description}
+                </p>
+              )}
+
+              {/* Store Count */}
+              {region.attributes?.stores?.data && (
+                <div class="flex items-center mb-4">
+                  <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                  </svg>
+                  <span class="text-gray-600 dark:text-gray-300">
+                    {region.attributes.stores.data.length} store{region.attributes.stores.data.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              )}
+
+              {/* Active Status */}
+              {region.attributes?.IsActive !== undefined && (
+                <div class="mb-4">
+                  <span class={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    region.attributes.IsActive
+                      ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                  }`}>
+                    {region.attributes.IsActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+              )}
+
+              <div class="flex space-x-2">
+                {/* View Stores Button */}
+                <a
+                  href={`/regions/${region.documentId}`}
+                  class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
+                >
+                  View Stores
+                </a>
+
+                {/* View on Map Button */}
+                <a
+                  href={`/regions/${region.documentId}/map`}
+                  class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Map
+                </a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

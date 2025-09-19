@@ -1,0 +1,266 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  try {
+    // Fetch all categories from Strapi
+    const response = await fetch('http://localhost:1337/api/product-categories?populate=*&pagination[pageSize]=100');
+
+    if (!response.ok) {
+      console.error('Failed to fetch categories:', response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    const categories = data?.data || [];
+
+    // Generate paths for each category
+    return categories.map(category => ({
+      params: {
+        category: category.attributes?.Slug || category.attributes?.Name?.toLowerCase().replace(/\s+/g, '-') || category.documentId
+      },
+      props: {
+        categoryData: category,
+        categoryName: category.attributes?.Name || 'Category',
+        categorySlug: category.attributes?.Slug || category.documentId
+      }
+    }));
+
+  } catch (error) {
+    console.error('Error fetching categories for static paths:', error);
+    return [];
+  }
+}
+
+const { category } = Astro.params;
+const { categoryData, categoryName, categorySlug } = Astro.props;
+
+// Fetch products for this category
+let products = [];
+let apiError = null;
+
+try {
+  console.log('🚀 Fetching products for category:', categoryName);
+
+  // Try to fetch products that belong to this category
+  // Adjust the endpoint and filter based on your Strapi setup
+  const response = await fetch(`http://localhost:1337/api/dosage-products?populate=*&filters[category][Slug][$eq]=${categorySlug}&pagination[pageSize]=100`);
+
+  if (response.ok) {
+    const data = await response.json();
+    products = data?.data || [];
+    console.log(`✅ ${products.length} products loaded for ${categoryName}`);
+  } else {
+    const errorData = await response.json();
+    console.error('❌ Products API Error:', errorData);
+    apiError = errorData.error?.message || 'Failed to fetch products';
+  }
+} catch (error) {
+  console.error('❌ Error fetching products:', error);
+  apiError = error.message;
+}
+---
+
+<Layout title={`${categoryName} - Cannabis Products | Mint Deals`} description={`Browse ${categoryName} cannabis products and find the best deals from Florida dispensaries.`}>
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-br from-purple-800 via-purple-700 to-indigo-700 text-white py-16">
+    <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div class="text-center">
+        <!-- Category Image -->
+        {categoryData?.attributes?.Image?.data?.attributes?.url && (
+          <div class="mb-8">
+            <img
+              src={`http://localhost:1337${categoryData.attributes.Image.data.attributes.url}`}
+              alt={categoryName}
+              class="w-32 h-32 mx-auto rounded-full object-cover border-4 border-white/20"
+            />
+          </div>
+        )}
+
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
+          {categoryName}
+        </h1>
+
+        {categoryData?.attributes?.Description && (
+          <p class="text-xl lg:text-2xl text-purple-100 max-w-3xl mx-auto">
+            {categoryData.attributes.Description}
+          </p>
+        )}
+
+        <!-- Breadcrumb -->
+        <nav class="mt-8">
+          <ol class="flex items-center justify-center space-x-2 text-sm">
+            <li>
+              <a href="/" class="text-purple-200 hover:text-white transition-colors">Home</a>
+            </li>
+            <li class="text-purple-300">/</li>
+            <li>
+              <a href="/categories" class="text-purple-200 hover:text-white transition-colors">Categories</a>
+            </li>
+            <li class="text-purple-300">/</li>
+            <li class="text-white font-medium">{categoryName}</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12">
+    <!-- Category Stats -->
+    <div class="mb-8 flex flex-wrap gap-4 justify-center">
+      <div class="bg-white dark:bg-gray-800 rounded-lg px-6 py-3 shadow-sm">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-purple-600">{products.length}</div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">Products Available</div>
+        </div>
+      </div>
+
+      {categoryData?.attributes?.IsActive !== undefined && (
+        <div class="bg-white dark:bg-gray-800 rounded-lg px-6 py-3 shadow-sm">
+          <div class="text-center">
+            <div class={`text-2xl font-bold ${categoryData.attributes.IsActive ? 'text-green-600' : 'text-gray-400'}`}>
+              {categoryData.attributes.IsActive ? '✓' : '○'}
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              {categoryData.attributes.IsActive ? 'Active' : 'Inactive'}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <!-- Products Grid -->
+    {products.length === 0 ? (
+      <div class="text-center py-16">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+        <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">No products found</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          {apiError ? `Error: ${apiError}` : `No products are available in the ${categoryName} category at this time.`}
+        </p>
+        <div class="mt-6">
+          <a
+            href="/categories"
+            class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Browse All Categories
+          </a>
+        </div>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {products.map(product => (
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow group">
+            {/* Product Image */}
+            {product.attributes?.Image?.data?.attributes?.url ? (
+              <div class="relative h-48 overflow-hidden">
+                <img
+                  src={`http://localhost:1337${product.attributes.Image.data.attributes.url}`}
+                  alt={product.attributes?.Name || 'Product'}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            ) : (
+              <div class="h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+              </div>
+            )}
+
+            <div class="p-6">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                {product.attributes?.Name || 'Product Name'}
+              </h3>
+
+              {/* Product Description */}
+              {product.attributes?.Discription && (
+                <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                  {product.attributes.Discription}
+                </p>
+              )}
+
+              {/* Quantity */}
+              {product.attributes?.QuantityPerPKG && (
+                <div class="flex items-center mb-3">
+                  <svg class="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2h4a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1h4z"/>
+                  </svg>
+                  <span class="text-sm text-gray-600 dark:text-gray-300">
+                    Qty: {product.attributes.QuantityPerPKG}
+                  </span>
+                </div>
+              )}
+
+              {/* Dosing Form */}
+              {product.attributes?.dosing_form?.data?.attributes?.Name && (
+                <div class="mb-3">
+                  <span class="inline-block bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full text-xs font-medium">
+                    {product.attributes.dosing_form.data.attributes.Name}
+                  </span>
+                </div>
+              )}
+
+              {/* Ingredients */}
+              {product.attributes?.ingredients?.data?.length > 0 && (
+                <div class="mb-4">
+                  <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Ingredients:</h4>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                    {product.attributes.ingredients.data.map(ing => ing.attributes?.Name).filter(Boolean).join(', ')}
+                  </p>
+                </div>
+              )}
+
+              <div class="flex space-x-2">
+                <a
+                  href={`/products/${product.documentId}`}
+                  class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
+                >
+                  View Details
+                </a>
+                <a
+                  href="/locations"
+                  class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Find Store
+                </a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    <!-- Related Categories -->
+    <div class="mt-16">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center">
+        Explore Other Categories
+      </h2>
+      <div class="flex justify-center">
+        <a
+          href="/categories"
+          class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+          Browse All Categories
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

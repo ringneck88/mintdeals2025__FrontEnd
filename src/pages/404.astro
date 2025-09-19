@@ -1,0 +1,205 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Fetch brand data from Strapi for logo
+let brandData = null;
+let logoUrl = null;
+
+try {
+  const response = await fetch('http://localhost:1337/api/brands?populate=*');
+
+  if (response.ok) {
+    const data = await response.json();
+    brandData = Array.isArray(data?.data) ? data?.data?.[0] : data?.data;
+
+    // Get logo URL
+    let logo = null;
+    if (brandData?.Logo) {
+      logo = brandData.Logo;
+    } else if (brandData?.attributes?.Logo) {
+      logo = brandData.attributes.Logo;
+    }
+
+    if (logo?.url) {
+      logoUrl = logo.url.startsWith('http')
+        ? logo.url
+        : `http://localhost:1337${logo.url}`;
+    }
+  }
+} catch (error) {
+  console.log('Could not fetch brand data:', error);
+}
+---
+
+<Layout title="404 - Page Not Found | Mint Cannabis" description="The page you're looking for doesn't exist">
+  <div class="min-h-[70vh] flex items-center justify-center px-4">
+    <div class="text-center">
+      <!-- Animated Logo or Fallback -->
+      <div class="mb-8 animate-pulse">
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt={brandData?.Name || "Mint Cannabis"}
+            class="h-24 md:h-32 w-auto mx-auto opacity-50"
+          />
+        ) : (
+          <div class="flex items-center justify-center">
+            <div class="bg-gradient-to-br from-green-500/20 to-emerald-600/20 rounded-full p-6">
+              <svg class="w-24 h-24 md:w-32 md:h-32 text-green-600/50" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+              </svg>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <!-- 404 Text with Cannabis Theme -->
+      <div class="mb-8">
+        <h1 class="text-8xl md:text-9xl font-black bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+          404
+        </h1>
+        <div class="flex items-center justify-center space-x-2 mt-4">
+          <span class="text-2xl md:text-3xl font-bold text-gray-700 dark:text-gray-300">Page Not</span>
+          <div class="relative">
+            <span class="text-2xl md:text-3xl font-bold text-green-600">Found</span>
+            <!-- Decorative Leaf -->
+            <svg class="absolute -top-3 -right-3 w-6 h-6 text-green-500 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/>
+              <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Funny Cannabis-themed Messages -->
+      <div class="mb-8 space-y-3">
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+          Looks like this page went up in smoke! 💨
+        </p>
+        <p class="text-sm text-gray-500 dark:text-gray-500">
+          The page you're looking for has either been moved, removed, or never existed.
+        </p>
+      </div>
+
+      <!-- Fun Error Messages Rotation -->
+      <div class="mb-10 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg max-w-md mx-auto">
+        <p class="text-sm text-green-700 dark:text-green-300 italic">
+          <span class="font-semibold">Pro tip:</span> Unlike our products, this page won't get you anywhere.
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a
+          href="/"
+          class="group flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all transform hover:scale-105"
+        >
+          <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Back to Home
+        </a>
+
+        <a
+          href="/locations"
+          class="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 border-2 border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg font-medium transition-all"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Find a Store
+        </a>
+
+        <a
+          href="/categories"
+          class="flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg font-medium transition-all"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+          Browse Products
+        </a>
+      </div>
+
+      <!-- Search Suggestion -->
+      <div class="mt-12 p-6 bg-gray-100 dark:bg-gray-800 rounded-lg max-w-2xl mx-auto">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+          Looking for something specific?
+        </h3>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search for products, stores, or information..."
+            class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+          <button
+            onclick="window.location.href = '/search?q=' + document.getElementById('search-input').value"
+            class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+          >
+            Search
+          </button>
+        </div>
+      </div>
+
+      <!-- Popular Links -->
+      <div class="mt-12">
+        <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-4">
+          Popular Pages
+        </h3>
+        <div class="flex flex-wrap gap-2 justify-center">
+          <a href="/dosage-guide" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full text-sm text-gray-700 dark:text-gray-300 transition-colors">
+            Dosage Guide
+          </a>
+          <a href="/regions" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full text-sm text-gray-700 dark:text-gray-300 transition-colors">
+            Regions
+          </a>
+          <a href="/deals" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full text-sm text-gray-700 dark:text-gray-300 transition-colors">
+            Today's Deals
+          </a>
+          <a href="/events" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full text-sm text-gray-700 dark:text-gray-300 transition-colors">
+            Events
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decorative Background Elements -->
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute top-20 left-10 w-72 h-72 bg-green-500/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-20 right-10 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
+  </div>
+</Layout>
+
+<style>
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+</style>
+
+<script>
+  // Handle Enter key for search
+  document.getElementById('search-input')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const searchValue = (e.target as HTMLInputElement).value;
+      if (searchValue) {
+        window.location.href = '/search?q=' + encodeURIComponent(searchValue);
+      }
+    }
+  });
+
+  // Fun console message
+  console.log('%c🌿 404 - Lost in the weeds? ', 'color: #16a34a; font-size: 16px; font-weight: bold;');
+  console.log('%cHead back to safety: ' + window.location.origin, 'color: #6b7280; font-size: 12px;');
+</script>

@@ -8,47 +8,54 @@ export interface Props {
 
 const { title, description = "Your deals website powered by Kelly" } = Astro.props;
 
-// Fetch brand data from Strapi
+// Fetch brand data and categories from Strapi
 let brandData = null;
 let logoUrl = null;
+let navigationCategories = [];
 
 try {
-  // Try to fetch brand data
-  const response = await fetch('http://localhost:1337/api/brands?populate=*');
+  // Fetch brand data and categories in parallel
+  const [brandResponse, categoriesResponse] = await Promise.allSettled([
+    fetch('http://localhost:1337/api/brands?populate=*'),
+    fetch('http://localhost:1337/api/product-categories?populate=*&pagination[pageSize]=10&sort=Name:asc')
+  ]);
 
-  console.log('Brand API Response Status:', response.status);
-
-  if (response.ok) {
+  // Process brand data
+  if (brandResponse.status === 'fulfilled' && brandResponse.value.ok) {
+    const response = brandResponse.value;
     const data = await response.json();
-    console.log('Brand Data:', JSON.stringify(data, null, 2));
 
     // For collection type, use data array; for single type, use data directly
     brandData = Array.isArray(data?.data) ? data?.data?.[0] : data?.data;
-    console.log('Processed Brand Data:', brandData);
 
-    // Get logo URL - the logo is directly in the data structure
+    // Get logo URL
     let logo = null;
-
     if (brandData?.Logo) {
-      // Direct logo structure (no data wrapper for media fields in this case)
       logo = brandData.Logo;
     } else if (brandData?.attributes?.Logo) {
-      // Nested structure
       logo = brandData.attributes.Logo;
     }
 
-    console.log('Logo data:', logo);
-
     if (logo?.url) {
-      // Prepend Strapi URL if it's a relative path
       logoUrl = logo.url.startsWith('http')
         ? logo.url
         : `http://localhost:1337${logo.url}`;
-      console.log('Final logo URL:', logoUrl);
     }
-  } else {
-    const errorData = await response.json();
-    console.log('Brand API Error:', errorData);
+  }
+
+  // Process categories data
+  if (categoriesResponse.status === 'fulfilled' && categoriesResponse.value.ok) {
+    const response = categoriesResponse.value;
+    const data = await response.json();
+
+    if (data?.data) {
+      navigationCategories = data.data.map(category => ({
+        name: category.attributes?.Name || '',
+        slug: category.attributes?.Slug || category.attributes?.Name?.toLowerCase().replace(/\s+/g, '-') || category.documentId,
+        description: category.attributes?.Description || '',
+        isActive: category.attributes?.IsActive !== false
+      })).filter(cat => cat.name && cat.isActive);
+    }
   }
 } catch (error) {
   console.log('Could not fetch brand data:', error);
@@ -134,18 +141,15 @@ try {
                 </button>
                 <div class="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[200]">
                   <div class="py-2">
-                    <a href="/stores" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                    <a href="/locations" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                       🏪 All Locations
                     </a>
+                    <a href="/regions" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                      🗺️ Browse by Region
+                    </a>
                     <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
-                    <a href="/stores/mint-cannabis-tempe" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
-                      📍 Mint Cannabis - Tempe
-                    </a>
-                    <a href="/stores/mint-cannabis-phoenix" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
-                      📍 Mint Cannabis - Phoenix
-                    </a>
-                    <a href="/stores/mint-cannabis-mesa" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
-                      📍 Mint Cannabis - Mesa
+                    <a href="/stores" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                      📍 Store Details
                     </a>
                   </div>
                 </div>
@@ -166,60 +170,24 @@ try {
                     </a>
                     <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
 
-                    <!-- Two Column Layout -->
-                    <div class="grid grid-cols-2 gap-1 px-2">
-                      <!-- General Education Links -->
-                      <div>
-                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1">Education</div>
-                        <a href="/learn/flower" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🌿 Flower
-                        </a>
-                        <a href="/learn/edibles" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🍭 Edibles
-                        </a>
-                        <a href="/learn/concentrates" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🍯 Concentrates
-                        </a>
-                        <a href="/learn/vaporizers" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          💨 Vaporizers
-                        </a>
-                        <a href="/learn/pre-rolls" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🚬 Pre-Rolls
-                        </a>
-                        <a href="/learn/topicals" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🧴 Topicals
-                        </a>
-                        <a href="/learn/cartridges" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🖊️ Cartridges
-                        </a>
+                    <!-- Dynamic Categories from Strapi -->
+                    {navigationCategories.length > 0 ? (
+                      <div class="max-h-64 overflow-y-auto">
+                        {navigationCategories.map(category => (
+                          <a
+                            href={`/${category.slug}`}
+                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400"
+                            title={category.description}
+                          >
+                            {category.name}
+                          </a>
+                        ))}
                       </div>
-
-                      <!-- State-specific Links -->
-                      <div>
-                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1">By State</div>
-                        <a href="/flower/flower-in-florida" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🌴 Florida Products
-                        </a>
-                        <a href="/edibles/edibles-in-california" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          ☀️ California Products
-                        </a>
-                        <a href="/concentrates/concentrates-in-colorado" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🏔️ Colorado Products
-                        </a>
-                        <a href="/vaporizers/vaporizers-in-nevada" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🎰 Nevada Products
-                        </a>
-                        <a href="/pre-rolls/pre-rolls-in-arizona" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🌵 Arizona Products
-                        </a>
-                        <a href="/topicals/topicals-in-oregon" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          🌲 Oregon Products
-                        </a>
-                        <a href="/cartridges/cartridges-in-washington" class="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400 rounded">
-                          ⛰️ Washington Products
-                        </a>
+                    ) : (
+                      <div class="px-4 py-2">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">No categories available</p>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -232,6 +200,9 @@ try {
               </a>
               <a href="#deals" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Deals
+              </a>
+              <a href="/dosage-guide" class="text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                Dosage Guide
               </a>
               <a href="#about" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 About
