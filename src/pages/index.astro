@@ -172,21 +172,17 @@ try {
     <div class="text-white hero-section">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="text-center">
-        <div class="mb-6 flex justify-center">
-          <img
-            src="/assets/Mint_Full_Logo.png"
-            alt="Mint Cannabis Deals"
-            class="h-24 md:h-32 lg:h-40 drop-shadow-2xl"
-          />
-        </div>
-        <p class="max-w-3xl mx-auto mb-8 text-xl md:text-2xl text-yellow-400 drop-shadow-lg">
+        <h1 class="mb-6 text-5xl font-bold text-white md:text-7xl drop-shadow-2xl">
+          Mint Cannabis Deals
+        </h1>
+        <p class="max-w-3xl mx-auto mb-8 text-xl text-yellow-400 md:text-2xl drop-shadow-lg">
           Your trusted source for premium cannabis products and information
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-          <a href="/locations" class="px-8 py-3 text-lg font-semibold text-black bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all transform hover:scale-105 shadow-lg">
+          <a href="/locations" class="px-8 py-3 text-lg font-semibold text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
             Find Locations
           </a>
-          <a href="/categories" class="px-8 py-3 text-lg font-semibold text-yellow-400 transition-all border-2 border-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black transform hover:scale-105 shadow-lg">
+          <a href="/categories" class="px-8 py-3 text-lg font-semibold text-yellow-400 transition-all transform border-2 border-yellow-400 rounded-lg shadow-lg hover:bg-yellow-400 hover:text-black hover:scale-105">
             Browse Products
           </a>
         </div>
@@ -222,7 +218,7 @@ try {
   <div class="py-16 bg-gradient-to-b from-green-900 to-black">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold md:text-4xl text-yellow-400">
+        <h2 class="mb-4 text-3xl font-bold text-yellow-400 md:text-4xl">
           Featured Locations
         </h2>
         <p class="text-xl text-green-300">
@@ -241,7 +237,7 @@ try {
       ) : stores.length > 0 ? (
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {stores.slice(0, 6).map(store => (
-            <div class="overflow-hidden transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 transform hover:scale-105">
+            <div class="overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 hover:scale-105">
               {store.image && (
                 <img
                   src={store.image}
@@ -288,7 +284,7 @@ try {
       )}
 
       <div class="mt-12 text-center">
-        <a href="/locations" class="inline-flex items-center px-6 py-3 font-medium text-black bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all transform hover:scale-105 shadow-lg">
+        <a href="/locations" class="inline-flex items-center px-6 py-3 font-medium text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
           View All Locations
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -302,7 +298,7 @@ try {
   <div class="py-16 bg-black">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold md:text-4xl text-yellow-400">
+        <h2 class="mb-4 text-3xl font-bold text-yellow-400 md:text-4xl">
           Product Categories
         </h2>
         <p class="text-xl text-green-300">
@@ -312,7 +308,7 @@ try {
 
       {apiError ? (
         <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto rounded-lg bg-red-900 bg-opacity-80">
+          <div class="max-w-md p-8 mx-auto bg-red-900 rounded-lg bg-opacity-80">
             <div class="mb-4 text-6xl text-red-400">⚠️</div>
             <h3 class="mb-2 text-lg font-medium text-red-200">API Error</h3>
             <p class="text-sm text-red-300">{apiError}</p>
@@ -323,7 +319,7 @@ try {
           {categories.slice(0, 8).map((category, index) => (
             <a
               href={`/${category.slug}`}
-              class="group relative overflow-hidden bg-black border-2 border-green-500 rounded-xl hover:border-yellow-400 transition-all transform hover:scale-105 hover:-translate-y-1"
+              class="relative overflow-hidden transition-all transform bg-black border-2 border-green-500 group rounded-xl hover:border-yellow-400 hover:scale-105 hover:-translate-y-1"
             >
               {/* Category Image or Icon */}
               {category.image ? (
@@ -331,7 +327,7 @@ try {
                   <img
                     src={category.image}
                     alt={category.title}
-                    class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                    class="object-cover w-full h-full transition-opacity opacity-80 group-hover:opacity-100"
                   />
                 </div>
               ) : (
@@ -342,11 +338,11 @@ try {
 
               {/* Category Content */}
               <div class="p-4">
-                <h3 class="text-lg font-bold text-yellow-400 group-hover:text-yellow-300 mb-1">
+                <h3 class="mb-1 text-lg font-bold text-yellow-400 group-hover:text-yellow-300">
                   {category.title}
                 </h3>
                 {category.description && (
-                  <p class="text-xs text-green-300 mb-2 line-clamp-2">
+                  <p class="mb-2 text-xs text-green-300 line-clamp-2">
                     {category.description}
                   </p>
                 )}
@@ -354,7 +350,7 @@ try {
                   <span class="text-xs text-green-400">
                     {category.productCount || 0} products
                   </span>
-                  <span class="text-yellow-400 group-hover:translate-x-1 transition-transform">
+                  <span class="text-yellow-400 transition-transform group-hover:translate-x-1">
                     →
                   </span>
                 </div>
@@ -373,7 +369,7 @@ try {
       )}
 
       <div class="mt-12 text-center">
-        <a href="/categories" class="inline-flex items-center px-6 py-3 font-medium text-black bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all transform hover:scale-105 shadow-lg">
+        <a href="/categories" class="inline-flex items-center px-6 py-3 font-medium text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
           View All Categories
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -387,7 +383,7 @@ try {
   <div class="py-16 bg-gradient-to-b from-black to-green-900">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold md:text-4xl text-yellow-400">
+        <h2 class="mb-4 text-3xl font-bold text-yellow-400 md:text-4xl">
           Why Choose Mint Deals
         </h2>
         <p class="text-xl text-green-300">
@@ -397,7 +393,7 @@ try {
 
       <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
         <!-- Feature 1 -->
-        <div class="p-8 bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400 transition-all">
+        <div class="p-8 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
           <div class="flex items-center justify-center w-16 h-16 mb-6 bg-green-900 rounded-lg">
             <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -411,7 +407,7 @@ try {
         </div>
 
         <!-- Feature 2 -->
-        <div class="p-8 bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400 transition-all">
+        <div class="p-8 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
           <div class="flex items-center justify-center w-16 h-16 mb-6 bg-green-900 rounded-lg">
             <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
@@ -424,7 +420,8 @@ try {
         </div>
 
         <!-- Feature 3 -->
-        <div class="p-8 bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400 transition-all">
+
+        <div class="p-8 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
           <div class="flex items-center justify-center w-16 h-16 mb-6 bg-green-900 rounded-lg">
             <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
