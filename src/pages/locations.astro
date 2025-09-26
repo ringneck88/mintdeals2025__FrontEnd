@@ -21,7 +21,7 @@ try {
   ]);
 
   // Process stores
-  if (storesResponse.status === 'fulfilled' && storesResponse.value.ok) {
+  if (storesResponse.status === 'fulfilled' && storesResponse.value?.ok) {
     const data = await storesResponse.value.json();
     storesData = data?.data || [];
     console.log('✅ Stores loaded:', storesData.length);
@@ -53,10 +53,20 @@ try {
 
     statsData.totalStates = states.size;
     statsData.totalCities = cities.size;
+  } else if (storesResponse.status === 'fulfilled' && storesResponse.value) {
+    // API responded but with an error status
+    try {
+      const errorData = await storesResponse.value.json();
+      console.error('❌ Stores API Error:', errorData);
+      apiError = errorData.error?.message || 'Failed to fetch stores';
+    } catch {
+      console.error('❌ Stores API Error: Non-JSON response');
+      apiError = 'Failed to fetch stores - API returned non-JSON response';
+    }
   } else {
-    const errorData = await storesResponse.value.json();
-    console.error('❌ Stores API Error:', errorData);
-    apiError = errorData.error?.message || 'Failed to fetch stores';
+    // Request failed entirely
+    console.error('❌ Stores API Error:', storesResponse.reason || 'Network error');
+    apiError = 'Failed to connect to API - is the backend running on http://localhost:1337?';
   }
 
   // Process categories
