@@ -15,9 +15,25 @@ function getCategoryIcon(slug) {
     'concentrates': '🍯',
     'edibles': '🍭',
     'topicals': '🧴',
-    'cartridges': '🖊️'
+    'cartridges': '🖊️',
+    'tinctures': '💧',
+    'accessories': '🔧',
+    'cbd': '🌱'
   };
   return icons[slug] || '🌿';
+}
+
+// Category color mapping for variety
+function getCategoryColor(index) {
+  const colors = [
+    'from-green-500 to-green-600',
+    'from-yellow-400 to-yellow-500',
+    'from-green-600 to-green-700',
+    'from-yellow-500 to-yellow-600',
+    'from-green-400 to-green-500',
+    'from-yellow-300 to-yellow-400'
+  ];
+  return colors[index % colors.length];
 }
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
@@ -28,7 +44,7 @@ try {
   // Fetch stores and categories in parallel
   const [storesResponse, categoriesResponse] = await Promise.allSettled([
     fetch(`${API_BASE}/locations?populate=*&pagination[pageSize]=6`),
-    fetch(`${API_BASE}/product-categories?populate=*&pagination[pageSize]=8&sort=Name:asc`)
+    fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=8&sort=Name:asc`)
   ]);
 
   // Process stores
@@ -56,16 +72,28 @@ try {
     const data = await categoriesResponse.value.json();
     const categoriesData = data?.data || [];
 
-    categories = categoriesData.map(category => ({
-      id: category.id,
-      documentId: category.documentId,
-      title: category.Name || '',
-      description: category.Description || category.Discription || '',
-      slug: category.Slug || category.documentId,
-      icon: getCategoryIcon(category.Slug),
-      image: category.Image?.url ? `https://mintdealsbackend-production.up.railway.app${category.Image.url}` : null,
-      isActive: category.IsActive !== false
-    })).filter(category => category.title && category.isActive);
+    categories = categoriesData.map((category, index) => {
+      // Check if it's Strapi v4 format (with attributes) or direct format
+      const isV4 = !!category.attributes;
+      const data = isV4 ? category.attributes : category;
+
+      return {
+        id: category.id,
+        documentId: category.documentId,
+        title: data.Name || data.name || '',
+        description: data.Description || data.description || '',
+        slug: data.Slug || data.slug || category.documentId || category.id,
+        icon: getCategoryIcon(data.Slug || data.slug),
+        image: data.Image?.data?.attributes?.url
+          ? `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`
+          : data.image?.url
+            ? `https://mintdealsbackend-production.up.railway.app${data.image.url}`
+            : null,
+        isActive: data.IsActive !== false && data.isActive !== false,
+        productCount: data.products?.data?.length || data.products?.length || 0,
+        colorGradient: getCategoryColor(index)
+      };
+    }).filter(category => category.title && category.isActive);
 
     console.log('✅ Categories loaded:', categories.length);
   }
@@ -78,9 +106,12 @@ try {
 ---
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Tenor+Sans&display=swap');
+
   body {
     margin: 0;
     padding: 0;
+    font-family: 'Tenor Sans', serif;
   }
   .video-background {
     position: fixed;
@@ -98,7 +129,7 @@ try {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(to top, #ffffff, #c2f0c2, #70db70, #33cc33, #c2f0c2, #ffffff);
+    background-image: linear-gradient(to top,  #29a329, #33cc33, #5cd65c, #85e085,  #c2f0c2,  #ebfaeb, #ffffff, #ffffff);
     mix-blend-mode: color;
     pointer-events: none;
     z-index: 1;
@@ -111,13 +142,19 @@ try {
   .content-wrapper {
     position: relative;
     z-index: 1;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5));
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
   }
   .hero-section {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 </style>
 
@@ -135,17 +172,21 @@ try {
     <div class="text-white hero-section">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="text-center">
-        <h1 class="mb-6 text-4xl font-bold md:text-6xl">
-          Mint Cannabis Deals
-        </h1>
-        <p class="max-w-3xl mx-auto mb-8 text-xl text-green-100 md:text-2xl">
+        <div class="mb-6 flex justify-center">
+          <img
+            src="/assets/Mint_Full_Logo.png"
+            alt="Mint Cannabis Deals"
+            class="h-24 md:h-32 lg:h-40 drop-shadow-2xl"
+          />
+        </div>
+        <p class="max-w-3xl mx-auto mb-8 text-xl md:text-2xl text-yellow-400 drop-shadow-lg">
           Your trusted source for premium cannabis products and information
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-          <a href="/locations" class="px-8 py-3 text-lg font-semibold text-green-800 transition-colors bg-white rounded-lg hover:bg-gray-100">
+          <a href="/locations" class="px-8 py-3 text-lg font-semibold text-black bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all transform hover:scale-105 shadow-lg">
             Find Locations
           </a>
-          <a href="/categories" class="px-8 py-3 text-lg font-semibold text-white transition-colors border-2 border-white rounded-lg hover:bg-white hover:text-green-800">
+          <a href="/categories" class="px-8 py-3 text-lg font-semibold text-yellow-400 transition-all border-2 border-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black transform hover:scale-105 shadow-lg">
             Browse Products
           </a>
         </div>
@@ -154,37 +195,37 @@ try {
     </div>
 
     <!-- Quick Stats Section -->
-  <div class="py-16 bg-white dark:bg-gray-800">
+  <div class="py-16 bg-black bg-opacity-90">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
         <div>
-          <div class="mb-2 text-3xl font-bold text-green-600 dark:text-green-400">{stores.length}+</div>
-          <div class="text-gray-600 dark:text-gray-400">Locations</div>
+          <div class="mb-2 text-3xl font-bold text-green-500">{stores.length}+</div>
+          <div class="text-yellow-400">Locations</div>
         </div>
         <div>
-          <div class="mb-2 text-3xl font-bold text-green-600 dark:text-green-400">{categories.length}+</div>
-          <div class="text-gray-600 dark:text-gray-400">Categories</div>
+          <div class="mb-2 text-3xl font-bold text-green-500">{categories.length}+</div>
+          <div class="text-yellow-400">Categories</div>
         </div>
         <div>
-          <div class="mb-2 text-3xl font-bold text-green-600 dark:text-green-400">100%</div>
-          <div class="text-gray-600 dark:text-gray-400">Legal</div>
+          <div class="mb-2 text-3xl font-bold text-green-500">100%</div>
+          <div class="text-yellow-400">Legal</div>
         </div>
         <div>
-          <div class="mb-2 text-3xl font-bold text-green-600 dark:text-green-400">24/7</div>
-          <div class="text-gray-600 dark:text-gray-400">Available</div>
+          <div class="mb-2 text-3xl font-bold text-green-500">24/7</div>
+          <div class="text-yellow-400">Available</div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Featured Locations Section -->
-  <div class="py-16 bg-gray-50 dark:bg-gray-900">
+  <div class="py-16 bg-gradient-to-b from-green-900 to-black">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white">
+        <h2 class="mb-4 text-3xl font-bold md:text-4xl text-yellow-400">
           Featured Locations
         </h2>
-        <p class="text-xl text-gray-600 dark:text-gray-300">
+        <p class="text-xl text-green-300">
           Visit our trusted dispensary partners
         </p>
       </div>
@@ -200,7 +241,7 @@ try {
       ) : stores.length > 0 ? (
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {stores.slice(0, 6).map(store => (
-            <div class="overflow-hidden transition-shadow bg-white rounded-lg shadow-lg dark:bg-gray-800 hover:shadow-xl">
+            <div class="overflow-hidden transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 transform hover:scale-105">
               {store.image && (
                 <img
                   src={store.image}
@@ -209,9 +250,9 @@ try {
                 />
               )}
               <div class="p-6">
-                <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">{store.name}</h3>
+                <h3 class="mb-2 text-xl font-bold text-yellow-400">{store.name}</h3>
                 {store.address && (
-                  <p class="flex items-start mb-2 text-gray-600 dark:text-gray-300">
+                  <p class="flex items-start mb-2 text-green-300">
                     <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -220,14 +261,14 @@ try {
                   </p>
                 )}
                 {store.phone && (
-                  <p class="flex items-center mb-4 text-gray-600 dark:text-gray-300">
+                  <p class="flex items-center mb-4 text-green-300">
                     <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
                     {store.phone}
                   </p>
                 )}
-                <a href={`/location/${store.slug}`} class="inline-flex items-center font-medium text-green-600 hover:text-green-700">
+                <a href={`/location/${store.slug}`} class="inline-flex items-center font-medium text-yellow-400 hover:text-yellow-300">
                   View Details
                   <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -239,15 +280,15 @@ try {
         </div>
       ) : (
         <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto bg-white rounded-lg dark:bg-gray-800">
-            <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">No Locations Available</h3>
-            <p class="text-gray-600 dark:text-gray-300">Location information will be displayed here.</p>
+          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
+            <h3 class="mb-2 text-lg font-medium text-yellow-400">No Locations Available</h3>
+            <p class="text-green-300">Location information will be displayed here.</p>
           </div>
         </div>
       )}
 
       <div class="mt-12 text-center">
-        <a href="/locations" class="inline-flex items-center px-6 py-3 font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700">
+        <a href="/locations" class="inline-flex items-center px-6 py-3 font-medium text-black bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all transform hover:scale-105 shadow-lg">
           View All Locations
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -258,53 +299,81 @@ try {
   </div>
 
   <!-- Product Categories Section -->
-  <div class="py-16 bg-white dark:bg-gray-900">
+  <div class="py-16 bg-black">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white">
+        <h2 class="mb-4 text-3xl font-bold md:text-4xl text-yellow-400">
           Product Categories
         </h2>
-        <p class="text-xl text-gray-600 dark:text-gray-300">
+        <p class="text-xl text-green-300">
           Explore our comprehensive range of cannabis products
         </p>
       </div>
 
       {apiError ? (
         <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto rounded-lg bg-red-50 dark:bg-red-900">
-            <div class="mb-4 text-6xl text-red-600 dark:text-red-400">⚠️</div>
-            <h3 class="mb-2 text-lg font-medium text-red-800 dark:text-red-200">API Error</h3>
-            <p class="text-sm text-red-600 dark:text-red-300">{apiError}</p>
+          <div class="max-w-md p-8 mx-auto rounded-lg bg-red-900 bg-opacity-80">
+            <div class="mb-4 text-6xl text-red-400">⚠️</div>
+            <h3 class="mb-2 text-lg font-medium text-red-200">API Error</h3>
+            <p class="text-sm text-red-300">{apiError}</p>
           </div>
         </div>
       ) : categories.length > 0 ? (
-        <div class="grid grid-cols-2 gap-6 md:grid-cols-4">
-          {categories.slice(0, 8).map(category => (
-            <a href={`/${category.slug}`} class="p-6 transition-all bg-white rounded-lg shadow-lg group dark:bg-gray-800 hover:shadow-xl hover:-translate-y-1">
-              <div class="text-center">
-                <div class="mb-4 text-4xl">{category.icon}</div>
-                <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">
+        <div class="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+          {categories.slice(0, 8).map((category, index) => (
+            <a
+              href={`/${category.slug}`}
+              class="group relative overflow-hidden bg-black border-2 border-green-500 rounded-xl hover:border-yellow-400 transition-all transform hover:scale-105 hover:-translate-y-1"
+            >
+              {/* Category Image or Icon */}
+              {category.image ? (
+                <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900 to-black">
+                  <img
+                    src={category.image}
+                    alt={category.title}
+                    class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              ) : (
+                <div class={`h-40 bg-gradient-to-br ${category.colorGradient} flex items-center justify-center`}>
+                  <span class="text-5xl">{category.icon}</span>
+                </div>
+              )}
+
+              {/* Category Content */}
+              <div class="p-4">
+                <h3 class="text-lg font-bold text-yellow-400 group-hover:text-yellow-300 mb-1">
                   {category.title}
                 </h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                  Learn more
-                </p>
+                {category.description && (
+                  <p class="text-xs text-green-300 mb-2 line-clamp-2">
+                    {category.description}
+                  </p>
+                )}
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-green-400">
+                    {category.productCount || 0} products
+                  </span>
+                  <span class="text-yellow-400 group-hover:translate-x-1 transition-transform">
+                    →
+                  </span>
+                </div>
               </div>
             </a>
           ))}
         </div>
       ) : (
         <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto bg-white rounded-lg dark:bg-gray-800">
+          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
             <div class="mb-4 text-6xl">🌿</div>
-            <h3 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Categories Coming Soon</h3>
-            <p class="text-gray-600 dark:text-gray-300">Product categories will be available here.</p>
+            <h3 class="mb-2 text-lg font-medium text-yellow-400">Categories Coming Soon</h3>
+            <p class="text-green-300">Product categories will be available here.</p>
           </div>
         </div>
       )}
 
       <div class="mt-12 text-center">
-        <a href="/categories" class="inline-flex items-center px-6 py-3 font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700">
+        <a href="/categories" class="inline-flex items-center px-6 py-3 font-medium text-black bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg hover:from-yellow-500 hover:to-yellow-600 transition-all transform hover:scale-105 shadow-lg">
           View All Categories
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -315,54 +384,54 @@ try {
   </div>
 
   <!-- About Section -->
-  <div class="py-16 bg-gray-50 dark:bg-gray-800">
+  <div class="py-16 bg-gradient-to-b from-black to-green-900">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="mb-12 text-center">
-        <h2 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl dark:text-white">
+        <h2 class="mb-4 text-3xl font-bold md:text-4xl text-yellow-400">
           Why Choose Mint Deals
         </h2>
-        <p class="text-xl text-gray-600 dark:text-gray-300">
+        <p class="text-xl text-green-300">
           Your trusted partner in cannabis discovery
         </p>
       </div>
 
       <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
         <!-- Feature 1 -->
-        <div class="p-8 bg-white rounded-lg shadow-lg dark:bg-gray-900">
-          <div class="flex items-center justify-center w-16 h-16 mb-6 bg-green-100 rounded-lg dark:bg-green-900">
-            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="p-8 bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400 transition-all">
+          <div class="flex items-center justify-center w-16 h-16 mb-6 bg-green-900 rounded-lg">
+            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Find Locations</h3>
-          <p class="text-gray-600 dark:text-gray-300">
+          <h3 class="mb-3 text-xl font-bold text-yellow-400">Find Locations</h3>
+          <p class="text-green-300">
             Discover trusted dispensaries near you with detailed information and directions.
           </p>
         </div>
 
         <!-- Feature 2 -->
-        <div class="p-8 bg-white rounded-lg shadow-lg dark:bg-gray-900">
-          <div class="flex items-center justify-center w-16 h-16 mb-6 bg-green-100 rounded-lg dark:bg-green-900">
-            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="p-8 bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400 transition-all">
+          <div class="flex items-center justify-center w-16 h-16 mb-6 bg-green-900 rounded-lg">
+            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Browse Products</h3>
-          <p class="text-gray-600 dark:text-gray-300">
+          <h3 class="mb-3 text-xl font-bold text-yellow-400">Browse Products</h3>
+          <p class="text-green-300">
             Explore comprehensive product information and educational resources.
           </p>
         </div>
 
         <!-- Feature 3 -->
-        <div class="p-8 bg-white rounded-lg shadow-lg dark:bg-gray-900">
-          <div class="flex items-center justify-center w-16 h-16 mb-6 bg-green-100 rounded-lg dark:bg-green-900">
-            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="p-8 bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400 transition-all">
+          <div class="flex items-center justify-center w-16 h-16 mb-6 bg-green-900 rounded-lg">
+            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Trusted Information</h3>
-          <p class="text-gray-600 dark:text-gray-300">
+          <h3 class="mb-3 text-xl font-bold text-yellow-400">Trusted Information</h3>
+          <p class="text-green-300">
             Access reliable, up-to-date information from verified sources and experts.
           </p>
         </div>

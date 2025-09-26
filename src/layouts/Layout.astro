@@ -16,8 +16,8 @@ let navigationCategories = [];
 try {
   // Fetch brand data and categories in parallel
   const [brandResponse, categoriesResponse] = await Promise.allSettled([
-    fetch('http://localhost:1337/api/brands?populate=*'),
-    fetch('http://localhost:1337/api/product-categories?populate=*&pagination[pageSize]=10&sort=Name:asc')
+    fetch('https://mintdealsbackend-production.up.railway.app/api/brands?populate=*'),
+    fetch('https://mintdealsbackend-production.up.railway.app/api/categories?populate=*&pagination[pageSize]=10&sort=Name:asc')
   ]);
 
   // Process brand data
@@ -49,12 +49,18 @@ try {
     const data = await response.json();
 
     if (data?.data) {
-      navigationCategories = data.data.map(category => ({
-        name: category.Name || '',
-        slug: category.Slug || category.Name?.toLowerCase().replace(/\s+/g, '-') || category.documentId,
-        description: category.Description || category.Discription || '',
-        isActive: category.IsActive !== false
-      })).filter(cat => cat.name && cat.isActive);
+      navigationCategories = data.data.map(category => {
+        // Handle both Strapi v4 format (with attributes) or direct format
+        const isV4 = !!category.attributes;
+        const catData = isV4 ? category.attributes : category;
+
+        return {
+          name: catData.Name || catData.name || '',
+          slug: catData.Slug || catData.slug || catData.Name?.toLowerCase().replace(/\s+/g, '-') || category.documentId,
+          description: catData.Description || catData.description || '',
+          isActive: catData.IsActive !== false && catData.isActive !== false
+        };
+      }).filter(cat => cat.name && cat.isActive);
     }
   }
 } catch (error) {
@@ -103,31 +109,12 @@ try {
         <div class="flex justify-between items-center py-6">
           <div class="flex items-center">
             <a href="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-              {logoUrl ? (
-                <!-- Brand logo from Strapi -->
-                <img
-                  src={logoUrl}
-                  alt={brandData?.attributes?.name || "Brand Logo"}
-                  class="h-12 w-auto object-contain"
-                />
-              ) : (
-                <!-- Fallback styled logo -->
-                <div class="flex items-center">
-                  <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-full p-2">
-                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                    </svg>
-                  </div>
-                  <div class="ml-3">
-                    <h1 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                      {brandData?.attributes?.name || "MINT"}
-                    </h1>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 -mt-1">
-                      {brandData?.attributes?.tagline || "Cannabis"}
-                    </p>
-                  </div>
-                </div>
-              )}
+              <!-- Mint Cannabis Logo -->
+              <img
+                src="/assets/Mint_Full_Logo.png"
+                alt="Mint Cannabis"
+                class="h-12 w-auto object-contain"
+              />
             </a>
           </div>
           
@@ -430,20 +417,12 @@ try {
           <!-- Company Info -->
           <div class="col-span-1">
             <div class="flex items-center mb-4">
-              {logoUrl ? (
-                <img
-                  src={logoUrl}
-                  alt={brandData?.Name || "Brand Logo"}
-                  class="h-8 w-auto mr-3 object-contain"
-                />
-              ) : (
-                <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-full p-1.5 mr-3">
-                  <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                  </svg>
-                </div>
-              )}
-              <h3 class="text-lg font-bold">{brandData?.Name || "FLMintDeals"}</h3>
+              <img
+                src="/assets/Mint_Full_Logo.png"
+                alt="Mint Cannabis"
+                class="h-8 w-auto mr-3 object-contain"
+              />
+              <h3 class="text-lg font-bold">Mint Cannabis</h3>
             </div>
             <p class="text-gray-300 text-sm">
               Your trusted source for cannabis deals and dispensary information in Florida.
