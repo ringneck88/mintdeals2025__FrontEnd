@@ -125,7 +125,7 @@ try {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(to top,  #29a329, #33cc33, #5cd65c, #85e085,  #c2f0c2,  #ebfaeb, #ffffff, #ffffff);
+    background-image: linear-gradient(to top,  rgba(41, 163, 41, 0.35), rgba(51, 204, 51, 0.3), rgba(92, 214, 92, 0.25), rgba(133, 224, 133, 0.2), rgba(194, 240, 194, 0.15), rgba(235, 250, 235, 0.1), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
     mix-blend-mode: color;
     pointer-events: none;
     z-index: 1;
@@ -138,7 +138,7 @@ try {
   .content-wrapper {
     position: relative;
     z-index: 1;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
   }
   .hero-section {
     min-height: 60vh;
@@ -212,7 +212,7 @@ try {
   </div>
 
   <!-- Featured Locations Section -->
-  <div class="py-12 bg-gradient-to-b from-green-900 to-black">
+  <div class="py-12 bg-gradient-to-b from-green-900/40 to-black/60">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="mb-8 text-center">
         <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
@@ -345,7 +345,7 @@ try {
             >
               {/* Category Image or Icon */}
               {category.image ? (
-                <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900 to-black">
+                <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50">
                   <img
                     src={category.image}
                     alt={category.title}
@@ -402,7 +402,7 @@ try {
   </div>
 
   <!-- About Section -->
-  <div class="py-12 bg-gradient-to-b from-black to-green-900">
+  <div class="py-12 bg-gradient-to-b from-black/60 to-green-900/40">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
       <div class="mb-8 text-center">
         <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">

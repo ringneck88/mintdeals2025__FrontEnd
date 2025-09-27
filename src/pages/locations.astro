@@ -16,7 +16,7 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 try {
   console.log('🚀 Fetching stores from Railway API');
 
-  const response = await fetch(`${API_BASE}/locations?populate=*&pagination[pageSize]=100`);
+  const response = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
 
   if (response.ok) {
     const data = await response.json();
@@ -104,13 +104,10 @@ try {
   const cities = new Set();
 
   storesData.forEach(store => {
-    // Handle both Strapi v4 and direct format
-    const storeData = store.attributes || store;
-
-    if (storeData.Address?.state || storeData.address?.state) {
-      const address = storeData.Address || storeData.address;
-      const state = address.state?.toUpperCase();
-      const city = address.city;
+    // Use direct format from Railway API
+    if (store.state) {
+      const state = store.state?.toUpperCase();
+      const city = store.city;
 
       states.add(state);
       if (city) cities.add(`${state}-${city}`);
@@ -137,29 +134,30 @@ try {
 
 // Process stores for display
 const stores = storesData.map(store => {
-  // Handle both Strapi v4 and direct format
-  const isV4 = !!store.attributes;
-  const data = isV4 ? store.attributes : store;
-
   return {
     id: store.id,
     documentId: store.documentId,
-    name: data.Name || data.name || 'Unnamed Store',
-    slug: data.Slug || data.slug || store.documentId,
-    address: data.Address || data.address,
-    phone: data.Phone || data.phone,
-    hours: data.Hours || data.hours,
-    image: data.HeroImage?.url
-      ? `https://mintdealsbackend-production.up.railway.app${data.HeroImage.url}`
-      : data.heroImage?.url
-        ? `https://mintdealsbackend-production.up.railway.app${data.heroImage.url}`
-        : null,
-    isActive: data.is_active !== false && data.isActive !== false,
-    menuUrl: data.Menu_url || data.menuUrl,
-    locationCode: data.LocationCode || data.locationCode,
-    productCategories: data.product_categories || data.productCategories || [],
-    over18: data.over18,
-    over21: data.over21
+    name: store.name || 'Unnamed Store',
+    slug: store.slug || store.documentId,
+    address: {
+      street: store.address,
+      city: store.city,
+      state: store.state,
+      zipCode: store.zip_code
+    },
+    phone: store.phone,
+    hours: store.hours || [],
+    image: store.image?.url
+      ? `https://mintdealsbackend-production.up.railway.app${store.image.url}`
+      : null,
+    isActive: store.is_active !== false,
+    menuUrl: store.menu_url,
+    locationCode: store.location_code,
+    productCategories: store.product_categories || [],
+    over18: store.over18,
+    over21: store.over21,
+    latitude: store.latitude,
+    longitude: store.longitude
   };
 }).filter(store => store.isActive);
 ---
