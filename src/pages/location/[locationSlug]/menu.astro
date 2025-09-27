@@ -9,25 +9,36 @@ const { locationSlug } = Astro.params;
 let locationData = null;
 let productsData = [];
 let categoriesData = [];
+let regionData = null;
 let apiError = null;
+
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 try {
   console.log('🚀 Fetching menu for location:', locationSlug);
 
-  // Fetch location data and products
-  const [locationResponse, productsResponse, categoriesResponse] = await Promise.allSettled([
-    fetch(`http://localhost:1337/api/locations?filters[Slug][$eq]=${locationSlug}&populate=*`),
-    fetch('http://localhost:1337/api/dosage-products?populate=*&pagination[pageSize]=100'),
-    fetch('http://localhost:1337/api/product-categories?populate=*&pagination[pageSize]=20')
+  // Fetch location data and related information
+  const [storesResponse, productsResponse, categoriesResponse, regionsResponse] = await Promise.allSettled([
+    fetch(`${API_BASE}/stores?filters[slug][$eq]=${locationSlug}&populate=*`),
+    fetch(`${API_BASE}/products?populate=*&pagination[pageSize]=100`),
+    fetch(`${API_BASE}/product-categories?populate=*&pagination[pageSize]=20`),
+    fetch(`${API_BASE}/regions?populate=*`)
   ]);
 
-  // Process location data
-  if (locationResponse.status === 'fulfilled' && locationResponse.value.ok) {
-    const data = await locationResponse.value.json();
+  // Process store/location data
+  if (storesResponse.status === 'fulfilled' && storesResponse.value.ok) {
+    const data = await storesResponse.value.json();
     if (data?.data?.length > 0) {
       locationData = data.data[0];
-      console.log('✅ Location found:', locationData.Name);
-      console.log('📋 DutchieScript field:', locationData.DutchieScript ? 'Found' : 'Not found');
+      console.log('✅ Location found:', locationData.name);
+      console.log('📋 Menu script field:', locationData.menu_url ? 'Found' : 'Not found');
+
+      // Process regions to find the matching region
+      if (regionsResponse.status === 'fulfilled' && regionsResponse.value.ok) {
+        const regionsData = await regionsResponse.value.json();
+        const regions = regionsData?.data || [];
+        regionData = regions.find(r => r.id === locationData.region?.id || r.id === locationData.region);
+      }
     } else {
       console.log('❌ Location not found:', locationSlug);
       return Astro.redirect('/404', 404);
@@ -58,24 +69,29 @@ try {
 // Group products by category
 const productsByCategory = {};
 categoriesData.forEach(category => {
-  productsByCategory[category.Name] = productsData.filter(product =>
-    product.category?.Name === category.Name ||
-    product.product_categories?.some(cat => cat.Name === category.Name)
+  const catName = category.name || category.Name;
+  productsByCategory[catName] = productsData.filter(product =>
+    product.category?.name === catName ||
+    product.category?.Name === catName ||
+    product.product_categories?.some(cat => cat.name === catName || cat.Name === catName)
   );
 });
 
 // Build breadcrumbs
 const breadcrumbs = [
   { label: 'Home', url: '/' },
-  { label: 'Locations', url: '/locations' },
-  { label: locationData?.Name || 'Location', url: `/location/${locationSlug}` },
+  { label: 'Store Locations', url: '/stores' },
+  { label: locationData?.name || 'Location', url: `/location/${locationSlug}` },
   { label: 'Menu', url: `/location/${locationSlug}/menu` }
 ];
+
+const pageTitle = `${locationData?.name} - Menu | Mint Cannabis`;
+const pageDescription = `Browse the full menu at ${locationData?.name}. Premium cannabis products including flower, concentrates, edibles, and more.`;
 ---
 
-<Layout title={`${locationData?.Name} - Menu | Mint Deals`} description={`Browse the full menu at ${locationData?.Name}. Premium cannabis products available.`}>
+<Layout title={pageTitle} description={pageDescription}>
   <!-- Breadcrumb Navigation -->
-  <div class="bg-gray-100 dark:bg-gray-800 py-4">
+  <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 py-4 border-b border-gray-200 dark:border-gray-700">
     <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <nav class="flex" aria-label="Breadcrumb">
         <ol class="flex items-center space-x-2 text-sm">
@@ -89,7 +105,7 @@ const breadcrumbs = [
               {index === breadcrumbs.length - 1 ? (
                 <span class="text-gray-900 dark:text-white font-medium">{crumb.label}</span>
               ) : (
-                <a href={crumb.url} class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">{crumb.label}</a>
+                <a href={crumb.url} class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">{crumb.label}</a>
               )}
             </li>
           ))}
@@ -100,132 +116,210 @@ const breadcrumbs = [
 
   {locationData && (
     <div>
-      <!-- Header Section -->
-      <div class="bg-gradient-to-br from-green-800 via-green-700 to-emerald-700 text-white py-12">
-        <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <!-- Hero Header Section -->
+      <div class="bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 text-white py-16 relative overflow-hidden">
+        <!-- Animated background elements -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+          <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+          <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-green-300/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
           <div class="text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">
-              {locationData.Name} Menu
+            <h1 class="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">
+              {locationData.name} Menu
             </h1>
 
-            {locationData.Address && (
-              <p class="text-xl text-green-100 mb-6">
-                {locationData.Address.city}, {locationData.Address.state}
-              </p>
-            )}
+            <p class="text-xl text-green-100 mb-8">
+              {locationData.city || locationData.address?.city}, {locationData.state || locationData.address?.state || regionData?.name}
+            </p>
 
             <div class="flex flex-wrap justify-center gap-4">
-              {locationData.Online_order_URL && (
-                <a
-                  href={locationData.Online_order_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              {locationData.online_ordering_url && (
+                <button
+                  onclick={`window.open('${locationData.online_ordering_url}', '_blank')`}
+                  class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center gap-2"
                 >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
                   Order Online
-                </a>
+                </button>
               )}
 
               <a
                 href={`/location/${locationSlug}`}
-                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center gap-2"
               >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
                 Store Details
               </a>
+
+              {locationData.phone && (
+                <a
+                  href={`tel:${locationData.phone}`}
+                  class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center gap-2"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                  </svg>
+                  Call Store
+                </a>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Menu Content -->
+      <!-- Main Menu Content -->
       <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12">
 
-        <!-- Dutchie Integration Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden mb-8">
-          <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-6">
-            <h2 class="text-2xl font-bold mb-2">🛒 Shop Our Menu</h2>
-            <p class="text-green-100">
-              Browse products, add to cart, and complete your order online
-            </p>
+        <!-- Dutchie Embedded Menu Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-12">
+          <div class="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-8">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-3xl font-bold mb-2 flex items-center gap-3">
+                  <span class="text-4xl">🛒</span>
+                  Shop Our Live Menu
+                </h2>
+                <p class="text-green-100 text-lg">
+                  Browse real-time inventory, view product details, and complete your order online
+                </p>
+              </div>
+              <div class="hidden md:block">
+                <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                  <p class="text-sm font-semibold">Powered by</p>
+                  <p class="text-2xl font-bold">Dutchie</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="p-6">
-            <!-- Menu container -->
-            <div id="dutchie-menu-container" class="min-h-96">
+          <div class="p-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+            <!-- Menu container with minimum height to prevent layout shift -->
+            <div id="dutchie-menu-container" class="min-h-[800px] relative">
+              <!-- Loading state -->
+              <div id="menu-loading" class="flex items-center justify-center py-32">
+                <div class="text-center">
+                  <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600 mx-auto mb-4"></div>
+                  <p class="text-gray-600 dark:text-gray-300 text-lg">Loading menu...</p>
+                </div>
+              </div>
+
               <!-- The Dutchie script will be inserted here -->
-              {locationData.DutchieScript ? (
-                <div set:html={locationData.DutchieScript} />
-              ) : (
-                <div class="flex items-center justify-center py-16">
+              {locationData.menu_url ? (
+                <div set:html={locationData.menu_url} class="dutchie-embed-wrapper" />
+              ) : locationData.online_ordering_url ? (
+                <div class="flex items-center justify-center py-32">
                   <div class="text-center">
-                    <p class="text-gray-600 dark:text-gray-300">Menu not available</p>
+                    <div class="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                      </svg>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 text-xl mb-6">Embedded menu not available</p>
+                    <button
+                      onclick={`window.open('${locationData.online_ordering_url}', '_blank')`}
+                      class="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    >
+                      View Menu & Order Online →
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div class="flex items-center justify-center py-32">
+                  <div class="text-center">
+                    <div class="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 text-xl mb-4">Online menu not available</p>
+                    <p class="text-gray-500 dark:text-gray-400">Please call the store for product availability</p>
+                    {locationData.phone && (
+                      <a
+                        href={`tel:${locationData.phone}`}
+                        class="inline-flex items-center mt-6 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold text-lg"
+                      >
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        {locationData.phone}
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
             </div>
 
-            <!-- Script to relocate Dutchie menu if it appears at bottom -->
+            <!-- Script to handle Dutchie menu positioning and loading -->
             <script is:inline>
               (function() {
-                // Wait for Dutchie to load and then move it if needed
+                const container = document.getElementById('dutchie-menu-container');
+                const loadingIndicator = document.getElementById('menu-loading');
+
+                if (!container) return;
+
+                let menuFound = false;
+
+                // Function to check and relocate Dutchie elements
                 function checkAndRelocateDutchie() {
-                  const container = document.getElementById('dutchie-menu-container');
-                  if (!container) return;
-
-                  // Look for Dutchie elements that might have been created at the bottom
+                  // Look for Dutchie elements that might have been created elsewhere
                   const dutchieIframe = document.querySelector('iframe[src*="dutchie.com"]');
-                  const dutchieDiv = document.querySelector('div[id*="se4ekt2e7rH5pspyn"]');
+                  const dutchieDiv = document.querySelector('div[id*="dutchie"]');
 
-                  // Also check for the actual ID used by Dutchie
-                  const dutchieMainDiv = document.getElementById('se4ekt2e7rH5pspyn');
+                  if (dutchieIframe || dutchieDiv) {
+                    const elementToMove = dutchieIframe || dutchieDiv;
 
-                  if (dutchieIframe && !container.contains(dutchieIframe)) {
-                    console.log('🎯 Found Dutchie iframe at bottom, moving to container');
-                    container.innerHTML = '';
-                    // Ensure iframe has proper styling
-                    dutchieIframe.style.width = '100%';
-                    dutchieIframe.style.minHeight = '800px';
-                    dutchieIframe.style.border = 'none';
-                    container.appendChild(dutchieIframe);
+                    if (!container.contains(elementToMove)) {
+                      console.log('🎯 Found Dutchie element, moving to container');
+
+                      // Hide loading indicator
+                      if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                      }
+
+                      // Clear container except for the element we're moving
+                      Array.from(container.children).forEach(child => {
+                        if (child !== elementToMove && child.id !== 'menu-loading') {
+                          child.remove();
+                        }
+                      });
+
+                      // Style and append the Dutchie element
+                      if (dutchieIframe) {
+                        dutchieIframe.style.width = '100%';
+                        dutchieIframe.style.minHeight = '1000px';
+                        dutchieIframe.style.border = 'none';
+                        dutchieIframe.style.borderRadius = '0.5rem';
+                      }
+
+                      container.appendChild(elementToMove);
+                      menuFound = true;
+                      return true;
+                    }
                   }
 
-                  if (dutchieMainDiv && !container.contains(dutchieMainDiv)) {
-                    console.log('🎯 Found Dutchie main div at bottom, moving to container');
-                    container.innerHTML = '';
-                    container.appendChild(dutchieMainDiv);
-                  } else if (dutchieDiv && !container.contains(dutchieDiv)) {
-                    console.log('🎯 Found Dutchie div at bottom, moving to container');
-                    container.innerHTML = '';
-                    container.appendChild(dutchieDiv);
-                  }
+                  return false;
                 }
 
-                // Check multiple times as Dutchie loads asynchronously
-                setTimeout(checkAndRelocateDutchie, 1000);
-                setTimeout(checkAndRelocateDutchie, 2000);
-                setTimeout(checkAndRelocateDutchie, 3000);
-                setTimeout(checkAndRelocateDutchie, 5000);
-
-                // Also use MutationObserver as a backup
+                // Use MutationObserver to watch for Dutchie elements being added
                 const observer = new MutationObserver((mutations) => {
+                  if (menuFound) return;
+
                   for (const mutation of mutations) {
                     for (const node of mutation.addedNodes) {
                       if (node.nodeType === 1) {
                         // Check if this is a Dutchie element
-                        if ((node.id && node.id.includes('se4ekt2e7rH5pspyn')) ||
+                        if ((node.id && node.id.includes('dutchie')) ||
                             (node.tagName === 'IFRAME' && node.src && node.src.includes('dutchie.com'))) {
-                          const container = document.getElementById('dutchie-menu-container');
-                          if (container && !container.contains(node)) {
-                            console.log('🎯 MutationObserver caught Dutchie element, moving to container');
-                            container.innerHTML = '';
-                            if (node.tagName === 'IFRAME') {
-                              node.style.width = '100%';
-                              node.style.minHeight = '800px';
-                              node.style.border = 'none';
-                            }
-                            container.appendChild(node);
+
+                          if (checkAndRelocateDutchie()) {
                             observer.disconnect();
-                            break;
+                            return;
                           }
                         }
                       }
@@ -233,80 +327,195 @@ const breadcrumbs = [
                   }
                 });
 
-                // Start observing
-                observer.observe(document.body, { childList: true, subtree: true });
+                // Start observing for DOM changes
+                observer.observe(document.body, {
+                  childList: true,
+                  subtree: true
+                });
 
-                // Stop after 10 seconds
-                setTimeout(() => observer.disconnect(), 10000);
+                // Check periodically as well
+                const checkInterval = setInterval(() => {
+                  if (checkAndRelocateDutchie() || menuFound) {
+                    clearInterval(checkInterval);
+                  }
+                }, 500);
+
+                // Stop checking after 15 seconds
+                setTimeout(() => {
+                  clearInterval(checkInterval);
+                  observer.disconnect();
+
+                  // If no menu found, hide loading indicator
+                  if (!menuFound && loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                  }
+                }, 15000);
+
+                // Also hide loading indicator if the wrapper has no script
+                const wrapper = document.querySelector('.dutchie-embed-wrapper');
+                if (wrapper && !wrapper.querySelector('script')) {
+                  setTimeout(() => {
+                    if (loadingIndicator) {
+                      loadingIndicator.style.display = 'none';
+                    }
+                  }, 2000);
+                }
               })();
             </script>
           </div>
         </div>
 
-        <!-- Fallback Menu Categories -->
-        {Object.keys(productsByCategory).length > 0 && (
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-            <div class="bg-gradient-to-r from-gray-500 to-gray-600 text-white p-6">
-              <h2 class="text-2xl font-bold mb-2">📋 Product Categories</h2>
-              <p class="text-gray-100">
-                Browse our product categories and dosage information
+        <!-- Product Categories Section -->
+        {categoriesData.length > 0 && (
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden mb-12">
+            <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-8">
+              <h2 class="text-3xl font-bold mb-2 flex items-center gap-3">
+                <span class="text-4xl">📦</span>
+                Product Categories
+              </h2>
+              <p class="text-purple-100 text-lg">
+                Explore our wide selection of premium cannabis products
               </p>
             </div>
 
-            <div class="p-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Object.entries(productsByCategory).map(([categoryName, products]) => (
-                  products.length > 0 && (
-                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                        {categoryName}
-                      </h3>
-                      <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                        {products.length} product{products.length !== 1 ? 's' : ''} available
-                      </p>
-                      <a
-                        href={`/${categoryName.toLowerCase()}`}
-                        class="inline-flex items-center text-green-600 hover:text-green-700 font-medium text-sm"
-                      >
-                        Learn More
-                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                      </a>
-                    </div>
-                  )
-                ))}
+            <div class="p-8">
+              <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {categoriesData.map(category => {
+                  const catName = category.name || category.Name;
+                  const catSlug = category.slug || category.Slug;
+                  const productCount = productsByCategory[catName]?.length || 0;
+
+                  const catIcon = catSlug?.includes('flower') ? '🌿' :
+                                 catSlug?.includes('concentrate') ? '💎' :
+                                 catSlug?.includes('pre-roll') || catSlug?.includes('preroll') ? '🚬' :
+                                 catSlug?.includes('vape') || catSlug?.includes('cartridge') ? '💨' :
+                                 catSlug?.includes('edible') ? '🍪' :
+                                 catSlug?.includes('topical') ? '🧴' :
+                                 catSlug?.includes('tincture') ? '💧' : '🌱';
+
+                  return (
+                    <a
+                      href={`/category/${catSlug}`}
+                      class="group bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl p-6 hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                    >
+                      <div class="text-center">
+                        <div class="text-4xl mb-3 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                          {catIcon}
+                        </div>
+                        <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors mb-2">
+                          {catName}
+                        </h3>
+                        {productCount > 0 && (
+                          <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {productCount} products
+                          </p>
+                        )}
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             </div>
           </div>
         )}
 
-        <!-- Contact Information -->
-        <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📞 Need Help?</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {locationData.Phone && (
-              <div class="flex items-center">
-                <svg class="w-5 h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+        <!-- Store Information Card -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Contact Information -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                 </svg>
-                <a href={`tel:${locationData.Phone}`} class="text-green-600 dark:text-green-400 hover:underline">
-                  Call us: {locationData.Phone}
-                </a>
               </div>
-            )}
+              Need Assistance?
+            </h3>
 
-            {locationData.Address && (
-              <div class="flex items-center">
-                <svg class="w-5 h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <div class="space-y-4">
+              {locationData.phone && (
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 mr-3 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                  </svg>
+                  <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Call us</p>
+                    <a href={`tel:${locationData.phone}`} class="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold">
+                      {locationData.phone}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {(locationData.address || locationData.city) && (
+                <div class="flex items-start">
+                  <svg class="w-5 h-5 mr-3 mt-1 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Visit us</p>
+                    <p class="text-gray-900 dark:text-white font-medium">
+                      {locationData.address?.street || locationData.address || locationData.street}
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-300">
+                      {locationData.city || locationData.address?.city}, {locationData.state || locationData.address?.state || regionData?.name} {locationData.zip_code || locationData.address?.zipCode}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {locationData.email && (
+                <div class="flex items-center">
+                  <svg class="w-5 h-5 mr-3 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                  <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Email us</p>
+                    <a href={`mailto:${locationData.email}`} class="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold">
+                      {locationData.email}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
-                <span class="text-gray-600 dark:text-gray-300">
-                  {locationData.Address.city}, {locationData.Address.state}
-                </span>
               </div>
-            )}
+              Quick Actions
+            </h3>
+
+            <div class="space-y-3">
+              <a
+                href={`/location/${locationSlug}`}
+                class="block w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-4 py-3 rounded-xl text-center font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                📍 View Store Details
+              </a>
+
+              <a
+                href={`/location/${locationSlug}/deals`}
+                class="block w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-3 rounded-xl text-center font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                🔥 Current Deals
+              </a>
+
+              {(locationData.latitude && locationData.longitude) && (
+                <button
+                  onclick={`window.open('https://maps.google.com/?q=${locationData.latitude},${locationData.longitude}', '_blank')`}
+                  class="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white px-4 py-3 rounded-xl text-center font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
+                  🗺️ Get Directions
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

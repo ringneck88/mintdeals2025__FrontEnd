@@ -1,29 +1,81 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { strapi } from '../lib/strapi';
 
 let regions = [];
 let stores = [];
 let error = null;
 
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
 try {
-  regions = await strapi.getMany('/regions', {
-    populate: ['stores', 'RegionImage'],
-    filters: { IsActive: { $eq: true } }
-  });
-  
-  stores = await strapi.getMany('/stores', {
-    populate: ['region', 'dosage_products', 'StoreImage', 'GalleryImages'],
-    filters: { IsActive: { $eq: true } }
-  });
+  console.log('🚀 Fetching stores and regions from API');
+
+  // Fetch regions first
+  const regionsResponse = await fetch(`${API_BASE}/regions?populate=*&pagination[pageSize]=100`);
+  if (regionsResponse.ok) {
+    const regionsData = await regionsResponse.json();
+    regions = regionsData?.data?.map(region => ({
+      id: region.id,
+      documentId: region.documentId,
+      Name: region.name || 'Unknown Region',
+      Code: region.code || 'XX',
+      State: region.name || 'Unknown State',
+      Description: region.description || `Cannabis dispensaries in ${region.name}`,
+      RegionImage: region.RegionImage ? {
+        url: region.RegionImage.url ? `https://mintdealsbackend-production.up.railway.app${region.RegionImage.url}` : null
+      } : null
+    })) || [];
+    console.log('✅ Regions loaded:', regions.length);
+  }
+
+  // Fetch stores from the stores endpoint
+  const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
+
+  if (storesResponse.ok) {
+    const storesData = await storesResponse.json();
+    const storesList = storesData?.data || [];
+
+    stores = storesList.map(store => ({
+      id: store.id,
+      documentId: store.documentId,
+      Name: store.name || 'Unnamed Store',
+      slug: store.slug || store.documentId,
+      Description: store.description,
+      Address: store.address?.street || store.address,
+      City: store.address?.city || store.city || 'Unknown City',
+      State: store.address?.state || store.state || 'Unknown State',
+      ZipCode: store.address?.zipCode || store.zip_code,
+      Phone: store.phone,
+      Email: store.email,
+      Website: store.website,
+      Latitude: store.latitude,
+      Longitude: store.longitude,
+      Hours: store.hours,
+      StoreImage: store.store_image || store.hero_image ? {
+        url: (store.store_image?.url || store.hero_image?.url) ?
+          `https://mintdealsbackend-production.up.railway.app${store.store_image?.url || store.hero_image?.url}` : null
+      } : null,
+      GalleryImages: store.gallery_images || [],
+      IsFeatured: store.is_featured || false,
+      IsActive: store.is_active !== false,
+      StoreManager: store.store_manager,
+      region: store.region ? {
+        id: store.region.id || store.region,
+        Name: regions.find(r => r.id === (store.region.id || store.region))?.Name || 'Unknown Region'
+      } : null,
+      dosage_products: store.products || []
+    })).filter(store => store.IsActive);
+
+    console.log('✅ Stores loaded:', stores.length);
+  } else {
+    throw new Error(`Failed to fetch stores: ${storesResponse.status}`);
+  }
+
 } catch (e) {
   error = e.message;
-  console.error('Error fetching store data:', e);
-
-  // No fallback data - only show content from database
-  regions = [];
-  
+  console.error('❌ Error fetching store data:', e);
   stores = [];
+  regions = [];
 }
 ---
 
@@ -346,8 +398,8 @@ try {
                 
                 {/* Action Buttons */}
                 <div class="flex space-x-3">
-                  <a 
-                    href={`/stores/${store.documentId}`}
+                  <a
+                    href={`/location/${store.slug || store.documentId}`}
                     class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-center"
                   >
                     <span class="flex items-center justify-center">

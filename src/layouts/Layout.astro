@@ -8,16 +8,22 @@ export interface Props {
 
 const { title, description = "Your deals website powered by Kelly" } = Astro.props;
 
-// Fetch brand data and categories from Strapi
+// Fetch brand data, categories, regions and stores from API
 let brandData = null;
 let logoUrl = null;
 let navigationCategories = [];
+let navigationRegions = [];
+let navigationStores = [];
+
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 try {
-  // Fetch brand data and categories in parallel
-  const [brandResponse, categoriesResponse] = await Promise.allSettled([
-    fetch('https://mintdealsbackend-production.up.railway.app/api/brands?populate=*'),
-    fetch('https://mintdealsbackend-production.up.railway.app/api/categories?populate=*&pagination[pageSize]=10&sort=Name:asc')
+  // Fetch all data in parallel
+  const [brandResponse, categoriesResponse, regionsResponse, storesResponse] = await Promise.allSettled([
+    fetch(`${API_BASE}/brands?populate=*`),
+    fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=10&sort=Name:asc`),
+    fetch(`${API_BASE}/regions?populate=*`),
+    fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`)
   ]);
 
   // Process brand data
@@ -63,8 +69,45 @@ try {
       }).filter(cat => cat.name && cat.isActive);
     }
   }
+
+  // Process regions data
+  if (regionsResponse.status === 'fulfilled' && regionsResponse.value.ok) {
+    const response = regionsResponse.value;
+    const data = await response.json();
+
+    if (data?.data) {
+      navigationRegions = data.data.map(region => ({
+        id: region.id,
+        documentId: region.documentId,
+        name: region.name || 'Unknown Region',
+        code: region.code || 'XX',
+        timezone: region.timezone,
+        age_restriction: region.age_restriction
+      }));
+    }
+  }
+
+  // Process stores data
+  if (storesResponse.status === 'fulfilled' && storesResponse.value.ok) {
+    const response = storesResponse.value;
+    const data = await response.json();
+
+    if (data?.data) {
+      navigationStores = data.data.map(store => ({
+        id: store.id,
+        documentId: store.documentId,
+        name: store.name || 'Unnamed Store',
+        slug: store.slug || store.documentId,
+        city: store.city,
+        state: store.state,
+        phone: store.phone,
+        is_active: store.is_active !== false,
+        region: store.region // This will be the region ID or object
+      })).filter(store => store.is_active);
+    }
+  }
 } catch (error) {
-  console.log('Could not fetch brand data:', error);
+  console.log('Could not fetch data:', error);
 }
 ---
 
@@ -104,7 +147,7 @@ try {
       <div class="smoke smoke5"></div>
     </div>
 
-    <header class="bg-white dark:bg-gray-800 shadow-lg dark:shadow-gray-700 relative z-[100]">
+    <header class="bg-black shadow-lg relative z-[100]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center py-6">
           <div class="flex items-center">
@@ -120,24 +163,24 @@ try {
           
           <div class="flex items-center space-x-4">
             <nav class="hidden md:flex space-x-8">
-              <a href="/" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <a href="/" class="text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Home
               </a>
 
               <!-- Categories Dropdown -->
               <div class="dropdown-group">
-                <button class="flex items-center text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                <button class="flex items-center text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                   Categories
                   <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
-                <div class="dropdown-menu absolute left-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 z-[200]">
+                <div class="dropdown-menu absolute left-0 mt-2 w-96 bg-gray-900 rounded-lg shadow-2xl border border-gray-700 z-[200]">
                   <div class="py-2">
-                    <a href="/categories" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400">
+                    <a href="/categories" class="block px-4 py-2 text-sm text-gray-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600 dark:hover:text-emerald-400">
                       📚 All Categories
                     </a>
-                    <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                    <div class="border-t border-gray-700 my-1"></div>
 
                     <!-- Category Overview -->
                     {navigationCategories.length > 0 ? (
@@ -203,7 +246,7 @@ try {
                             </div>
 
                             {category !== navigationCategories[navigationCategories.length - 1] && (
-                              <div class="border-t border-gray-100 dark:border-gray-700 my-2"></div>
+                              <div class="border-t border-gray-700 my-2"></div>
                             )}
                           </div>
                         ))}
@@ -219,92 +262,103 @@ try {
 
               <!-- Locations Dropdown -->
               <div class="dropdown-group">
-                <button class="flex items-center text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                <button class="flex items-center text-gray-200 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                   Locations
                   <svg class="w-4 h-4 ml-1 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
-                <div class="dropdown-menu absolute left-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 z-[200]">
+                <div class="dropdown-menu absolute left-0 mt-2 w-80 bg-gray-900 rounded-lg shadow-2xl border border-gray-700 z-[200]">
                   <div class="py-2">
-                    <a href="/locations" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
-                      🏪 All Locations
+                    <a href="/stores" class="block px-4 py-2 text-sm text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                      🏪 All Store Locations
                     </a>
-                    <a href="/regions" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
+                    <a href="/regions" class="block px-4 py-2 text-sm text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                       🗺️ Browse by Region
                     </a>
-                    <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                    <div class="border-t border-gray-700 my-1"></div>
 
-                    <!-- Arizona Region -->
-                    <div class="px-2 py-1">
-                      <div class="mb-2">
-                        <a
-                          href="/locations?state=AZ"
-                          class="block px-2 py-1 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded"
-                        >
-                          🌵 Arizona
-                        </a>
-                      </div>
-                      <div class="ml-4 space-y-1">
-                        <a
-                          href="/locations?state=AZ&city=Tempe"
-                          class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
-                        >
-                          📍 Tempe
-                        </a>
-                        <a
-                          href="/locations?state=AZ&city=Phoenix"
-                          class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
-                        >
-                          📍 Phoenix
-                        </a>
-                      </div>
-                    </div>
+                    <!-- Dynamic Regions with Stores -->
+                    {navigationRegions.length > 0 ? (
+                      <div class="max-h-96 overflow-y-auto">
+                        {navigationRegions.map((region, index) => {
+                          // Get stores for this region
+                          const regionStores = navigationStores.filter(store => {
+                            const storeRegionId = typeof store.region === 'object' ? store.region?.id : store.region;
+                            return storeRegionId === region.id;
+                          });
 
-                    <div class="border-t border-gray-100 dark:border-gray-700 my-2"></div>
+                          // Get region icon based on name/code
+                          const regionIcon = region.code === 'AZ' || region.name?.includes('Arizona') ? '🌵' :
+                                           region.code === 'NV' || region.name?.includes('Nevada') ? '🎰' :
+                                           region.code === 'IL' || region.name?.includes('Illinois') ? '🌆' :
+                                           region.code === 'MI' || region.name?.includes('Michigan') ? '🏞️' :
+                                           region.code === 'MO' || region.name?.includes('Missouri') ? '🏛️' :
+                                           region.code === 'FL' || region.name?.includes('Florida') ? '🌴' : '📍';
 
-                    <!-- Nevada Region -->
-                    <div class="px-2 py-1">
-                      <div class="mb-2">
-                        <a
-                          href="/locations?state=NV"
-                          class="block px-2 py-1 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded"
-                        >
-                          🎰 Nevada
-                        </a>
+                          return (
+                            <>
+                              <div class="px-2 py-1">
+                                <div class="mb-2">
+                                  <a
+                                    href={`/stores?region=${region.id}`}
+                                    class="block px-2 py-1 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded"
+                                  >
+                                    {regionIcon} {region.name} ({regionStores.length})
+                                  </a>
+                                </div>
+                                {regionStores.length > 0 && (
+                                  <div class="ml-4 space-y-1">
+                                    {regionStores.slice(0, 5).map(store => (
+                                      <a
+                                        href={`/location/${store.slug}`}
+                                        class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded truncate"
+                                        title={store.name}
+                                      >
+                                        📍 {store.name}
+                                        {store.city && (
+                                          <span class="text-gray-400 dark:text-gray-500 ml-1">• {store.city}</span>
+                                        )}
+                                      </a>
+                                    ))}
+                                    {regionStores.length > 5 && (
+                                      <a
+                                        href={`/stores?region=${region.id}`}
+                                        class="block px-2 py-1 text-xs text-green-600 dark:text-green-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded font-medium"
+                                      >
+                                        View all {regionStores.length} locations →
+                                      </a>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              {index < navigationRegions.length - 1 && (
+                                <div class="border-t border-gray-700 my-2"></div>
+                              )}
+                            </>
+                          );
+                        })}
                       </div>
-                      <div class="ml-4 space-y-1">
-                        <a
-                          href="/locations?state=NV&city=Las Vegas"
-                          class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
-                        >
-                          📍 Las Vegas
-                        </a>
-                        <div class="ml-4">
-                          <a
-                            href="/locations?state=NV&city=Las Vegas&district=Strip"
-                            class="block px-2 py-1 text-xs text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
-                          >
-                            ◦ The Strip
-                          </a>
-                        </div>
+                    ) : (
+                      <div class="px-4 py-2">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Loading locations...</p>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              <a href="/deals" class="text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <a href="/deals" class="text-gray-200 hover:text-orange-600 dark:hover:text-orange-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Deals
               </a>
 
-              <a href="#about" class="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <a href="#about" class="text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 About
               </a>
             </nav>
             
             <!-- Theme Toggle Button -->
-            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-800 text-gray-200 hover:bg-gray-700 transition-colors">
               <svg id="theme-toggle-dark-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
               </svg>
@@ -316,7 +370,7 @@ try {
 
           <!-- Mobile menu button -->
           <div class="md:hidden">
-            <button id="mobile-menu-button" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none">
+            <button id="mobile-menu-button" class="text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
               </svg>
@@ -325,22 +379,22 @@ try {
         </div>
 
         <!-- Mobile menu -->
-        <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200 dark:border-gray-600 pt-4 pb-3 relative z-[150]">
-          <a href="/" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium">
+        <div id="mobile-menu" class="md:hidden hidden border-t border-gray-700 pt-4 pb-3 relative z-[150]">
+          <a href="/" class="block px-3 py-2 text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium">
             Home
           </a>
 
           <!-- Mobile Store Locations -->
           <div>
-            <button id="mobile-stores-toggle" class="flex items-center justify-between w-full px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
+            <button id="mobile-stores-toggle" class="flex items-center justify-between w-full px-3 py-2 text-gray-200 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
               Locations
               <svg id="mobile-stores-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
             <div id="mobile-stores-menu" class="hidden pl-6 pb-2">
-              <a href="/locations" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">
-                🏪 All Locations
+              <a href="/stores" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">
+                🏪 All Store Locations
               </a>
               <a href="/locations?state=AZ&city=Tempe" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">
                 📍 Tempe Locations
@@ -356,7 +410,7 @@ try {
 
           <!-- Mobile Categories -->
           <div>
-            <button id="mobile-categories-toggle" class="flex items-center justify-between w-full px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 text-sm font-medium">
+            <button id="mobile-categories-toggle" class="flex items-center justify-between w-full px-3 py-2 text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 text-sm font-medium">
               Categories
               <svg id="mobile-categories-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -390,16 +444,16 @@ try {
             </div>
           </div>
 
-          <a href="/states" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium">
+          <a href="/states" class="block px-3 py-2 text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium">
             States
           </a>
-          <a href="/events" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 text-sm font-medium">
+          <a href="/events" class="block px-3 py-2 text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 text-sm font-medium">
             Events
           </a>
-          <a href="#deals" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
+          <a href="#deals" class="block px-3 py-2 text-gray-200 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
             Deals
           </a>
-          <a href="#about" class="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
+          <a href="#about" class="block px-3 py-2 text-gray-200 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
             About
           </a>
         </div>
