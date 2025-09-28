@@ -1,0 +1,496 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Dutchie API configuration
+const DUTCHIE_API_URL = 'https://plus.dutchie.com/plus/2021-07/graphql';
+const DUTCHIE_API_KEY = 'public-eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJBUEktQ0xJRU5UIiwiZXhwIjozMzI4NzcyNTY2OCwiaWF0IjoxNzMwODE2ODY4LCJpc3MiOiJodHRwczovL2R1dGNoaWUuY29tIiwianRpIjoiNzFmYjcyYjItMThmNy00OWE0LTkwYjgtYjVjMDY0NWZhMjZlIiwiZW50ZXJwcmlzZV9pZCI6IjQ1ODZkZmZkLTVmOTEtNGUxZi04OThhLWJmMjMzMjQ4MzBjMSIsInV1aWQiOiJhNzM4MGE0MC1iMmM5LTQ2ZDktOWY5My1jZTEwM2JjZGM0MjkifQ.XZyCX1ZrNy75e3RcqukMUPffIqxEBnWUZ_o52V4VGco';
+
+// Initialize data
+let specialProducts = [];
+let apiError = null;
+let stores = [];
+let dutchieRetailerIds = [];
+
+// GraphQL query to fetch products on special
+const SPECIALS_QUERY = `
+  query GetSpecialProducts($retailerId: ID!) {
+    menu(retailerId: $retailerId) {
+      products {
+        id
+        name
+        brand {
+          name
+        }
+        category
+        subcategory
+        image
+        description
+        potencyCbd {
+          formatted
+        }
+        potencyThc {
+          formatted
+        }
+        variants {
+          id
+          option
+          priceRec
+          specialPriceRec
+          quantity
+        }
+      }
+    }
+  }
+`;
+
+// Category icon mapping
+function getCategoryIcon(category) {
+  const icons = {
+    'FLOWER': '🌿',
+    'PRE_ROLLS': '🚬',
+    'VAPORIZERS': '💨',
+    'CONCENTRATES': '🍯',
+    'EDIBLES': '🍭',
+    'TOPICALS': '🧴',
+    'CARTRIDGES': '🖊️',
+    'TINCTURES': '💧',
+    'ACCESSORIES': '🔧',
+    'CBD': '🌱'
+  };
+  return icons[category] || '🌿';
+}
+
+// Calculate discount percentage
+function calculateDiscount(regular, special) {
+  if (!regular || !special || special >= regular) return 0;
+  return Math.round(((regular - special) / regular) * 100);
+}
+
+// Format price
+function formatPrice(price) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  }).format(price / 100);
+}
+
+// First, fetch stores to get Dutchie retailer IDs
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
+try {
+  console.log('🚀 Fetching stores to get Dutchie retailer IDs');
+
+  // Fetch stores from Railway API
+  const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
+  if (storesResponse.ok) {
+    const storesData = await storesResponse.json();
+    stores = storesData?.data || [];
+
+    // Extract Dutchie retailer IDs from stores
+    dutchieRetailerIds = stores
+      .map(store => store.dutchie_retailer_id || store.dutchie_id || store.retailer_id)
+      .filter(id => id); // Remove null/undefined values
+
+    console.log('✅ Stores loaded:', stores.length);
+    console.log('🏪 Dutchie retailer IDs found:', dutchieRetailerIds.length);
+
+    if (dutchieRetailerIds.length > 0) {
+      console.log('🔍 Available retailer IDs:', dutchieRetailerIds);
+    } else {
+      console.log('⚠️ No Dutchie retailer IDs found in stores, trying with enterprise ID');
+      dutchieRetailerIds = ["4586dffd-5f91-4e1f-898a-bf23324830c1"]; // Fallback to enterprise ID
+    }
+  }
+} catch (error) {
+  console.error('❌ Error fetching stores:', error);
+  dutchieRetailerIds = ["4586dffd-5f91-4e1f-898a-bf23324830c1"]; // Fallback to enterprise ID
+}
+
+try {
+  console.log('🚀 Fetching special products from Dutchie API');
+
+  // Use the first available retailer ID
+  const retailerId = dutchieRetailerIds[0] || "4586dffd-5f91-4e1f-898a-bf23324830c1";
+
+  const requestBody = {
+    query: SPECIALS_QUERY,
+    variables: {
+      retailerId: retailerId
+    }
+  };
+
+  console.log('🔍 Request body:', JSON.stringify(requestBody, null, 2));
+
+  const response = await fetch(DUTCHIE_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${DUTCHIE_API_KEY}`,
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  console.log('📡 Response status:', response.status);
+  const responseText = await response.text();
+  console.log('📡 Response body:', responseText);
+
+  if (response.ok) {
+    const data = JSON.parse(responseText);
+
+    if (data.errors) {
+      console.error('❌ GraphQL Errors:', data.errors);
+      apiError = `GraphQL Error: ${data.errors.map(e => e.message).join(', ')}`;
+
+      // Use fallback data when there are GraphQL errors
+      console.log('🔄 Using fallback data due to GraphQL errors');
+      throw new Error('GraphQL Error: Using fallback data');
+    } else if (data.data?.menu?.products) {
+      // Filter products that have special prices
+      specialProducts = data.data.menu.products.filter(product => {
+        return product.variants?.some(v => v.specialPriceRec && v.specialPriceRec !== v.priceRec);
+      });
+
+      console.log(`✅ ${specialProducts.length} special products loaded`);
+    } else {
+      console.log('❌ No products found in response');
+      apiError = 'No products found in API response';
+    }
+  } else {
+    console.error('❌ Dutchie API Error:', response.status, responseText);
+    apiError = `API Error: ${response.status} - ${responseText}`;
+  }
+} catch (error) {
+  console.error('❌ Error fetching special products:', error);
+  apiError = error.message;
+
+  // Fallback data for demonstration
+  specialProducts = [
+    {
+      id: '1',
+      name: 'Blue Dream',
+      brand: { name: 'Mint Cannabis' },
+      category: 'FLOWER',
+      subcategory: 'Sativa',
+      description: 'A classic sativa-dominant hybrid with a sweet berry aroma',
+      image: 'https://images.dutchie.com/generic/flower.jpg',
+      potencyThc: { formatted: '22.5%' },
+      potencyCbd: { formatted: '0.1%' },
+      variants: [
+        {
+          id: 'v1',
+          option: '3.5g',
+          priceRec: 5500,
+          specialPriceRec: 4000,
+          quantity: 3.5
+        }
+      ]
+    },
+    {
+      id: '2',
+      name: 'OG Kush',
+      brand: { name: 'Mint Cannabis' },
+      category: 'FLOWER',
+      subcategory: 'Indica',
+      description: 'A legendary indica with earthy pine and woody notes',
+      image: 'https://images.dutchie.com/generic/flower.jpg',
+      potencyThc: { formatted: '25.0%' },
+      potencyCbd: { formatted: '0.2%' },
+      variants: [
+        {
+          id: 'v2',
+          option: '7g',
+          priceRec: 10000,
+          specialPriceRec: 7000,
+          quantity: 7
+        }
+      ]
+    },
+    {
+      id: '3',
+      name: 'Sour Gummies',
+      brand: { name: 'Mint Edibles' },
+      category: 'EDIBLES',
+      subcategory: 'Gummies',
+      description: 'Delicious sour gummies with precise dosing',
+      image: 'https://images.dutchie.com/generic/edibles.jpg',
+      potencyThc: { formatted: '100mg' },
+      potencyCbd: { formatted: '0mg' },
+      variants: [
+        {
+          id: 'v3',
+          option: '10 pack',
+          priceRec: 3500,
+          specialPriceRec: 2000,
+          quantity: 10
+        }
+      ]
+    }
+  ];
+}
+---
+
+<style>
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .video-background video {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+  }
+  .hero-section {
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .discount-badge {
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+</style>
+
+<Layout title="Special Deals - Mint Cannabis" description="Discover amazing deals and special offers on premium cannabis products at Mint Cannabis.">
+  <!-- Video Background -->
+  <div class="video-background">
+    <video autoplay loop muted playsinline>
+      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+    <!-- Hero Section -->
+    <div class="text-white hero-section">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        <div class="text-center">
+          <h1 class="mb-4 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
+            🔥 Special Deals
+          </h1>
+          <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
+            Limited time offers on premium cannabis products
+          </p>
+          <div class="flex flex-wrap justify-center gap-4">
+            <a href="/" class="px-6 py-2.5 text-base font-semibold text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+              🏠 Back to Home
+            </a>
+            <a href="/locations" class="px-6 py-2.5 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-105">
+              📍 Find Stores
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Bar -->
+    <div class="bg-gradient-to-r from-green-800 via-green-900 to-green-800 py-2">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        <div class="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
+          <div class="text-white">
+            <div class="text-xl font-bold text-yellow-400">{specialProducts.length}+</div>
+            <div class="text-xs text-green-200">Products on Sale</div>
+          </div>
+          <div class="text-white">
+            <div class="text-xl font-bold text-yellow-400">Up to 40%</div>
+            <div class="text-xs text-green-200">Off Regular Price</div>
+          </div>
+          <div class="text-white">
+            <div class="text-xl font-bold text-yellow-400">Daily</div>
+            <div class="text-xs text-green-200">New Deals</div>
+          </div>
+          <div class="text-white">
+            <div class="text-xl font-bold text-yellow-400">6+</div>
+            <div class="text-xs text-green-200">Locations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Special Products Section -->
+    <div class="bg-black py-12">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        <!-- Section Header -->
+        <div class="mb-8 text-center">
+          <h2 class="text-3xl font-bold text-white md:text-4xl">
+            Today's Special Offers
+          </h2>
+          <p class="mt-2 text-gray-400">
+            {apiError ? 'Showing sample products' : 'Limited quantities available - Shop now!'}
+          </p>
+        </div>
+
+        <!-- Products Grid -->
+        {specialProducts.length === 0 ? (
+          <div class="py-16 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gray-800 rounded-full">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h3 class="mb-2 text-xl font-medium text-white">No Special Deals Available</h3>
+            <p class="text-gray-400">
+              {apiError ? `Error: ${apiError}` : 'Check back soon for amazing deals!'}
+            </p>
+          </div>
+        ) : (
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {specialProducts.map(product => {
+              const bestVariant = product.variants?.find(v => v.specialPriceRec) || product.variants?.[0];
+              const discount = bestVariant ? calculateDiscount(bestVariant.priceRec, bestVariant.specialPriceRec) : 0;
+
+              return (
+                <div class="relative overflow-hidden transition-all transform bg-gray-900 border border-green-500 rounded-lg shadow-lg hover:scale-105 hover:shadow-2xl group">
+                  {/* Discount Badge */}
+                  {discount > 0 && (
+                    <div class="absolute top-2 right-2 z-10 px-3 py-1 text-xs font-bold text-black bg-yellow-400 rounded-full discount-badge">
+                      {discount}% OFF
+                    </div>
+                  )}
+
+                  {/* Product Image */}
+                  <div class="relative h-48 overflow-hidden bg-gray-800">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        class="object-cover w-full h-full transition-transform group-hover:scale-110"
+                      />
+                    ) : (
+                      <div class="flex items-center justify-center w-full h-full">
+                        <span class="text-6xl">{getCategoryIcon(product.category)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Info */}
+                  <div class="p-6">
+                    {/* Brand & Category */}
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-xs font-medium text-green-400">
+                        {product.brand?.name || 'Mint Cannabis'}
+                      </span>
+                      <span class="px-2 py-1 text-xs text-green-200 bg-green-900 rounded-full">
+                        {product.subcategory || product.category}
+                      </span>
+                    </div>
+
+                    {/* Product Name */}
+                    <h3 class="mb-2 text-lg font-bold text-white">
+                      {product.name}
+                    </h3>
+
+                    {/* Description */}
+                    {product.description && (
+                      <p class="mb-3 text-sm text-gray-400 line-clamp-2">
+                        {product.description}
+                      </p>
+                    )}
+
+                    {/* Potency */}
+                    {(product.potencyThc || product.potencyCbd) && (
+                      <div class="flex gap-3 mb-3">
+                        {product.potencyThc && (
+                          <span class="text-xs text-yellow-400">
+                            THC: {product.potencyThc.formatted}
+                          </span>
+                        )}
+                        {product.potencyCbd && (
+                          <span class="text-xs text-blue-400">
+                            CBD: {product.potencyCbd.formatted}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Variants & Pricing */}
+                    {bestVariant && (
+                      <div class="mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                          <span class="text-sm text-gray-400">
+                            {bestVariant.option}
+                          </span>
+                          <div class="flex items-center gap-2">
+                            {bestVariant.specialPriceRec && bestVariant.priceRec > bestVariant.specialPriceRec && (
+                              <span class="text-sm text-gray-500 line-through">
+                                {formatPrice(bestVariant.priceRec)}
+                              </span>
+                            )}
+                            <span class="text-lg font-bold text-green-400">
+                              {formatPrice(bestVariant.specialPriceRec || bestVariant.priceRec)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div class="flex gap-2">
+                      <button class="flex-1 px-4 py-2 font-medium text-black transition-colors bg-yellow-500 rounded-lg hover:bg-yellow-600">
+                        View Deal
+                      </button>
+                      <a href="/locations" class="px-4 py-2 font-medium text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700">
+                        Find Store
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Load More Button */}
+        {specialProducts.length > 0 && (
+          <div class="mt-12 text-center">
+            <button class="px-8 py-3 font-semibold text-black transition-all transform bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg shadow-lg hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+              Load More Deals
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-gradient-to-br from-green-900 via-black to-green-800 py-16">
+      <div class="px-4 mx-auto text-center sm:px-6 lg:px-8 max-w-7xl">
+        <h2 class="mb-4 text-3xl font-bold text-white md:text-4xl">
+          Don't Miss Out on These Deals!
+        </h2>
+        <p class="max-w-2xl mx-auto mb-8 text-lg text-gray-300">
+          Special offers are available for a limited time only. Visit your nearest Mint Cannabis location today.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="/locations" class="px-8 py-3 font-semibold text-black transition-all transform bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg shadow-lg hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+            📍 Find Your Store
+          </a>
+          <a href="/categories" class="px-8 py-3 font-semibold text-white transition-all transform bg-gradient-to-r from-green-600 to-green-700 rounded-lg shadow-lg hover:from-green-700 hover:to-green-800 hover:scale-105">
+            🛍️ Browse All Products
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
