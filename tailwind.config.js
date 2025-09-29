@@ -6,6 +6,26 @@ export default {
   darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      letterSpacing: {
+        'tighter': '-0.04em',
+        'tight': '-0.02em',
+        'normal': '0em',
+        'wide': '0.02em',
+        'wider': '0.04em',
+        'widest': '0.08em',
+      },
+      lineHeight: {
+        'extra-tight': '1.1',
+        'tight': '1.25',
+        'snug': '1.375',
+        'normal': '1.5',
+        'relaxed': '1.625',
+        'loose': '1.75',
+      },
       animation: {
         'gradient-x': 'gradient-x 15s ease infinite',
         'gradient-y': 'gradient-y 15s ease infinite',

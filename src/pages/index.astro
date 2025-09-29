@@ -211,6 +211,91 @@ try {
     </div>
   </div>
 
+  <!-- Product Categories Section -->
+  <div class="py-12 bg-black">
+    <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+      <div class="mb-8 text-center">
+        <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
+          Product Categories
+        </h2>
+        <p class="text-lg text-green-300">
+          Explore our comprehensive range of cannabis products
+        </p>
+      </div>
+
+      {apiError ? (
+        <div class="py-12 text-center">
+          <div class="max-w-md p-8 mx-auto bg-red-900 rounded-lg bg-opacity-80">
+            <div class="mb-4 text-6xl text-red-400">⚠️</div>
+            <h3 class="mb-2 text-lg font-medium text-red-200">API Error</h3>
+            <p class="text-sm text-red-300">{apiError}</p>
+          </div>
+        </div>
+      ) : categories.length > 0 ? (
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {categories.slice(0, 8).map((category, index) => (
+            <a
+              href={`/${category.slug}`}
+              class="relative overflow-hidden transition-all transform bg-black border-2 border-green-500 group rounded-xl hover:border-yellow-400 hover:scale-105 hover:-translate-y-1"
+            >
+              {/* Category Image or Icon */}
+              {category.image ? (
+                <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50">
+                  <img
+                    src={category.image}
+                    alt={category.title}
+                    class="object-cover w-full h-full transition-opacity opacity-80 group-hover:opacity-100"
+                  />
+                </div>
+              ) : (
+                <div class={`h-40 bg-gradient-to-br ${category.colorGradient} flex items-center justify-center`}>
+                  <span class="text-5xl">{category.icon}</span>
+                </div>
+              )}
+
+              {/* Category Content */}
+              <div class="p-4">
+                <h3 class="mb-1 text-lg font-bold text-yellow-400 group-hover:text-yellow-300">
+                  {category.title}
+                </h3>
+                {category.description && (
+                  <p class="mb-2 text-xs text-green-300 line-clamp-2">
+                    {category.description}
+                  </p>
+                )}
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-green-400">
+                    {category.productCount || 0} products
+                  </span>
+                  <span class="text-yellow-400 transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="py-12 text-center">
+          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
+            <div class="mb-4 text-6xl">🌿</div>
+            <h3 class="mb-2 text-lg font-medium text-yellow-400">Categories Coming Soon</h3>
+            <p class="text-green-300">Product categories will be available here.</p>
+          </div>
+        </div>
+      )}
+
+      <div class="mt-12 text-center">
+        <a href="/categories" class="inline-flex items-center px-6 py-3 font-medium text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+          View All Categories
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- Featured Locations Section -->
   <div class="py-12 bg-gradient-to-b from-green-900/40 to-black/60">
     <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
@@ -308,91 +393,6 @@ try {
       <div class="mt-12 text-center">
         <a href="/locations" class="inline-flex items-center px-6 py-3 font-medium text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
           View All Locations
-          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-          </svg>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Product Categories Section -->
-  <div class="py-12 bg-black">
-    <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
-      <div class="mb-8 text-center">
-        <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
-          Product Categories
-        </h2>
-        <p class="text-lg text-green-300">
-          Explore our comprehensive range of cannabis products
-        </p>
-      </div>
-
-      {apiError ? (
-        <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto bg-red-900 rounded-lg bg-opacity-80">
-            <div class="mb-4 text-6xl text-red-400">⚠️</div>
-            <h3 class="mb-2 text-lg font-medium text-red-200">API Error</h3>
-            <p class="text-sm text-red-300">{apiError}</p>
-          </div>
-        </div>
-      ) : categories.length > 0 ? (
-        <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {categories.slice(0, 8).map((category, index) => (
-            <a
-              href={`/${category.slug}`}
-              class="relative overflow-hidden transition-all transform bg-black border-2 border-green-500 group rounded-xl hover:border-yellow-400 hover:scale-105 hover:-translate-y-1"
-            >
-              {/* Category Image or Icon */}
-              {category.image ? (
-                <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50">
-                  <img
-                    src={category.image}
-                    alt={category.title}
-                    class="object-cover w-full h-full transition-opacity opacity-80 group-hover:opacity-100"
-                  />
-                </div>
-              ) : (
-                <div class={`h-40 bg-gradient-to-br ${category.colorGradient} flex items-center justify-center`}>
-                  <span class="text-5xl">{category.icon}</span>
-                </div>
-              )}
-
-              {/* Category Content */}
-              <div class="p-4">
-                <h3 class="mb-1 text-lg font-bold text-yellow-400 group-hover:text-yellow-300">
-                  {category.title}
-                </h3>
-                {category.description && (
-                  <p class="mb-2 text-xs text-green-300 line-clamp-2">
-                    {category.description}
-                  </p>
-                )}
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-green-400">
-                    {category.productCount || 0} products
-                  </span>
-                  <span class="text-yellow-400 transition-transform group-hover:translate-x-1">
-                    →
-                  </span>
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
-            <div class="mb-4 text-6xl">🌿</div>
-            <h3 class="mb-2 text-lg font-medium text-yellow-400">Categories Coming Soon</h3>
-            <p class="text-green-300">Product categories will be available here.</p>
-          </div>
-        </div>
-      )}
-
-      <div class="mt-12 text-center">
-        <a href="/categories" class="inline-flex items-center px-6 py-3 font-medium text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
-          View All Categories
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
           </svg>

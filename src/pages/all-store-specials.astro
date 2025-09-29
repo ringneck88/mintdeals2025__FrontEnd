@@ -1,0 +1,547 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Dutchie API configuration
+const DUTCHIE_API_URL = 'https://plus.dutchie.com/plus/2021-07/graphql';
+const DUTCHIE_API_KEY = 'public-eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJBUEktQ0xJRU5UIiwiZXhwIjozMzI4NzcyNTY2OCwiaWF0IjoxNzMwODE2ODY4LCJpc3MiOiJodHRwczovL2R1dGNoaWUuY29tIiwianRpIjoiNzFmYjcyYjItMThmNy00OWE0LTkwYjgtYjVjMDY0NWZhMjZlIiwiZW50ZXJwcmlzZV9pZCI6IjQ1ODZkZmZkLTVmOTEtNGUxZi04OThhLWJmMjMzMjQ4MzBjMSIsInV1aWQiOiJhNzM4MGE0MC1iMmM5LTQ2ZDktOWY5My1jZTEwM2JjZGM0MjkifQ.XZyCX1ZrNy75e3RcqukMUPffIqxEBnWUZ_o52V4VGco';
+
+// Initialize data
+let dutchieStores = [];
+let storeSpecials = [];
+let apiErrors = [];
+let totalSpecials = 0;
+
+// GraphQL query to fetch all stores - only non-nullable fields
+const STORES_QUERY = `
+  query GetStores {
+    retailers {
+      id
+      name
+      address
+      phone
+    }
+  }
+`;
+
+// GraphQL query to fetch products on special for a specific store
+const SPECIALS_QUERY = `
+  query GetSpecialProducts($retailerId: ID!) {
+    menu(retailerId: $retailerId) {
+      products {
+        id
+        name
+        brand {
+          name
+        }
+        category
+        subcategory
+        image
+        description
+        potencyCbd {
+          formatted
+        }
+        potencyThc {
+          formatted
+        }
+        variants {
+          id
+          option
+          priceRec
+          specialPriceRec
+          quantity
+        }
+      }
+    }
+  }
+`;
+
+// Enterprise ID from the API key
+const ENTERPRISE_ID = "4586dffd-5f91-4e1f-898a-bf23324830c1";
+
+// Helper functions
+function getCategoryIcon(category) {
+  const icons = {
+    'FLOWER': '🌿',
+    'PRE_ROLLS': '🚬',
+    'VAPORIZERS': '💨',
+    'CONCENTRATES': '🍯',
+    'EDIBLES': '🍭',
+    'TOPICALS': '🧴',
+    'CARTRIDGES': '🖊️',
+    'TINCTURES': '💧',
+    'ACCESSORIES': '🔧',
+    'CBD': '🌱'
+  };
+  return icons[category] || '🌿';
+}
+
+function calculateDiscount(regular, special) {
+  if (!regular || !special || special >= regular) return 0;
+  return Math.round(((regular - special) / regular) * 100);
+}
+
+function formatPrice(price) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  }).format(price / 100);
+}
+
+async function fetchFromDutchie(query, variables) {
+  const response = await fetch(DUTCHIE_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${DUTCHIE_API_KEY}`,
+    },
+    body: JSON.stringify({ query, variables })
+  });
+
+  const responseText = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`API Error: ${response.status} - ${responseText}`);
+  }
+
+  const data = JSON.parse(responseText);
+
+  if (data.errors) {
+    throw new Error(`GraphQL Error: ${data.errors.map(e => e.message).join(', ')}`);
+  }
+
+  return data.data;
+}
+
+// Step 1: Fetch all stores
+try {
+  console.log('🚀 Step 1: Fetching all Dutchie stores');
+
+  const storesData = await fetchFromDutchie(STORES_QUERY, {});
+
+  dutchieStores = storesData?.retailers || [];
+  console.log(`✅ Found ${dutchieStores.length} Dutchie stores`);
+
+  if (dutchieStores.length > 0) {
+    dutchieStores.forEach(store => {
+      console.log(`🏪 Store: ${store.name} - ID: ${store.id}`);
+    });
+  }
+} catch (error) {
+  console.error('❌ Error fetching Dutchie stores:', error);
+  apiErrors.push(`Stores fetch error: ${error.message}`);
+}
+
+// Step 2: Fetch specials for each store
+if (dutchieStores.length > 0) {
+  console.log('🚀 Step 2: Fetching specials for each store...');
+
+  for (const store of dutchieStores) {
+    try {
+      console.log(`🔍 Fetching specials for ${store.name} (ID: ${store.id})`);
+
+      const specialsData = await fetchFromDutchie(SPECIALS_QUERY, {
+        retailerId: store.id
+      });
+
+      if (specialsData?.menu?.products) {
+        // Filter products that have special prices
+        const specialProducts = specialsData.menu.products.filter(product => {
+          return product.variants?.some(v => v.specialPriceRec && v.specialPriceRec !== v.priceRec);
+        });
+
+        if (specialProducts.length > 0) {
+          storeSpecials.push({
+            store: store,
+            products: specialProducts,
+            specialCount: specialProducts.length
+          });
+
+          totalSpecials += specialProducts.length;
+          console.log(`✅ Found ${specialProducts.length} special products at ${store.name}`);
+        } else {
+          console.log(`📝 No special products found at ${store.name}`);
+        }
+      } else {
+        console.log(`❌ No menu data found for ${store.name}`);
+      }
+    } catch (error) {
+      console.error(`❌ Error fetching specials for ${store.name}:`, error);
+      apiErrors.push(`${store.name}: ${error.message}`);
+    }
+  }
+} else {
+  console.log('❌ No stores available to fetch specials from');
+}
+
+console.log(`🎯 Final Results: ${storeSpecials.length} stores with specials, ${totalSpecials} total special products`);
+
+// Fallback data if no real data is available
+if (storeSpecials.length === 0) {
+  console.log('🔄 Using fallback data for demonstration');
+  storeSpecials = [
+    {
+      store: {
+        id: 'demo-1',
+        name: 'Demo Store - Northern Ave',
+        address: '2444 W Northern Ave, Phoenix, AZ',
+        phone: '(480) 555-0123'
+      },
+      products: [
+        {
+          id: '1',
+          name: 'Blue Dream',
+          brand: { name: 'Mint Cannabis' },
+          category: 'FLOWER',
+          subcategory: 'Sativa',
+          description: 'A classic sativa-dominant hybrid',
+          image: 'https://images.dutchie.com/generic/flower.jpg',
+          potencyThc: { formatted: '22.5%' },
+          variants: [
+            {
+              id: 'v1',
+              option: '3.5g',
+              priceRec: 5500,
+              specialPriceRec: 4000,
+              quantity: 3.5
+            }
+          ]
+        }
+      ],
+      specialCount: 1
+    }
+  ];
+  totalSpecials = 1;
+}
+---
+
+<style>
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .video-background video {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5));
+  }
+  .hero-section {
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .discount-badge {
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .store-section {
+    scroll-margin-top: 100px;
+  }
+</style>
+
+<Layout title="All Store Specials - Mint Cannabis" description="Browse special deals from all Mint Cannabis locations powered by live Dutchie data.">
+  <!-- Video Background -->
+  <div class="video-background">
+    <video autoplay loop muted playsinline>
+      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+    <!-- Hero Section -->
+    <div class="text-white hero-section">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        <div class="text-center">
+          <h1 class="mb-4 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
+            🔥 All Store Specials
+          </h1>
+          <p class="max-w-2xl mx-auto mb-2 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
+            Live deals from all Mint Cannabis locations
+          </p>
+          <p class="max-w-2xl mx-auto mb-6 text-sm text-green-300 drop-shadow-lg">
+            Powered by real-time Dutchie inventory data
+          </p>
+          <div class="flex flex-wrap justify-center gap-4">
+            <a href="/" class="px-6 py-2.5 text-base font-semibold text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+              🏠 Back to Home
+            </a>
+            <a href="/locations" class="px-6 py-2.5 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-105">
+              📍 All Locations
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Bar -->
+    <div class="bg-gradient-to-r from-purple-800 via-purple-900 to-purple-800 py-3">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        <div class="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
+          <div class="text-white">
+            <div class="text-xl font-bold text-yellow-400">{storeSpecials.length}</div>
+            <div class="text-xs text-purple-200">Stores with Deals</div>
+          </div>
+          <div class="text-white">
+            <div class="text-xl font-bold text-yellow-400">{totalSpecials}+</div>
+            <div class="text-xs text-purple-200">Total Specials</div>
+          </div>
+          <div class="text-white">
+            <div class="text-xl font-bold text-yellow-400">{dutchieStores.length}</div>
+            <div class="text-xs text-purple-200">Dutchie Stores</div>
+          </div>
+          <div class="text-white">
+            <div class="text-xl font-bold text-yellow-400">Live</div>
+            <div class="text-xs text-purple-200">Real-time Data</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debug Info (visible in development) -->
+    <div class="bg-gray-900/80 border border-gray-600 text-gray-200 px-6 py-4 mx-4 mt-4 rounded-xl">
+      <h3 class="font-semibold mb-3">🔧 API Debug Information:</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <p><strong>Enterprise ID:</strong> {ENTERPRISE_ID}</p>
+          <p><strong>Dutchie Stores Found:</strong> {dutchieStores.length}</p>
+          <p><strong>Stores with Specials:</strong> {storeSpecials.length}</p>
+        </div>
+        <div>
+          <p><strong>Total Special Products:</strong> {totalSpecials}</p>
+          <p><strong>API Errors:</strong> {apiErrors.length}</p>
+          <p><strong>Data Source:</strong> {storeSpecials.length > 0 && !apiErrors.length ? '🟢 Live Dutchie API' : '🟡 Fallback/Demo Data'}</p>
+        </div>
+      </div>
+      {apiErrors.length > 0 && (
+        <div class="mt-3 p-3 bg-red-900/50 border border-red-500 rounded-lg">
+          <p class="font-medium text-red-200 mb-2">API Errors:</p>
+          {apiErrors.map(error => (
+            <p class="text-xs text-red-300">• {error}</p>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <!-- Store Navigation -->
+    <div class="bg-black/50 py-6">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        <h3 class="text-xl font-bold text-white mb-4 text-center">Jump to Store:</h3>
+        <div class="flex flex-wrap justify-center gap-2">
+          {storeSpecials.map((storeData, index) => (
+            <a
+              href={`#store-${index}`}
+              class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              {storeData.store.name} ({storeData.specialCount})
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stores with Specials -->
+    <div class="bg-black py-12">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        {storeSpecials.map((storeData, storeIndex) => (
+          <section id={`store-${storeIndex}`} class="store-section mb-16">
+            <!-- Store Header -->
+            <div class="bg-gradient-to-r from-purple-900 to-indigo-900 rounded-2xl p-8 mb-8">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 class="text-3xl font-bold text-white mb-2">
+                    🏪 {storeData.store.name}
+                  </h2>
+                  <div class="text-purple-200 space-y-1">
+                    {storeData.store.address && (
+                      <p class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                        </svg>
+                        {storeData.store.address}
+                      </p>
+                    )}
+                    <p>📱 Store ID: {storeData.store.id}</p>
+                  </div>
+                </div>
+                <div class="mt-4 md:mt-0 text-center">
+                  <div class="bg-yellow-500 text-black px-6 py-3 rounded-full font-bold text-lg">
+                    {storeData.specialCount} Specials
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {storeData.products.map(product => {
+                const bestVariant = product.variants?.find(v => v.specialPriceRec) || product.variants?.[0];
+                const discount = bestVariant ? calculateDiscount(bestVariant.priceRec, bestVariant.specialPriceRec) : 0;
+
+                return (
+                  <div class="relative overflow-hidden transition-all transform bg-gray-900 border border-purple-500 rounded-lg shadow-lg hover:scale-105 hover:shadow-2xl group">
+                    {/* Discount Badge */}
+                    {discount > 0 && (
+                      <div class="absolute top-2 right-2 z-10 px-3 py-1 text-xs font-bold text-black bg-yellow-400 rounded-full discount-badge">
+                        {discount}% OFF
+                      </div>
+                    )}
+
+                    {/* Store Badge */}
+                    <div class="absolute top-2 left-2 z-10 px-2 py-1 text-xs font-bold text-white bg-purple-600 rounded-full">
+                      Store {storeIndex + 1}
+                    </div>
+
+                    {/* Product Image */}
+                    <div class="relative h-48 overflow-hidden bg-gray-800">
+                      {product.image ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          class="object-cover w-full h-full transition-transform group-hover:scale-110"
+                        />
+                      ) : (
+                        <div class="flex items-center justify-center w-full h-full">
+                          <span class="text-6xl">{getCategoryIcon(product.category)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Product Info */}
+                    <div class="p-6">
+                      {/* Brand & Category */}
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium text-purple-400">
+                          {product.brand?.name || 'Mint Cannabis'}
+                        </span>
+                        <span class="px-2 py-1 text-xs text-purple-200 bg-purple-900 rounded-full">
+                          {product.subcategory || product.category}
+                        </span>
+                      </div>
+
+                      {/* Product Name */}
+                      <h3 class="mb-2 text-lg font-bold text-white">
+                        {product.name}
+                      </h3>
+
+                      {/* Description */}
+                      {product.description && (
+                        <p class="mb-3 text-sm text-gray-400 line-clamp-2">
+                          {product.description}
+                        </p>
+                      )}
+
+                      {/* Potency */}
+                      {(product.potencyThc || product.potencyCbd) && (
+                        <div class="flex gap-3 mb-3">
+                          {product.potencyThc && (
+                            <span class="text-xs text-yellow-400">
+                              THC: {product.potencyThc.formatted}
+                            </span>
+                          )}
+                          {product.potencyCbd && (
+                            <span class="text-xs text-blue-400">
+                              CBD: {product.potencyCbd.formatted}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Variants & Pricing */}
+                      {bestVariant && (
+                        <div class="mb-4">
+                          <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-gray-400">
+                              {bestVariant.option}
+                            </span>
+                            <div class="flex items-center gap-2">
+                              {bestVariant.specialPriceRec && bestVariant.priceRec > bestVariant.specialPriceRec && (
+                                <span class="text-sm text-gray-500 line-through">
+                                  {formatPrice(bestVariant.priceRec)}
+                                </span>
+                              )}
+                              <span class="text-lg font-bold text-purple-400">
+                                {formatPrice(bestVariant.specialPriceRec || bestVariant.priceRec)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div class="flex gap-2">
+                        <button class="flex-1 px-4 py-2 font-medium text-black transition-colors bg-yellow-500 rounded-lg hover:bg-yellow-600">
+                          View Deal
+                        </button>
+                        <button class="px-4 py-2 font-medium text-white transition-colors bg-purple-600 rounded-lg hover:bg-purple-700">
+                          Store
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+
+        {/* No Specials Message */}
+        {storeSpecials.length === 0 && (
+          <div class="py-16 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gray-800 rounded-full">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h3 class="mb-2 text-xl font-medium text-white">No Special Deals Available</h3>
+            <p class="text-gray-400">
+              {apiErrors.length > 0 ? 'Error loading stores. Check the debug info above.' : 'Check back soon for amazing deals!'}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-gradient-to-br from-purple-900 via-black to-indigo-800 py-16">
+      <div class="px-4 mx-auto text-center sm:px-6 lg:px-8 max-w-7xl">
+        <h2 class="mb-4 text-3xl font-bold text-white md:text-4xl">
+          🎯 Find Your Perfect Deal
+        </h2>
+        <p class="max-w-2xl mx-auto mb-8 text-lg text-gray-300">
+          Browse specials from all our locations and find the best deals near you.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="/locations" class="px-8 py-3 font-semibold text-black transition-all transform bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg shadow-lg hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+            📍 Find Your Store
+          </a>
+          <a href="/specials" class="px-8 py-3 font-semibold text-white transition-all transform bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg shadow-lg hover:from-purple-700 hover:to-purple-800 hover:scale-105">
+            🔥 All Specials
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

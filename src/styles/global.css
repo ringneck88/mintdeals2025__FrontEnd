@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Professional Typography - Inter Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 /* Dark mode initialization */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -167,4 +170,36 @@
 /* Smooth transitions for all elements */
 * {
   transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Professional Typography Enhancements */
+body {
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings with refined spacing */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Body text optimization */
+p {
+  line-height: 1.625;
+  letter-spacing: -0.011em;
+}
+
+/* Navigation and UI text */
+nav a, button, .btn {
+  letter-spacing: -0.011em;
+  font-weight: 500;
+}
+
+/* Small text refinement */
+.text-sm, .text-xs {
+  letter-spacing: 0em;
 }
