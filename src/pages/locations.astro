@@ -104,11 +104,11 @@ try {
   const cities = new Set();
 
   storesData.forEach(store => {
-    // Use direct format from Railway API
-    if (store.state) {
-      const state = store.state?.toUpperCase();
-      const city = store.city;
+    // Access state from the correct field
+    const state = (store.state || store.attributes?.Address?.state)?.toUpperCase();
+    const city = store.city || store.attributes?.Address?.city;
 
+    if (state) {
       states.add(state);
       if (city) cities.add(`${state}-${city}`);
 
