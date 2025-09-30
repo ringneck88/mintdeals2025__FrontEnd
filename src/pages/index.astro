@@ -43,8 +43,8 @@ try {
 
   // Fetch stores and categories in parallel
   const [storesResponse, categoriesResponse] = await Promise.allSettled([
-    fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=6`),
-    fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=8&sort=Name:asc`)
+    fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=500`),
+    fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=100&sort=Name:asc`)
   ]);
 
   // Process stores
@@ -178,7 +178,7 @@ try {
           Your trusted source for premium cannabis products and information
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-          <a href="/locations" class="px-6 py-2.5 text-base font-semibold text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+          <a href="/stores" class="px-6 py-2.5 text-base font-semibold text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
             Find Locations
           </a>
           <a href="/categories" class="px-6 py-2.5 text-base font-semibold text-yellow-400 transition-all transform border-2 border-yellow-400 rounded-lg shadow-lg hover:bg-yellow-400 hover:text-black hover:scale-105">
@@ -393,7 +393,7 @@ try {
       )}
 
       <div class="mt-12 text-center">
-        <a href="/locations" class="inline-flex items-center px-6 py-3 font-medium text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+        <a href="/stores" class="inline-flex items-center px-6 py-3 font-medium text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
           View All Locations
           <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>

@@ -29,7 +29,7 @@ try {
   }
 
   // Fetch stores from the stores endpoint
-  const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
+  const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=500`);
 
   if (storesResponse.ok) {
     const storesData = await storesResponse.json();
