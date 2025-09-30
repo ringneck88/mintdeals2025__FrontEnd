@@ -147,8 +147,8 @@ try {
             </div>
           )}
 
-          <div class="bg-black bg-opacity-80 p-8 md:p-12 rounded-lg shadow-2xl border-2 border-yellow-400 rich-text-content">
-            <div set:html={categoryData.RichText}></div>
+          <div class="bg-black bg-opacity-90 p-8 md:p-12 rounded-lg shadow-2xl border-2 border-yellow-400 overflow-hidden">
+            <div class="rich-text-content" set:html={categoryData.RichText}></div>
           </div>
         </div>
       </div>
@@ -182,6 +182,8 @@ try {
     margin: 0;
     padding: 0;
     font-family: 'Special Gothic Expanded One', sans-serif;
+    font-weight: 400;
+    font-style: normal;
   }
   .video-background {
     position: fixed;
@@ -234,7 +236,7 @@ try {
     overflow-wrap: break-word;
     word-break: break-word;
     max-width: 100%;
-    overflow: hidden;
+    width: 100%;
     font-family: 'Special Gothic Expanded One', sans-serif;
   }
 
@@ -242,6 +244,15 @@ try {
     max-width: 100%;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    box-sizing: border-box;
+  }
+
+  /* Ensure all block elements stay within container */
+  .rich-text-content :global(div),
+  .rich-text-content :global(section),
+  .rich-text-content :global(article) {
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .rich-text-content :global(h1),
@@ -357,19 +368,22 @@ try {
     padding: 0;
   }
 
-  .rich-text-content :global(table) {
-    width: 100%;
-    max-width: 100%;
-    border-collapse: collapse;
-    margin: 1.5em 0;
-    table-layout: fixed;
-  }
-
-  /* Wrapper for table to enable horizontal scroll */
+  /* Table wrapper with scroll */
   .rich-text-content :global(table) {
     display: block;
+    width: 100%;
+    max-width: 100%;
     overflow-x: auto;
-    white-space: normal;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rich-text-content :global(table) :global(tbody),
+  .rich-text-content :global(table) :global(thead) {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
   }
 
   .rich-text-content :global(th),
