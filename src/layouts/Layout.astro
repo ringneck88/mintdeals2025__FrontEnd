@@ -23,7 +23,7 @@ try {
     fetch(`${API_BASE}/brands?populate=*`),
     fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=10&sort=Name:asc`),
     fetch(`${API_BASE}/regions?populate=*`),
-    fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`)
+    fetch(`${API_BASE}/stores?populate=region&pagination[pageSize]=500`)
   ]);
 
   // Process brand data
@@ -76,14 +76,21 @@ try {
     const data = await response.json();
 
     if (data?.data) {
-      navigationRegions = data.data.map(region => ({
-        id: region.id,
-        documentId: region.documentId,
-        name: region.name || 'Unknown Region',
-        code: region.code || 'XX',
-        timezone: region.timezone,
-        age_restriction: region.age_restriction
-      }));
+      navigationRegions = data.data.map(region => {
+        // Generate slug from name since API doesn't provide slug or code
+        const slug = region.slug || (region.name ? region.name.toLowerCase().replace(/\s+/g, '-') : region.documentId);
+        const code = region.code || (region.name ? region.name.substring(0, 2).toUpperCase() : 'XX');
+
+        return {
+          id: region.id,
+          documentId: region.documentId,
+          name: region.name || 'Unknown Region',
+          code: code,
+          slug: slug,
+          timezone: region.timezone,
+          age_restriction: region.age_restriction
+        };
+      });
     }
   }
 
@@ -93,17 +100,23 @@ try {
     const data = await response.json();
 
     if (data?.data) {
-      navigationStores = data.data.map(store => ({
-        id: store.id,
-        documentId: store.documentId,
-        name: store.name || 'Unnamed Store',
-        slug: store.slug || store.documentId,
-        city: store.city,
-        state: store.state,
-        phone: store.phone,
-        is_active: store.is_active !== false,
-        region: store.region // This will be the region ID or object
-      })).filter(store => store.is_active);
+      navigationStores = data.data.map(store => {
+        // Extract region ID - it will be an object when populated
+        const regionId = typeof store.region === 'object' && store.region !== null ? store.region.id : store.region;
+
+        return {
+          id: store.id,
+          documentId: store.documentId,
+          name: store.name || 'Unnamed Store',
+          slug: store.slug || store.documentId,
+          city: store.address?.city || store.city,
+          state: store.address?.state || store.state,
+          phone: store.phone,
+          is_active: store.is_active !== false,
+          region: store.region, // Keep full region object
+          regionId: regionId // Also store the ID for easy filtering
+        };
+      }).filter(store => store.is_active);
     }
   }
 } catch (error) {
@@ -163,7 +176,7 @@ try {
           
           <div class="flex items-center space-x-4">
             <nav class="hidden md:flex space-x-8">
-              <a href="/" class="text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-semibold tracking-tight transition-colors">
+              <a href="/" class="text-gray-200 hover:text-yellow-600 dark:hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-semibold tracking-tight transition-colors">
                 Home
               </a>
 
@@ -282,11 +295,8 @@ try {
                     {navigationRegions.length > 0 ? (
                       <div class="max-h-96 overflow-y-auto">
                         {navigationRegions.map((region, index) => {
-                          // Get stores for this region
-                          const regionStores = navigationStores.filter(store => {
-                            const storeRegionId = typeof store.region === 'object' ? store.region?.id : store.region;
-                            return storeRegionId === region.id;
-                          });
+                          // Get stores for this region - match by region ID
+                          const regionStores = navigationStores.filter(store => store.regionId === region.id);
 
                           // Get region icon based on name/code
                           const regionIcon = region.code === 'AZ' || region.name?.includes('Arizona') ? '🌵' :
@@ -301,7 +311,7 @@ try {
                               <div class="px-2 py-1">
                                 <div class="mb-2">
                                   <a
-                                    href={`/stores?region=${region.id}`}
+                                    href={`/region/${region.slug || region.code?.toLowerCase() || region.id}`}
                                     class="block px-2 py-1 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded"
                                   >
                                     {regionIcon} {region.name} ({regionStores.length})
@@ -323,7 +333,7 @@ try {
                                     ))}
                                     {regionStores.length > 5 && (
                                       <a
-                                        href={`/stores?region=${region.id}`}
+                                        href={`/region/${region.slug || region.code?.toLowerCase() || region.id}`}
                                         class="block px-2 py-1 text-xs text-green-600 dark:text-green-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded font-medium"
                                       >
                                         View all {regionStores.length} locations →
@@ -361,20 +371,20 @@ try {
                     <a href="/deals" class="block px-4 py-2 text-sm font-medium tracking-tight text-gray-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400">
                       🔥 Current Deals
                     </a>
-                    <a href="/all-store-specials" class="block px-4 py-2 text-sm font-medium tracking-tight text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400">
+                    <a href="/all-store-specials" class="block px-4 py-2 text-sm font-medium tracking-tight text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400">
                       🏪 All Store Specials
                     </a>
                     <a href="/specials" class="block px-4 py-2 text-sm font-medium tracking-tight text-gray-200 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-600 dark:hover:text-yellow-400">
                       ⭐ Special Offers
                     </a>
-                    <a href="/northern-specials" class="block px-4 py-2 text-sm font-medium tracking-tight text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400">
+                    <a href="/northern-specials" class="block px-4 py-2 text-sm font-medium tracking-tight text-gray-200 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-600 dark:hover:text-yellow-400">
                       📍 Northern Ave Specials
                     </a>
                   </div>
                 </div>
               </div>
 
-              <a href="#about" class="text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-semibold tracking-tight transition-colors">
+              <a href="#about" class="text-gray-200 hover:text-green-600 dark:hover:text-green-400 px-3 py-2 rounded-md text-sm font-semibold tracking-tight transition-colors">
                 About
               </a>
             </nav>
@@ -392,7 +402,7 @@ try {
 
           <!-- Mobile menu button -->
           <div class="md:hidden">
-            <button id="mobile-menu-button" class="text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none">
+            <button id="mobile-menu-button" class="text-gray-200 hover:text-yellow-600 dark:hover:text-yellow-400 focus:outline-none">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
               </svg>
@@ -402,7 +412,7 @@ try {
 
         <!-- Mobile menu -->
         <div id="mobile-menu" class="md:hidden hidden border-t border-gray-700 pt-4 pb-3 relative z-[150]">
-          <a href="/" class="block px-3 py-2 text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium">
+          <a href="/" class="block px-3 py-2 text-gray-200 hover:text-yellow-600 dark:hover:text-yellow-400 text-sm font-medium">
             Home
           </a>
 
@@ -466,10 +476,10 @@ try {
             </div>
           </div>
 
-          <a href="/states" class="block px-3 py-2 text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium">
+          <a href="/states" class="block px-3 py-2 text-gray-200 hover:text-green-600 dark:hover:text-green-400 text-sm font-medium">
             States
           </a>
-          <a href="/events" class="block px-3 py-2 text-gray-200 hover:text-purple-600 dark:hover:text-purple-400 text-sm font-medium">
+          <a href="/events" class="block px-3 py-2 text-gray-200 hover:text-yellow-600 dark:hover:text-yellow-400 text-sm font-medium">
             Events
           </a>
           <!-- Mobile Deals -->
@@ -484,13 +494,13 @@ try {
               <a href="/deals" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400">
                 🔥 Current Deals
               </a>
-              <a href="/all-store-specials" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400">
+              <a href="/all-store-specials" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">
                 🏪 All Store Specials
               </a>
               <a href="/specials" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400">
                 ⭐ Special Offers
               </a>
-              <a href="/northern-specials" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
+              <a href="/northern-specials" class="block px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400">
                 📍 Northern Ave Specials
               </a>
             </div>

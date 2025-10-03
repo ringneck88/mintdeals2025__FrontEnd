@@ -4,7 +4,8 @@
       "Bash(for endpoint in \"locations\" \"store\" \"region\" \"product-categories\" \"product-category\" \"category\")",
       "Bash(do echo \"Testing $endpoint:\")",
       "Bash(done)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "WebFetch(domain:mintdealsbackend-production.up.railway.app)"
     ],
     "deny": [],
     "ask": []

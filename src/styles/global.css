@@ -182,15 +182,15 @@ body {
 
 /* Headings with refined spacing */
 h1, h2, h3, h4, h5, h6 {
-  letter-spacing: -0.02em;
+  letter-spacing: -0.07em;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 0.7;
 }
 
 /* Body text optimization */
 p {
-  line-height: 1.625;
-  letter-spacing: -0.011em;
+  line-height: 0.8;
+  letter-spacing: -0.03311em;
 }
 
 /* Navigation and UI text */
