@@ -9,6 +9,7 @@ const { category } = Astro.params;
 let categoryData = null;
 let categoryName = 'Category';
 let categorySlug = category;
+let richTextContent = '';
 
 try {
   console.log('🚀 Fetching category data for:', category);
@@ -22,7 +23,17 @@ try {
       categoryData = categoryDataResponse.data[0];
       categoryName = categoryData.Name || 'Category';
       categorySlug = categoryData.slug || category;
+
+      // Handle RichText - it might be a string or an object
+      if (typeof categoryData.RichText === 'string') {
+        richTextContent = categoryData.RichText;
+      } else if (typeof categoryData.RichText === 'object' && categoryData.RichText !== null) {
+        // If it's an object, try to extract the content
+        richTextContent = categoryData.RichText.content || categoryData.RichText.html || JSON.stringify(categoryData.RichText);
+      }
+
       console.log('✅ Category found:', categoryName);
+      console.log('📝 RichText type:', typeof categoryData.RichText);
     } else {
       console.log('❌ Category not found:', category);
       // Return 404 if category doesn't exist
@@ -130,7 +141,7 @@ try {
     <!-- Main Content -->
     <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12 bg-black bg-opacity-90 text-white">
     <!-- Article Content Section -->
-    {categoryData?.RichText && (
+    {richTextContent && (
       <div class="mt-16">
         <div class="max-w-4xl mx-auto">
           <h2 class="text-3xl font-bold text-yellow-400 mb-8 text-center drop-shadow-lg" style="font-family: 'Special Gothic Expanded One', sans-serif;">
@@ -148,7 +159,7 @@ try {
           )}
 
           <div class="bg-black bg-opacity-90 p-8 md:p-12 rounded-lg shadow-2xl border-2 border-yellow-400 overflow-hidden">
-            <div class="rich-text-content" set:html={categoryData.RichText}></div>
+            <div class="rich-text-content" set:html={richTextContent}></div>
           </div>
         </div>
       </div>
