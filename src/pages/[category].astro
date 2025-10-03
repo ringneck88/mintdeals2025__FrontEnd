@@ -28,8 +28,30 @@ try {
       if (typeof categoryData.RichText === 'string') {
         richTextContent = categoryData.RichText;
       } else if (typeof categoryData.RichText === 'object' && categoryData.RichText !== null) {
-        // If it's an object, try to extract the content
-        richTextContent = categoryData.RichText.content || categoryData.RichText.html || JSON.stringify(categoryData.RichText);
+        // If it's an object (Strapi's block content), convert to HTML
+        if (Array.isArray(categoryData.RichText)) {
+          // Handle array of blocks
+          richTextContent = categoryData.RichText.map(block => {
+            if (block.type === 'paragraph') {
+              return `<p>${block.children?.map(child => child.text || '').join('') || ''}</p>`;
+            }
+            if (block.type === 'heading') {
+              const level = block.level || 2;
+              return `<h${level}>${block.children?.map(child => child.text || '').join('') || ''}</h${level}>`;
+            }
+            if (block.type === 'list') {
+              const tag = block.format === 'ordered' ? 'ol' : 'ul';
+              const items = block.children?.map(item =>
+                `<li>${item.children?.map(child => child.text || '').join('') || ''}</li>`
+              ).join('') || '';
+              return `<${tag}>${items}</${tag}>`;
+            }
+            return '';
+          }).join('\n');
+        } else {
+          // Try to extract content from object structure
+          richTextContent = categoryData.RichText.content || categoryData.RichText.html || '';
+        }
       }
 
       console.log('✅ Category found:', categoryName);
