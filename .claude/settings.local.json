@@ -5,7 +5,12 @@
       "Bash(do echo \"Testing $endpoint:\")",
       "Bash(done)",
       "Bash(curl:*)",
-      "WebFetch(domain:mintdealsbackend-production.up.railway.app)"
+      "WebFetch(domain:mintdealsbackend-production.up.railway.app)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx astro:*)",
+      "Bash(npx wrangler pages deploy:*)"
     ],
     "deny": [],
     "ask": []
