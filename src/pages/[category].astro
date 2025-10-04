@@ -50,6 +50,8 @@ try {
 
       console.log('✅ Category found:', categoryName);
       console.log('✅ Final richTextContent length:', richTextContent.length);
+      console.log('✅ richTextContent constructor:', richTextContent?.constructor?.name);
+      console.log('✅ richTextContent is string?', typeof richTextContent === 'string');
     } else {
       console.log('❌ Category not found:', category);
       // Return 404 if category doesn't exist
@@ -175,7 +177,14 @@ try {
           )}
 
           <div class="bg-black bg-opacity-90 p-8 md:p-12 rounded-lg shadow-2xl border-2 border-yellow-400 overflow-hidden">
-            <div class="rich-text-content" set:html={`${richTextContent}`}></div>
+            <div class="rich-text-content" id="richTextContainer"></div>
+            <script define:vars={{ richTextContent }}>
+              // Client-side HTML injection to bypass Cloudflare Workers serialization
+              const container = document.getElementById('richTextContainer');
+              if (container && richTextContent) {
+                container.innerHTML = richTextContent;
+              }
+            </script>
           </div>
         </div>
       </div>
