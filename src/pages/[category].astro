@@ -20,7 +20,7 @@ try {
   if (categoryResponse.ok) {
     const categoryDataResponse = await categoryResponse.json();
     if (categoryDataResponse?.data?.length > 0) {
-      categoryData = categoryDataResponse.data[0];
+      categoryData = categoryDataResponse.data[0].attributes || categoryDataResponse.data[0];
       categoryName = categoryData.Name || 'Category';
       categorySlug = categoryData.slug || category;
 
