@@ -6,10 +6,11 @@ import Layout from '../layouts/Layout.astro';
 const { category } = Astro.params;
 
 // Fetch category data dynamically based on the URL parameter
-let categoryData = null;
 let categoryName = 'Category';
 let categorySlug = category;
 let richTextContent = '';
+let categoryImageUrl = null;
+let categoryDescription = '';
 
 try {
   console.log('🚀 Fetching category data for:', category);
@@ -20,9 +21,11 @@ try {
   if (categoryResponse.ok) {
     const categoryDataResponse = await categoryResponse.json();
     if (categoryDataResponse?.data?.length > 0) {
-      categoryData = categoryDataResponse.data[0];
+      const categoryData = categoryDataResponse.data[0];
       categoryName = categoryData.Name || 'Category';
       categorySlug = categoryData.slug || category;
+      categoryDescription = categoryData.Discription || '';
+      categoryImageUrl = categoryData?.image?.url || null;
 
       // RichText is a string directly on the data object
       // Force to string to prevent [object Object] issues
@@ -120,10 +123,10 @@ try {
       <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="text-center">
           <!-- Category Hero Image -->
-          {categoryData?.image?.url && (
+          {categoryImageUrl && (
             <div class="mb-8">
               <img
-                src={`https://mintdealsbackend-production.up.railway.app${categoryData.image.url}`}
+                src={`https://mintdealsbackend-production.up.railway.app${categoryImageUrl}`}
                 alt={categoryName}
                 class="w-32 h-32 mx-auto rounded-full object-cover border-4 border-yellow-400/30 drop-shadow-2xl"
               />
@@ -134,9 +137,9 @@ try {
             {categoryName}
           </h1>
 
-          {categoryData?.Discription && (
+          {categoryDescription && (
             <p class="text-xl lg:text-2xl text-yellow-400 max-w-3xl mx-auto drop-shadow-lg">
-              {categoryData.Discription}
+              {categoryDescription}
             </p>
           )}
 
@@ -154,10 +157,10 @@ try {
             Learn About {categoryName}
           </h2>
 
-          {categoryData?.image?.url && (
+          {categoryImageUrl && (
             <div class="mb-8">
               <img
-                src={`https://mintdealsbackend-production.up.railway.app${categoryData.image.url}`}
+                src={`https://mintdealsbackend-production.up.railway.app${categoryImageUrl}`}
                 alt={categoryName}
                 class="w-full h-64 md:h-80 object-cover rounded-lg shadow-lg"
               />
