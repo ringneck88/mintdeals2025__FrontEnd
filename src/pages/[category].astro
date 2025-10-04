@@ -25,9 +25,18 @@ try {
       categorySlug = categoryData.slug || category;
 
       // RichText is a string directly on the data object
-      richTextContent = categoryData.RichText || '';
-      console.log('📝 RichText type:', typeof categoryData.RichText);
+      // Force to string to prevent [object Object] issues
+      const rawRichText = categoryData.RichText;
+      if (typeof rawRichText === 'string') {
+        richTextContent = rawRichText;
+      } else if (rawRichText) {
+        richTextContent = String(rawRichText);
+      } else {
+        richTextContent = '';
+      }
+      console.log('📝 RichText type:', typeof rawRichText);
       console.log('📝 RichText length:', richTextContent.length);
+      console.log('📝 RichText preview:', richTextContent.substring(0, 100));
 
       console.log('✅ Category found:', categoryName);
       console.log('✅ Final richTextContent length:', richTextContent.length);
