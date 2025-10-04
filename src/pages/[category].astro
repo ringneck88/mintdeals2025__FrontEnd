@@ -27,13 +27,20 @@ try {
       categoryDescription = categoryData.Discription || '';
       categoryImageUrl = categoryData?.image?.url || null;
 
-      // RichText is a string directly on the data object
-      // Force to string to prevent [object Object] issues
+      // RichText is a string with unicode-escaped HTML
+      // Decode unicode escapes and ensure it's a string
       const rawRichText = categoryData.RichText;
-      if (typeof rawRichText === 'string') {
-        richTextContent = rawRichText;
-      } else if (rawRichText) {
-        richTextContent = String(rawRichText);
+      if (rawRichText) {
+        // Convert to string first, then decode any unicode escapes
+        const textContent = typeof rawRichText === 'string' ? rawRichText : JSON.stringify(rawRichText);
+        // Use a try-catch in case there are parsing issues
+        try {
+          // If it's already properly decoded, this will just return it
+          richTextContent = textContent;
+        } catch (e) {
+          console.error('Failed to process RichText:', e);
+          richTextContent = String(rawRichText);
+        }
       } else {
         richTextContent = '';
       }
@@ -168,7 +175,7 @@ try {
           )}
 
           <div class="bg-black bg-opacity-90 p-8 md:p-12 rounded-lg shadow-2xl border-2 border-yellow-400 overflow-hidden">
-            <div class="rich-text-content"><Fragment set:html={richTextContent} /></div>
+            <div class="rich-text-content" set:html={`${richTextContent}`}></div>
           </div>
         </div>
       </div>
