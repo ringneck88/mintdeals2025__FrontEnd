@@ -20,32 +20,14 @@ try {
   if (categoryResponse.ok) {
     const categoryDataResponse = await categoryResponse.json();
     if (categoryDataResponse?.data?.length > 0) {
-      categoryData = categoryDataResponse.data[0].attributes || categoryDataResponse.data[0];
+      categoryData = categoryDataResponse.data[0];
       categoryName = categoryData.Name || 'Category';
       categorySlug = categoryData.slug || category;
 
-      // Handle RichText - ensure it's always a string
-      const rawRichText = categoryData.RichText;
-      console.log('📝 RichText type:', typeof rawRichText);
-      console.log('📝 RichText value:', rawRichText);
-
-      // Convert to string, handling all cases
-      if (!rawRichText) {
-        richTextContent = '';
-      } else if (typeof rawRichText === 'string') {
-        richTextContent = rawRichText;
-      } else if (typeof rawRichText === 'object') {
-        // If it's an object, try to stringify it properly
-        console.warn('⚠️ RichText is an object, attempting to stringify');
-        try {
-          richTextContent = JSON.stringify(rawRichText);
-        } catch (e) {
-          console.error('❌ Failed to stringify RichText:', e);
-          richTextContent = '';
-        }
-      } else {
-        richTextContent = String(rawRichText);
-      }
+      // RichText is a string directly on the data object
+      richTextContent = categoryData.RichText || '';
+      console.log('📝 RichText type:', typeof categoryData.RichText);
+      console.log('📝 RichText length:', richTextContent.length);
 
       console.log('✅ Category found:', categoryName);
       console.log('✅ Final richTextContent length:', richTextContent.length);
