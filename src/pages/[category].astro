@@ -24,38 +24,31 @@ try {
       categoryName = categoryData.Name || 'Category';
       categorySlug = categoryData.slug || category;
 
-      // Handle RichText - it might be a string or an object
-      if (typeof categoryData.RichText === 'string') {
-        richTextContent = categoryData.RichText;
-      } else if (typeof categoryData.RichText === 'object' && categoryData.RichText !== null) {
-        // If it's an object (Strapi's block content), convert to HTML
-        if (Array.isArray(categoryData.RichText)) {
-          // Handle array of blocks
-          richTextContent = categoryData.RichText.map(block => {
-            if (block.type === 'paragraph') {
-              return `<p>${block.children?.map(child => child.text || '').join('') || ''}</p>`;
-            }
-            if (block.type === 'heading') {
-              const level = block.level || 2;
-              return `<h${level}>${block.children?.map(child => child.text || '').join('') || ''}</h${level}>`;
-            }
-            if (block.type === 'list') {
-              const tag = block.format === 'ordered' ? 'ol' : 'ul';
-              const items = block.children?.map(item =>
-                `<li>${item.children?.map(child => child.text || '').join('') || ''}</li>`
-              ).join('') || '';
-              return `<${tag}>${items}</${tag}>`;
-            }
-            return '';
-          }).join('\n');
-        } else {
-          // Try to extract content from object structure
-          richTextContent = categoryData.RichText.content || categoryData.RichText.html || '';
+      // Handle RichText - ensure it's always a string
+      const rawRichText = categoryData.RichText;
+      console.log('📝 RichText type:', typeof rawRichText);
+      console.log('📝 RichText value:', rawRichText);
+
+      // Convert to string, handling all cases
+      if (!rawRichText) {
+        richTextContent = '';
+      } else if (typeof rawRichText === 'string') {
+        richTextContent = rawRichText;
+      } else if (typeof rawRichText === 'object') {
+        // If it's an object, try to stringify it properly
+        console.warn('⚠️ RichText is an object, attempting to stringify');
+        try {
+          richTextContent = JSON.stringify(rawRichText);
+        } catch (e) {
+          console.error('❌ Failed to stringify RichText:', e);
+          richTextContent = '';
         }
+      } else {
+        richTextContent = String(rawRichText);
       }
 
       console.log('✅ Category found:', categoryName);
-      console.log('📝 RichText type:', typeof categoryData.RichText);
+      console.log('✅ Final richTextContent length:', richTextContent.length);
     } else {
       console.log('❌ Category not found:', category);
       // Return 404 if category doesn't exist
