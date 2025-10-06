@@ -128,7 +128,7 @@ try {
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/gif" href="/favicon.gif" />
 
     <!-- Theme detection script -->
     <script is:inline>
@@ -587,7 +587,24 @@ try {
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         console.log('Theme toggle script loaded');
-        
+
+        // RichText content handler
+        const richTextContainers = document.querySelectorAll('[data-content]');
+        console.log('🔍 Found RichText containers:', richTextContainers.length);
+
+        richTextContainers.forEach((container, index) => {
+          const content = container.getAttribute('data-content');
+          console.log(`📝 Container ${index} content length:`, content?.length);
+          console.log(`📝 Container ${index} content preview:`, content?.substring(0, 100));
+
+          if (content) {
+            container.innerHTML = content;
+            console.log(`✅ Rendered RichText in container ${index}`);
+          } else {
+            console.error(`❌ No content in container ${index}`);
+          }
+        });
+
         // Theme toggle functionality
         function toggleTheme() {
           console.log('Toggle theme clicked');

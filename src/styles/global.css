@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* Professional Typography - Inter Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Professional Typography - Montserrat Font */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
 
 /* Dark mode initialization */
 @media (prefers-color-scheme: dark) {
@@ -194,8 +194,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Body text optimization */
 p {
-  line-height: 0.8;
-  letter-spacing: -0.03311em;
+  line-height: 0.99;
+  letter-spacing: -0.04em;
 }
 
 /* Navigation and UI text */

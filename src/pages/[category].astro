@@ -1,21 +1,28 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
 import Layout from '../layouts/Layout.astro';
 
+// Generate static paths for all categories
+export async function getStaticPaths() {
+  const response = await fetch('https://mintdealsbackend-production.up.railway.app/api/categories?populate=*');
+  const data = await response.json();
+  const categories = data?.data || [];
+
+  return categories.map(cat => ({
+    params: { category: cat.slug },
+  }));
+}
+
 const { category } = Astro.params;
 
-// Fetch category data dynamically based on the URL parameter
+// Fetch category data
 let categoryName = 'Category';
 let categorySlug = category;
-let richTextContent = '';
 let categoryImageUrl = null;
 let categoryDescription = '';
 
 try {
-  console.log('🚀 Fetching category data for:', category);
-
-  // Fetch the specific category by slug
   const categoryResponse = await fetch(`https://mintdealsbackend-production.up.railway.app/api/categories?filters[slug][$eq]=${category}&populate=*`);
 
   if (categoryResponse.ok) {
@@ -26,69 +33,29 @@ try {
       categorySlug = categoryData.slug || category;
       categoryDescription = categoryData.Discription || '';
       categoryImageUrl = categoryData?.image?.url || null;
-
-      // RichText is a string with unicode-escaped HTML
-      // Decode unicode escapes and ensure it's a string
-      const rawRichText = categoryData.RichText;
-      if (rawRichText) {
-        // Convert to string first, then decode any unicode escapes
-        const textContent = typeof rawRichText === 'string' ? rawRichText : JSON.stringify(rawRichText);
-        // Use a try-catch in case there are parsing issues
-        try {
-          // If it's already properly decoded, this will just return it
-          richTextContent = textContent;
-        } catch (e) {
-          console.error('Failed to process RichText:', e);
-          richTextContent = String(rawRichText);
-        }
-      } else {
-        richTextContent = '';
-      }
-      console.log('📝 RichText type:', typeof rawRichText);
-      console.log('📝 RichText length:', richTextContent.length);
-      console.log('📝 RichText preview:', richTextContent.substring(0, 100));
-
-      console.log('✅ Category found:', categoryName);
-      console.log('✅ Final richTextContent length:', richTextContent.length);
-      console.log('✅ richTextContent constructor:', richTextContent?.constructor?.name);
-      console.log('✅ richTextContent is string?', typeof richTextContent === 'string');
     } else {
-      console.log('❌ Category not found:', category);
-      // Return 404 if category doesn't exist
       return Astro.redirect('/404', 404);
     }
   } else {
-    console.error('❌ Category API Error:', categoryResponse.status);
     return Astro.redirect('/404', 404);
   }
 } catch (error) {
-  console.error('❌ Error fetching category:', error);
+  console.error('Error fetching category:', error);
   return Astro.redirect('/404', 404);
 }
 
 // Fetch products for this category
 let products = [];
-let apiError = null;
 
 try {
-  console.log('🚀 Fetching products for category:', categoryName);
-
-  // Try to fetch products that belong to this category
-  // Note: Products endpoint may need to be configured in Railway backend
   const response = await fetch(`https://mintdealsbackend-production.up.railway.app/api/products?populate=*&filters[category][slug][$eq]=${categorySlug}&pagination[pageSize]=100`);
 
   if (response.ok) {
     const data = await response.json();
     products = data?.data || [];
-    console.log(`✅ ${products.length} products loaded for ${categoryName}`);
-  } else {
-    const errorData = await response.json();
-    console.error('❌ Products API Error:', errorData);
-    apiError = errorData.error?.message || 'Failed to fetch products';
   }
 } catch (error) {
-  console.error('❌ Error fetching products:', error);
-  apiError = error.message;
+  console.error('Error fetching products:', error);
 }
 ---
 
@@ -142,7 +109,7 @@ try {
             </div>
           )}
 
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 text-white drop-shadow-2xl" style="font-family: 'Special Gothic Expanded One', sans-serif;">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 text-white drop-shadow-2xl">
             {categoryName}
           </h1>
 
@@ -151,18 +118,16 @@ try {
               {categoryDescription}
             </p>
           )}
-
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
     <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12 bg-black bg-opacity-90 text-white">
-    <!-- Article Content Section -->
-    {richTextContent && (
+      <!-- Rich Text Content Section (Client-side loaded) -->
       <div class="mt-16">
         <div class="max-w-4xl mx-auto">
-          <h2 class="text-3xl font-bold text-yellow-400 mb-8 text-center drop-shadow-lg" style="font-family: 'Special Gothic Expanded One', sans-serif;">
+          <h2 class="text-3xl font-bold text-yellow-400 mb-8 text-center drop-shadow-lg">
             Learn About {categoryName}
           </h2>
 
@@ -177,81 +142,73 @@ try {
           )}
 
           <div class="bg-black bg-opacity-90 p-8 md:p-12 rounded-lg shadow-2xl border-2 border-yellow-400 overflow-hidden">
-            <div class="rich-text-content" id="richTextContainer" data-category-slug={categorySlug}>Loading content...</div>
+            <div id="richTextContent" data-slug={categorySlug} class="rich-text-content">
+              <p class="text-center text-gray-400">Loading content...</p>
+            </div>
           </div>
-          <script is:inline>
-            window.addEventListener('DOMContentLoaded', async () => {
-              const container = document.getElementById('richTextContainer');
-              const slug = container?.getAttribute('data-category-slug');
-              console.log('🔍 Client-side: Starting to load RichText for slug:', slug);
-
-              if (!container || !slug) {
-                console.error('❌ Missing container or slug');
-                return;
-              }
-
-              try {
-                const url = `https://mintdealsbackend-production.up.railway.app/api/categories?filters[slug][$eq]=${slug}&populate=*`;
-                console.log('🌐 Fetching from:', url);
-
-                const response = await fetch(url);
-                console.log('📡 Response status:', response.status);
-
-                const data = await response.json();
-                console.log('📦 Response data:', data);
-
-                const richText = data?.data?.[0]?.RichText;
-                console.log('📝 RichText type:', typeof richText);
-                console.log('📝 RichText length:', richText?.length);
-
-                if (richText && typeof richText === 'string') {
-                  container.innerHTML = richText;
-                  console.log('✅ Successfully rendered RichText');
-                } else {
-                  container.innerHTML = '<p>Error: Content not available</p>';
-                  console.error('❌ RichText is not a string or is empty');
-                }
-              } catch (error) {
-                console.error('❌ Failed to load rich text:', error);
-                container.innerHTML = '<p>Error loading content</p>';
-              }
-            });
-          </script>
         </div>
       </div>
-    )}
 
-    <!-- Related Categories -->
-    <div class="mt-16">
-      <h2 class="text-2xl font-bold text-white mb-8 text-center">
-        Explore Other Categories
-      </h2>
-      <div class="flex justify-center">
-        <a
-          href="/categories"
-          class="inline-flex items-center px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-black rounded-lg font-medium transition-colors"
-        >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-          </svg>
-          Browse All Categories
-        </a>
+      <!-- Related Categories -->
+      <div class="mt-16">
+        <h2 class="text-2xl font-bold text-white mb-8 text-center">
+          Explore Other Categories
+        </h2>
+        <div class="flex justify-center">
+          <a
+            href="/categories"
+            class="inline-flex items-center px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-black rounded-lg font-medium transition-colors"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            Browse All Categories
+          </a>
+        </div>
       </div>
     </div>
   </div>
-  </div>
+
+  <!-- Client-side script to load RichText -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const container = document.getElementById('richTextContent');
+      const slug = container?.getAttribute('data-slug');
+
+      if (!container || !slug) {
+        console.error('Missing container or slug');
+        return;
+      }
+
+      try {
+        const response = await fetch(`https://mintdealsbackend-production.up.railway.app/api/categories?filters[slug][$eq]=${slug}&populate=*`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const richText = data?.data?.[0]?.RichText;
+
+        if (richText && typeof richText === 'string') {
+          container.innerHTML = richText;
+        } else {
+          container.innerHTML = '<p class="text-gray-400">No content available.</p>';
+        }
+      } catch (error) {
+        console.error('Failed to load rich text:', error);
+        container.innerHTML = '<p class="text-red-400">Error loading content.</p>';
+      }
+    });
+  </script>
 </Layout>
 
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&display=swap');
-
   body {
     margin: 0;
     padding: 0;
-    font-family: 'Special Gothic Expanded One', sans-serif;
-    font-weight: 400;
-    font-style: normal;
   }
+
   .video-background {
     position: fixed;
     top: 0;
@@ -261,6 +218,7 @@ try {
     z-index: -1;
     overflow: hidden;
   }
+
   .video-background::before {
     content: '';
     position: absolute;
@@ -273,28 +231,32 @@ try {
     pointer-events: none;
     z-index: 1;
   }
+
   .video-background video {
     object-fit: cover;
     height: 100%;
     width: 100%;
   }
+
   .content-wrapper {
     position: relative;
     z-index: 1;
     background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
   }
+
   .hero-section {
-    min-height: 40vh;
+    min-height: 10vh; /* 25% of desktop (40vh) */
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 0;
+    padding: 1rem 0;
   }
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+
+  @media (min-width: 768px) {
+    .hero-section {
+      min-height: 40vh;
+      padding: 2rem 0;
+    }
   }
 
   /* Rich Text Content Styling */
@@ -304,7 +266,6 @@ try {
     word-break: break-word;
     max-width: 100%;
     width: 100%;
-    font-family: 'Special Gothic Expanded One', sans-serif;
   }
 
   .rich-text-content > :global(*) {
@@ -314,7 +275,6 @@ try {
     box-sizing: border-box;
   }
 
-  /* Ensure all block elements stay within container */
   .rich-text-content :global(div),
   .rich-text-content :global(section),
   .rich-text-content :global(article) {
@@ -435,7 +395,6 @@ try {
     padding: 0;
   }
 
-  /* Table wrapper with scroll */
   .rich-text-content :global(table) {
     display: block;
     width: 100%;
