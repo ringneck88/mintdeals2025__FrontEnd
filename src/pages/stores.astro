@@ -22,7 +22,7 @@ try {
       State: region.name || 'Unknown State',
       Description: region.description || `Cannabis dispensaries in ${region.name}`,
       RegionImage: region.RegionImage ? {
-        url: region.RegionImage.url ? `https://mintdealsbackend-production.up.railway.app${region.RegionImage.url}` : null
+        url: region.RegionImage.url ? (region.RegionImage.url.startsWith('http') ? region.RegionImage.url : `https://mintdealsbackend-production.up.railway.app${region.RegionImage.url}`) : null
       } : null
     })) || [];
     console.log('✅ Regions loaded:', regions.length);
@@ -53,7 +53,9 @@ try {
       Hours: store.hours,
       StoreImage: store.store_image || store.hero_image ? {
         url: (store.store_image?.url || store.hero_image?.url) ?
-          `https://mintdealsbackend-production.up.railway.app${store.store_image?.url || store.hero_image?.url}` : null
+          ((store.store_image?.url || store.hero_image?.url).startsWith('http') ?
+            (store.store_image?.url || store.hero_image?.url) :
+            `https://mintdealsbackend-production.up.railway.app${store.store_image?.url || store.hero_image?.url}`) : null
       } : null,
       GalleryImages: store.gallery_images || [],
       IsFeatured: store.is_featured || false,

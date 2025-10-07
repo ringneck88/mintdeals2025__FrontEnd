@@ -56,7 +56,9 @@ try {
       longitude: store.longitude,
       storeImage: store.store_image || store.hero_image ? {
         url: (store.store_image?.url || store.hero_image?.url) ?
-          `https://mintdealsbackend-production.up.railway.app${store.store_image?.url || store.hero_image?.url}` : null
+          ((store.store_image?.url || store.hero_image?.url).startsWith('http') ?
+            (store.store_image?.url || store.hero_image?.url) :
+            `https://mintdealsbackend-production.up.railway.app${store.store_image?.url || store.hero_image?.url}`) : null
       } : null
     }));
   }

@@ -70,13 +70,13 @@ const categories = categoriesData.map((category, index) => {
     slug: data.Slug || data.slug || category.documentId || category.id,
     icon: getCategoryIcon(data.Slug || data.slug),
     image: data.image?.data?.attributes?.url
-      ? `https://mintdealsbackend-production.up.railway.app${data.image.data.attributes.url}`
+      ? (data.image.data.attributes.url.startsWith('http') ? data.image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.image.data.attributes.url}`)
       : data.image?.url
-        ? `https://mintdealsbackend-production.up.railway.app${data.image.url}`
+        ? (data.image.url.startsWith('http') ? data.image.url : `https://mintdealsbackend-production.up.railway.app${data.image.url}`)
         : data.Image?.data?.attributes?.url
-          ? `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`
+          ? (data.Image.data.attributes.url.startsWith('http') ? data.Image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`)
           : data.Image?.url
-            ? `https://mintdealsbackend-production.up.railway.app${data.Image.url}`
+            ? (data.Image.url.startsWith('http') ? data.Image.url : `https://mintdealsbackend-production.up.railway.app${data.Image.url}`)
             : null,
     isActive: data.IsActive !== false && data.isActive !== false,
     colorGradient: getCategoryColor(index),

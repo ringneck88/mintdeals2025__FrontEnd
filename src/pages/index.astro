@@ -43,8 +43,8 @@ try {
 
   // Fetch stores and categories in parallel
   const [storesResponse, categoriesResponse] = await Promise.allSettled([
-    fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=500`),
-    fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=100`)
+    fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=50`),
+    fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=25`)
   ]);
 
   // Process stores
@@ -86,13 +86,13 @@ try {
         slug: data.Slug || data.slug || category.documentId || category.id,
         icon: getCategoryIcon(data.Slug || data.slug),
         image: data.image?.data?.attributes?.url
-          ? `https://mintdealsbackend-production.up.railway.app${data.image.data.attributes.url}`
+          ? (data.image.data.attributes.url.startsWith('http') ? data.image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.image.data.attributes.url}`)
           : data.image?.url
-            ? `https://mintdealsbackend-production.up.railway.app${data.image.url}`
+            ? (data.image.url.startsWith('http') ? data.image.url : `https://mintdealsbackend-production.up.railway.app${data.image.url}`)
             : data.Image?.data?.attributes?.url
-              ? `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`
+              ? (data.Image.data.attributes.url.startsWith('http') ? data.Image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`)
               : data.Image?.url
-                ? `https://mintdealsbackend-production.up.railway.app${data.Image.url}`
+                ? (data.Image.url.startsWith('http') ? data.Image.url : `https://mintdealsbackend-production.up.railway.app${data.Image.url}`)
                 : null,
         isActive: true,
         productCount: data.products?.data?.length || data.products?.length || 0,
@@ -337,15 +337,15 @@ try {
       ) : stores.length > 0 ? (
         <div>
           <!-- Location Status Bar -->
-          <div id="location-status" class="mb-6 p-4 bg-green-900/50 rounded-lg border border-green-500 text-center hidden">
+          <div id="location-status" class="hidden p-4 mb-6 text-center border border-green-500 rounded-lg bg-green-900/50">
             <div id="location-loading" class="flex items-center justify-center gap-3">
-              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-400"></div>
+              <div class="w-5 h-5 border-b-2 border-yellow-400 rounded-full animate-spin"></div>
               <span class="text-yellow-400">Getting your location to show nearest stores...</span>
             </div>
-            <div id="location-success" class="text-green-300 hidden">
+            <div id="location-success" class="hidden text-green-300">
               📍 Showing stores near you
             </div>
-            <div id="location-error" class="text-yellow-400 hidden">
+            <div id="location-error" class="hidden text-yellow-400">
               📍 Location unavailable - showing all stores
             </div>
           </div>
@@ -353,7 +353,7 @@ try {
           <div id="stores-grid" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {stores.slice(0, 6).map(store => (
               <div
-                class="store-card overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 hover:scale-105"
+                class="overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg store-card hover:shadow-2xl hover:border-yellow-400 hover:scale-105"
                 data-store-id={store.id}
                 data-lat={store.address?.latitude || ''}
                 data-lng={store.address?.longitude || ''}
@@ -369,7 +369,7 @@ try {
                 <div class="p-6">
                   <div class="flex items-start justify-between mb-2">
                     <h3 class="text-xl font-bold text-yellow-400">{store.name}</h3>
-                    <span class="store-distance text-xs text-green-400 bg-green-900/50 px-2 py-1 rounded hidden"></span>
+                    <span class="hidden px-2 py-1 text-xs text-green-400 rounded store-distance bg-green-900/50"></span>
                   </div>
                   {store.address && (
                     <p class="flex items-start mb-2 text-green-300">
