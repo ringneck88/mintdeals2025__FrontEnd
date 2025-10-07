@@ -92,7 +92,10 @@ try {
           age_restriction: region.age_restriction
         };
       });
+      console.log('✅ Navigation regions loaded:', navigationRegions.length, navigationRegions.map(r => r.name));
     }
+  } else {
+    console.log('❌ Failed to fetch regions:', regionsResponse.status, regionsResponse.reason?.message);
   }
 
   // Process stores data
@@ -118,7 +121,11 @@ try {
           regionId: regionId // Also store the ID for easy filtering
         };
       }).filter(store => store.is_active);
+      console.log('✅ Navigation stores loaded:', navigationStores.length, 'stores');
+      console.log('Stores by region:', navigationStores.reduce((acc, s) => { acc[s.regionId] = (acc[s.regionId] || 0) + 1; return acc; }, {}));
     }
+  } else {
+    console.log('❌ Failed to fetch stores:', storesResponse.status, storesResponse.reason?.message);
   }
 } catch (error) {
   console.log('Could not fetch data:', error);
@@ -298,7 +305,7 @@ try {
                     <div class="border-t border-gray-700 my-1"></div>
 
                     <!-- Dynamic Regions with Stores -->
-                    {navigationRegions.length > 0 ? (
+                    {navigationRegions.length > 0 || navigationStores.length > 0 ? (
                       <div class="max-h-96 overflow-y-auto">
                         {navigationRegions.map((region, index) => {
                           // Get stores for this region - match by region ID
@@ -354,6 +361,50 @@ try {
                             </>
                           );
                         })}
+
+                        {/* Show stores without a region */}
+                        {(() => {
+                          const storesWithoutRegion = navigationStores.filter(store => !store.regionId);
+                          return storesWithoutRegion.length > 0 ? (
+                            <>
+                              {navigationRegions.length > 0 && (
+                                <div class="border-t border-gray-700 my-2"></div>
+                              )}
+                              <div class="px-2 py-1">
+                                <div class="mb-2">
+                                  <a
+                                    href="/stores"
+                                    class="block px-2 py-1 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                                  >
+                                    📍 Other Locations ({storesWithoutRegion.length})
+                                  </a>
+                                </div>
+                                <div class="ml-4 space-y-1">
+                                  {storesWithoutRegion.slice(0, 10).map(store => (
+                                    <a
+                                      href={`/location/${store.slug}`}
+                                      class="block px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded truncate"
+                                      title={store.name}
+                                    >
+                                      📍 {store.name}
+                                      {store.city && (
+                                        <span class="text-gray-400 dark:text-gray-500 ml-1">• {store.city}</span>
+                                      )}
+                                    </a>
+                                  ))}
+                                  {storesWithoutRegion.length > 10 && (
+                                    <a
+                                      href="/stores"
+                                      class="block px-2 py-1 text-xs text-green-600 dark:text-green-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded font-medium"
+                                    >
+                                      View all {storesWithoutRegion.length} locations →
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          ) : null;
+                        })()}
                       </div>
                     ) : (
                       <div class="px-4 py-2">

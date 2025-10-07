@@ -43,13 +43,22 @@ try {
           return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
         }
 
-        // Case 2: Direct image object with url: image.url
+        // Case 2: Direct image object with formats (Cloudinary or Strapi uploaded images)
+        if (typeof imageData === 'object' && imageData.formats) {
+          // Prefer larger formats for better quality
+          if (imageData.formats.large?.url) return imageData.formats.large.url;
+          if (imageData.formats.medium?.url) return imageData.formats.medium.url;
+          if (imageData.formats.small?.url) return imageData.formats.small.url;
+          if (imageData.formats.thumbnail?.url) return imageData.formats.thumbnail.url;
+        }
+
+        // Case 3: Direct image object with url: image.url
         if (typeof imageData === 'object' && imageData.url) {
           const url = imageData.url;
           return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
         }
 
-        // Case 3: String URL directly
+        // Case 4: String URL directly
         if (typeof imageData === 'string') {
           return imageData.startsWith('http') ? imageData : `https://mintdealsbackend-production.up.railway.app${imageData}`;
         }
@@ -131,7 +140,7 @@ try {
           {categoryImageUrl && (
             <div class="mb-8">
               <img
-                src={`https://mintdealsbackend-production.up.railway.app${categoryImageUrl}`}
+                src={categoryImageUrl}
                 alt={categoryName}
                 class="w-32 h-32 mx-auto rounded-full object-cover border-4 border-yellow-400/30 drop-shadow-2xl"
               />

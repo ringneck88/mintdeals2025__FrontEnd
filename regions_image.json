@@ -1,0 +1,72 @@
+{
+    "data": [
+        {
+            "id": 6,
+            "documentId": "lxfft0bdwb9ew7bxy5e1pxve",
+            "name": "Missouri",
+            "timezone": "America/Chicago",
+            "createdAt": "2025-09-24T21:53:27.839Z",
+            "updatedAt": "2025-09-24T21:53:29.847Z",
+            "publishedAt": "2025-09-24T21:53:29.896Z",
+            "Image": null
+        },
+        {
+            "id": 8,
+            "documentId": "roebocf6f4gjvyz4wvfmkc03",
+            "name": "Illinois",
+            "timezone": "America/Chicago",
+            "createdAt": "2025-09-24T21:55:09.177Z",
+            "updatedAt": "2025-09-24T21:55:10.693Z",
+            "publishedAt": "2025-09-24T21:55:10.745Z",
+            "Image": null
+        },
+        {
+            "id": 12,
+            "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+            "name": "Florida",
+            "timezone": "America/Miami",
+            "createdAt": "2025-09-24T21:57:53.396Z",
+            "updatedAt": "2025-09-24T21:57:55.030Z",
+            "publishedAt": "2025-09-24T21:57:55.077Z",
+            "Image": null
+        },
+        {
+            "id": 13,
+            "documentId": "rou9s393k72quf1xwyal526j",
+            "name": "Arizona",
+            "timezone": "America/Phoenix",
+            "createdAt": "2025-09-24T21:35:18.992Z",
+            "updatedAt": "2025-09-24T22:15:32.309Z",
+            "publishedAt": "2025-09-24T22:15:32.370Z",
+            "Image": null
+        },
+        {
+            "id": 14,
+            "documentId": "vshpq65s6xe59ckoy6a7egue",
+            "name": "Michigan",
+            "timezone": "America/Lansing",
+            "createdAt": "2025-09-24T21:56:32.975Z",
+            "updatedAt": "2025-09-25T23:29:20.242Z",
+            "publishedAt": "2025-09-25T23:29:20.303Z",
+            "Image": null
+        },
+        {
+            "id": 15,
+            "documentId": "vggg7apoja5mgyloolxzuzev",
+            "name": "Nevada",
+            "timezone": "America/Carson City",
+            "createdAt": "2025-09-24T21:47:08.409Z",
+            "updatedAt": "2025-09-25T23:30:55.754Z",
+            "publishedAt": "2025-09-25T23:30:55.808Z",
+            "Image": null
+        }
+    ],
+    "meta": {
+        "pagination": {
+            "page": 1,
+            "pageSize": 25,
+            "pageCount": 1,
+            "total": 6
+        }
+    }
+}
