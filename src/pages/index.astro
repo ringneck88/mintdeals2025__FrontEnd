@@ -73,20 +73,28 @@ try {
     const categoriesData = data?.data || [];
 
 
-    categories = categoriesData.map((category, index) => ({
-      id: category.id,
-      documentId: category.documentId,
-      title: category.Name || '',
-      description: category.Discription || '',
-      slug: category.slug || category.documentId || category.id,
-      icon: getCategoryIcon(category.slug),
-      image: category.image?.url
-        ? `https://mintdealsbackend-production.up.railway.app${category.image.url}`
-        : null,
-      isActive: true,
-      productCount: category.products?.length || 0,
-      colorGradient: getCategoryColor(index)
-    }));
+    categories = categoriesData.map((category, index) => {
+      // Check if it's Strapi v4 format (with attributes) or direct format
+      const isV4 = !!category.attributes;
+      const data = isV4 ? category.attributes : category;
+
+      return {
+        id: category.id,
+        documentId: category.documentId,
+        title: data.Name || data.name || '',
+        description: data.Discription || data.description || '',
+        slug: data.Slug || data.slug || category.documentId || category.id,
+        icon: getCategoryIcon(data.Slug || data.slug),
+        image: data.Image?.data?.attributes?.url
+          ? `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`
+          : data.image?.url
+            ? `https://mintdealsbackend-production.up.railway.app${data.image.url}`
+            : null,
+        isActive: true,
+        productCount: data.products?.data?.length || data.products?.length || 0,
+        colorGradient: getCategoryColor(index)
+      };
+    });
 
 
     categories = categories.filter(category => category.title && category.isActive);
