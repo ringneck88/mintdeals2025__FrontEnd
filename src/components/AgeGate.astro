@@ -1,0 +1,813 @@
+---
+// Age Gate Component
+---
+
+<!-- Inline script to prevent flash - runs immediately before page renders -->
+<script is:inline>
+  (function() {
+    // Hide age gate by default if already verified
+    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('ageVerified') === 'true') {
+      document.documentElement.style.setProperty('--age-gate-display', 'none');
+    } else {
+      document.documentElement.style.setProperty('--age-gate-display', 'flex');
+    }
+  })();
+</script>
+
+<div id="ageGate" class="age-gate-overlay">
+  <div class="age-gate-content">
+    <!-- Outer Ring Numbers - Alternating directions -->
+    <div class="outer-ring-container" id="outerRingContainer">
+      <!-- Right rotation (0, 10, 20, 30, 40, 50) -->
+      <div class="outer-ring-numbers outer-ring-right">
+        <div class="ring-number" style="--index: 0;">0</div>
+        <div class="ring-number" style="--index: 2;">10</div>
+        <div class="ring-number" style="--index: 4;">20</div>
+        <div class="ring-number" style="--index: 6;">30</div>
+        <div class="ring-number" style="--index: 8;">40</div>
+        <div class="ring-number" style="--index: 10;">50</div>
+      </div>
+
+      <!-- Left rotation (5, 15, 25, 35, 45, 55) -->
+      <div class="outer-ring-numbers outer-ring-left">
+        <div class="ring-number" style="--index: 1;">5</div>
+        <div class="ring-number" style="--index: 3;">15</div>
+        <div class="ring-number" style="--index: 5;">25</div>
+        <div class="ring-number" style="--index: 7;">35</div>
+        <div class="ring-number" style="--index: 9;">45</div>
+        <div class="ring-number" style="--index: 11;">55</div>
+      </div>
+
+      <!-- Center Logo (spins with outer ring) -->
+      <div class="center-logo-container">
+        <img src="/favicon.png" alt="Mint Logo" class="center-logo" />
+      </div>
+    </div>
+
+    <!-- Stationary Pointer on outer ring -->
+    <div class="stationary-pointer">
+      <div class="pointer-triangle"></div>
+    </div>
+
+    <!-- Vault Lever on the right (green) -->
+    <button id="vaultLever" class="vault-lever vault-lever-right">
+      <div class="lever-handle"></div>
+      <div class="lever-base"></div>
+      <span class="lever-text">I'm 21+</span>
+    </button>
+
+    <!-- Vault Lever on the left (red) -->
+    <button id="vaultLeverNo" class="vault-lever vault-lever-left">
+      <div class="lever-handle"></div>
+      <div class="lever-base lever-base-red"></div>
+      <span class="lever-text">Under 21</span>
+    </button>
+
+    <h1 class="age-gate-title">Age Verification</h1>
+    <p class="age-gate-message">You must be 21 years or older to enter this site.</p>
+    <p class="age-gate-question">Are you 21 years of age or older?</p>
+
+    <div id="errorMessage" class="error-message hidden">
+      Must be over 21
+    </div>
+  </div>
+</div>
+
+<script>
+  // Check if user has already verified their age this session
+  function checkAgeVerification() {
+    return sessionStorage.getItem('ageVerified') === 'true';
+  }
+
+  // Show or hide the age gate
+  function initAgeGate() {
+    const ageGate = document.getElementById('ageGate');
+    const errorMessage = document.getElementById('errorMessage');
+
+    if (!ageGate) return;
+
+    // If already verified, hide the gate
+    if (checkAgeVerification()) {
+      ageGate.style.display = 'none';
+      return;
+    }
+
+    // Show the age gate
+    ageGate.style.display = 'flex';
+
+    // Handle vault lever
+    const vaultLever = document.getElementById('vaultLever');
+    const outerRingContainer = document.getElementById('outerRingContainer');
+    const ageGateContent = document.querySelector('.age-gate-content');
+
+    if (vaultLever) {
+      vaultLever.addEventListener('click', () => {
+        // Pull lever animation
+        vaultLever.style.transform = 'rotate(90deg)';
+
+        // Stop the outer ring from spinning
+        if (outerRingContainer) {
+          outerRingContainer.style.animation = 'stopAtTop 1.5s ease-out forwards';
+        }
+
+        // Open vault door
+        setTimeout(() => {
+          if (ageGateContent) {
+            ageGateContent.style.transform = 'scale(1.2) rotateY(90deg)';
+            ageGateContent.style.opacity = '0';
+          }
+        }, 800);
+
+        // Wait for animation, then hide gate
+        setTimeout(() => {
+          sessionStorage.setItem('ageVerified', 'true');
+          ageGate.style.display = 'none';
+        }, 2000);
+      });
+    }
+
+    // Handle "Yes" button (keep as fallback)
+    const yesButton = document.getElementById('ageYes');
+    if (yesButton) {
+      yesButton.addEventListener('click', () => {
+        // Trigger same animation as lever
+        if (vaultLever) {
+          vaultLever.click();
+        }
+      });
+    }
+
+    // Handle left lever (No)
+    const vaultLeverNo = document.getElementById('vaultLeverNo');
+    if (vaultLeverNo) {
+      vaultLeverNo.addEventListener('click', () => {
+        // Pull lever animation
+        vaultLeverNo.style.transform = 'translateY(-50%) rotate(-90deg)';
+
+        // Add red flashing alarm to vault
+        const ageGateContent = document.querySelector('.age-gate-content');
+        if (ageGateContent) {
+          ageGateContent.classList.add('alarm-flash');
+        }
+
+        // Show error message
+        if (errorMessage) {
+          errorMessage.classList.remove('hidden');
+        }
+      });
+    }
+  }
+
+  // Combination lock rotation - random direction changes
+  function randomRotation() {
+    const outerRingContainer = document.getElementById('outerRingContainer');
+    if (!outerRingContainer) return;
+
+    let currentRotation = 0;
+
+    function changeRotation() {
+      const duration = Math.random() * (3 - 1.5) + 1.5; // Random between 1.5s and 3s
+      const direction = Math.random() > 0.5 ? 1 : -1; // 1 for clockwise, -1 for counterclockwise
+      const degrees = (Math.random() * 60 + 20) * direction; // Random rotation between 20-80 degrees
+
+      currentRotation += degrees;
+
+      outerRingContainer.style.transition = `transform ${duration}s ease-in-out`;
+      outerRingContainer.style.transform = `translate(-50%, -50%) rotate(${currentRotation}deg)`;
+
+      // Schedule next change
+      setTimeout(changeRotation, duration * 1000);
+    }
+
+    changeRotation();
+  }
+
+  // Run on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initAgeGate();
+      randomRotation();
+    });
+  } else {
+    initAgeGate();
+    randomRotation();
+  }
+</script>
+
+<style>
+  .age-gate-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    display: var(--age-gate-display, flex);
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 20px;
+  }
+
+  .age-gate-content {
+    background: radial-gradient(circle at center, rgba(0, 0, 0, 0.98) 0%, rgba(20, 20, 20, 0.95) 100%);
+    border: 6px solid #fbbf24;
+    border-radius: 50%;
+    padding: 2rem 1.5rem;
+    max-width: 518px;
+    width: 500px;
+    height: 500px;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow:
+      0 0 40px rgba(251, 191, 36, 0.4),
+      inset 0 0 60px rgba(0, 0, 0, 0.8),
+      0 20px 60px rgba(0, 0, 0, 0.6);
+    position: relative;
+    transition: transform 1.2s ease-out, opacity 1s ease-out;
+    transform-style: preserve-3d;
+  }
+
+  /* Vault-like concentric circles */
+  .age-gate-content::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    border: 3px solid rgba(251, 191, 36, 0.3);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .age-gate-content::after {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    right: 40px;
+    bottom: 40px;
+    border: 2px solid rgba(251, 191, 36, 0.2);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* Outer Ring Container - spins everything together */
+  .outer-ring-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    width: 450px;
+    height: 450px;
+    z-index: 1;
+    transition: transform 1s ease-in-out;
+  }
+
+  /* Bold ring around numbers */
+  .outer-ring-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    height: 350px;
+    border: 4px solid #fbbf24;
+    border-radius: 50%;
+    box-shadow:
+      0 0 20px rgba(251, 191, 36, 0.5),
+      inset 0 0 20px rgba(251, 191, 36, 0.3);
+  }
+
+  /* Outer Ring Numbers */
+  .outer-ring-numbers {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+  }
+
+  .outer-ring-numbers .ring-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #fbbf24;
+    text-shadow: 0 0 15px rgba(251, 191, 36, 0.8);
+    transform:
+      translate(-50%, -50%)
+      rotate(calc(var(--index) * 30deg))
+      translateY(-185px);
+  }
+
+  /* Keep numbers upright - counter-rotate */
+  .outer-ring-numbers .ring-number span {
+    display: inline-block;
+  }
+
+  /* Stationary Pointer */
+  .stationary-pointer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .pointer-triangle {
+    position: absolute;
+    top: -243px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 24px solid #fbbf24;
+    filter: drop-shadow(0 0 20px rgba(251, 191, 36, 1));
+  }
+
+  /* Center Logo (stationary) */
+  .center-logo-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+    z-index: 10;
+  }
+
+  .center-logo {
+    width: 130px;
+    height: 130px;
+    filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.8));
+  }
+
+  /* Vault Lever */
+  .vault-lever {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 180px;
+    height: 150px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 20;
+  }
+
+  .vault-lever-right {
+    right: -205px;
+    transform-origin: 30px center;
+  }
+
+  .vault-lever-left {
+    left: -165px;
+    transform-origin: 150px center;
+  }
+
+  .lever-base {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 150px;
+    height: 60px;
+    background: radial-gradient(ellipse, rgba(16, 185, 129, 0.6) 0%, rgba(16, 185, 129, 0.3) 40%, transparent 70%);
+    filter: blur(15px);
+    animation: pulseGreen 2s ease-in-out infinite;
+    z-index: 1;
+  }
+
+  .lever-base-red {
+    background: radial-gradient(ellipse, rgba(239, 68, 68, 0.6) 0%, rgba(239, 68, 68, 0.3) 40%, transparent 70%);
+    animation: pulseRed 2s ease-in-out infinite;
+  }
+
+  .lever-handle {
+    position: absolute;
+    left: 0px;
+    top: 25px;
+    width: 140px;
+    height: 40px;
+    background:
+      linear-gradient(180deg, #52525b 0%, #3f3f46 50%, #27272a 100%);
+    border-radius: 6px;
+    border: 2px solid #18181b;
+    box-shadow:
+      0 6px 12px rgba(0, 0, 0, 0.9),
+      0 3px 6px rgba(0, 0, 0, 0.7),
+      inset 0 2px 4px rgba(255, 255, 255, 0.1),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .lever-handle::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle, #18181b 0%, #3f3f46 100%);
+    border-radius: 50%;
+    box-shadow:
+      inset 2px 2px 4px rgba(0, 0, 0, 0.8),
+      inset -1px -1px 2px rgba(255, 255, 255, 0.1);
+  }
+
+  .lever-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1em;
+    font-weight: 800;
+    color: #10b981;
+    text-shadow:
+      0 0 15px rgba(16, 185, 129, 1),
+      0 0 25px rgba(16, 185, 129, 0.8),
+      0 2px 4px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+    pointer-events: none;
+    position: relative;
+    z-index: 2;
+    letter-spacing: 0.05em;
+    padding-left: 10px;
+  }
+
+  .vault-lever-left .lever-text {
+    color: #ef4444;
+    text-shadow:
+      0 0 15px rgba(239, 68, 68, 1),
+      0 0 25px rgba(239, 68, 68, 0.8),
+      0 2px 4px rgba(0, 0, 0, 0.8);
+    padding-left: 0px;
+    padding-right: 25px;
+  }
+
+  .vault-lever-left .lever-handle {
+    flex-direction: row-reverse;
+  }
+
+  .vault-lever-left .lever-handle::before {
+    left: auto;
+    right: 12px;
+  }
+
+  @keyframes pulseGreen {
+    0%, 100% {
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulseRed {
+    0%, 100% {
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .vault-lever:hover .lever-handle {
+    background: linear-gradient(180deg, #71717a 0%, #52525b 50%, #3f3f46 100%);
+    box-shadow:
+      0 10px 20px rgba(0, 0, 0, 0.9),
+      0 6px 12px rgba(0, 0, 0, 0.7),
+      inset 0 2px 4px rgba(255, 255, 255, 0.2),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .lock-wheel {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, #2a2a2a 0%, #1a1a1a 100%);
+    border: 6px solid #fbbf24;
+    border-radius: 50%;
+    position: relative;
+    animation: spin 3s linear infinite;
+    box-shadow:
+      0 0 20px rgba(251, 191, 36, 0.5),
+      inset 0 0 20px rgba(0, 0, 0, 0.8);
+  }
+
+  .lock-numbers {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .number {
+    position: absolute;
+    font-family: 'Montserrat', monospace;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fbbf24;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+  }
+
+  .number:nth-child(1) { transform: rotate(0deg) translateY(-35px) rotate(0deg); }
+  .number:nth-child(2) { transform: rotate(72deg) translateY(-35px) rotate(-72deg); }
+  .number:nth-child(3) { transform: rotate(144deg) translateY(-35px) rotate(-144deg); }
+  .number:nth-child(4) { transform: rotate(216deg) translateY(-35px) rotate(-216deg); }
+  .number:nth-child(5) { transform: rotate(288deg) translateY(-35px) rotate(-288deg); }
+
+  .lock-indicator {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 12px solid #fbbf24;
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
+  }
+
+  /* Random direction rotation */
+  @keyframes spinRandom {
+    from {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+
+  /* Wobble right animation */
+  @keyframes wobbleRight {
+    0%, 100% {
+      transform:
+        translate(-50%, -50%)
+        rotate(calc(var(--index) * 30deg))
+        translateY(-220px)
+        rotate(calc(var(--index) * -30deg));
+    }
+    50% {
+      transform:
+        translate(-50%, -50%)
+        rotate(calc(var(--index) * 30deg))
+        translateY(-220px)
+        rotate(calc(var(--index) * -30deg + 5deg));
+    }
+  }
+
+  /* Wobble left animation */
+  @keyframes wobbleLeft {
+    0%, 100% {
+      transform:
+        translate(-50%, -50%)
+        rotate(calc(var(--index) * 30deg))
+        translateY(-220px)
+        rotate(calc(var(--index) * -30deg));
+    }
+    50% {
+      transform:
+        translate(-50%, -50%)
+        rotate(calc(var(--index) * 30deg))
+        translateY(-220px)
+        rotate(calc(var(--index) * -30deg - 5deg));
+    }
+  }
+
+  /* Center wheel spinning */
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Stop animation - align to top */
+  @keyframes stopAtTop {
+    to {
+      transform: translate(-50%, -50%) rotate(0deg);
+      animation-play-state: paused;
+    }
+  }
+
+  .age-gate-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fbbf24;
+    margin-bottom: 1rem;
+    letter-spacing: -0.04em;
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    width: 100%;
+    text-align: center;
+  }
+
+  .age-gate-message {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    color: #ffffff;
+    line-height: 1.5;
+    position: absolute;
+    bottom: 140px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    width: 90%;
+    text-align: center;
+  }
+
+  .age-gate-question {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #fbbf24;
+    position: absolute;
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    width: 100%;
+    text-align: center;
+  }
+
+  .error-message {
+    background: rgba(239, 68, 68, 0.9);
+    border: 3px solid #ef4444;
+    border-radius: 10px;
+    padding: 1.5rem 2rem;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 200;
+    text-align: center;
+    box-shadow:
+      0 0 40px rgba(239, 68, 68, 1),
+      0 0 80px rgba(239, 68, 68, 0.8);
+    animation: pulseError 0.5s ease-in-out infinite;
+  }
+
+  @keyframes pulseError {
+    0%, 100% {
+      box-shadow:
+        0 0 40px rgba(239, 68, 68, 1),
+        0 0 80px rgba(239, 68, 68, 0.8);
+    }
+    50% {
+      box-shadow:
+        0 0 60px rgba(239, 68, 68, 1),
+        0 0 120px rgba(239, 68, 68, 1);
+    }
+  }
+
+  .alarm-flash {
+    animation: alarmFlash 0.3s ease-in-out infinite !important;
+  }
+
+  @keyframes alarmFlash {
+    0%, 100% {
+      box-shadow:
+        0 0 40px rgba(251, 191, 36, 0.4),
+        inset 0 0 60px rgba(0, 0, 0, 0.8),
+        0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    50% {
+      box-shadow:
+        0 0 80px rgba(239, 68, 68, 1),
+        inset 0 0 80px rgba(239, 68, 68, 0.5),
+        0 20px 80px rgba(239, 68, 68, 0.8);
+    }
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .age-gate-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-direction: column;
+  }
+
+  @media (min-width: 640px) {
+    .age-gate-buttons {
+      flex-direction: row;
+    }
+  }
+
+  .age-button {
+    flex: 1;
+    padding: 1rem 2rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .age-button-yes {
+    background: #fbbf24;
+    color: #000000;
+    border-color: #fbbf24;
+  }
+
+  .age-button-yes:hover {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
+  }
+
+  .age-button-no {
+    background: transparent;
+    color: #ffffff;
+    border-color: #ffffff;
+  }
+
+  .age-button-no:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .age-gate-disclaimer {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.875rem;
+    color: #9ca3af;
+    line-height: 1.5;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 640px) {
+    .age-gate-content {
+      width: 90vw;
+      height: 90vw;
+      max-width: 450px;
+      max-height: 450px;
+      padding: 2rem 1.5rem;
+    }
+
+    .age-gate-title {
+      font-size: 1.5rem;
+    }
+
+    .age-gate-message {
+      font-size: 0.95rem;
+    }
+
+    .age-gate-question {
+      font-size: 1.1rem;
+    }
+
+    .logo-image {
+      width: 60px;
+      height: 60px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .age-gate-content {
+      padding: 4rem 3rem;
+    }
+
+    .age-gate-title {
+      font-size: 2.5rem;
+    }
+  }
+</style>
