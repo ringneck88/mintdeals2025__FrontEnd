@@ -62,6 +62,18 @@ const categories = categoriesData.map((category, index) => {
   const isV4 = !!category.attributes;
   const data = isV4 ? category.attributes : category;
 
+  const imageUrl = data.image?.data?.attributes?.url
+    ? (data.image.data.attributes.url.startsWith('http') ? data.image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.image.data.attributes.url}`)
+    : data.image?.url
+      ? (data.image.url.startsWith('http') ? data.image.url : `https://mintdealsbackend-production.up.railway.app${data.image.url}`)
+      : data.Image?.data?.attributes?.url
+        ? (data.Image.data.attributes.url.startsWith('http') ? data.Image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`)
+        : data.Image?.url
+          ? (data.Image.url.startsWith('http') ? data.Image.url : `https://mintdealsbackend-production.up.railway.app${data.Image.url}`)
+          : null;
+
+  console.log(`Category: ${data.Name || data.name}, Image URL: ${imageUrl}`);
+
   return {
     id: category.id,
     documentId: category.documentId,
@@ -69,15 +81,7 @@ const categories = categoriesData.map((category, index) => {
     description: data.Description || data.description || '',
     slug: data.Slug || data.slug || category.documentId || category.id,
     icon: getCategoryIcon(data.Slug || data.slug),
-    image: data.image?.data?.attributes?.url
-      ? (data.image.data.attributes.url.startsWith('http') ? data.image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.image.data.attributes.url}`)
-      : data.image?.url
-        ? (data.image.url.startsWith('http') ? data.image.url : `https://mintdealsbackend-production.up.railway.app${data.image.url}`)
-        : data.Image?.data?.attributes?.url
-          ? (data.Image.data.attributes.url.startsWith('http') ? data.Image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`)
-          : data.Image?.url
-            ? (data.Image.url.startsWith('http') ? data.Image.url : `https://mintdealsbackend-production.up.railway.app${data.Image.url}`)
-            : null,
+    image: imageUrl,
     isActive: data.IsActive !== false && data.isActive !== false,
     colorGradient: getCategoryColor(index),
     productCount: data.products?.data?.length || data.products?.length || 0

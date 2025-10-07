@@ -32,7 +32,19 @@ try {
       categoryName = categoryData.Name || 'Category';
       categorySlug = categoryData.slug || category;
       categoryDescription = categoryData.Discription || '';
-      categoryImageUrl = categoryData?.image?.url || null;
+
+      // Handle image URL (works with both Cloudinary and local uploads)
+      const imageUrl = categoryData?.image?.data?.attributes?.url
+        || categoryData?.image?.url
+        || categoryData?.Image?.data?.attributes?.url
+        || categoryData?.Image?.url
+        || null;
+
+      categoryImageUrl = imageUrl && imageUrl.startsWith('http')
+        ? imageUrl
+        : imageUrl
+          ? `https://mintdealsbackend-production.up.railway.app${imageUrl}`
+          : null;
     } else {
       return Astro.redirect('/404', 404);
     }
