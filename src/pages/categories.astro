@@ -69,11 +69,15 @@ const categories = categoriesData.map((category, index) => {
     description: data.Description || data.description || '',
     slug: data.Slug || data.slug || category.documentId || category.id,
     icon: getCategoryIcon(data.Slug || data.slug),
-    image: data.Image?.data?.attributes?.url
-      ? `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`
+    image: data.image?.data?.attributes?.url
+      ? `https://mintdealsbackend-production.up.railway.app${data.image.data.attributes.url}`
       : data.image?.url
         ? `https://mintdealsbackend-production.up.railway.app${data.image.url}`
-        : null,
+        : data.Image?.data?.attributes?.url
+          ? `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`
+          : data.Image?.url
+            ? `https://mintdealsbackend-production.up.railway.app${data.Image.url}`
+            : null,
     isActive: data.IsActive !== false && data.isActive !== false,
     colorGradient: getCategoryColor(index),
     productCount: data.products?.data?.length || data.products?.length || 0
