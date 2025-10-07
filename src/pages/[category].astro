@@ -33,18 +33,35 @@ try {
       categorySlug = categoryData.slug || category;
       categoryDescription = categoryData.Discription || '';
 
-      // Handle image URL (works with both Cloudinary and local uploads)
-      const imageUrl = categoryData?.image?.data?.attributes?.url
-        || categoryData?.image?.url
-        || categoryData?.Image?.data?.attributes?.url
-        || categoryData?.Image?.url
-        || null;
+      // Helper function to get image URL from various possible structures
+      function getImageUrl(imageData) {
+        if (!imageData || imageData === null) return null;
 
-      categoryImageUrl = imageUrl && imageUrl.startsWith('http')
-        ? imageUrl
-        : imageUrl
-          ? `https://mintdealsbackend-production.up.railway.app${imageUrl}`
-          : null;
+        // Case 1: Strapi v4 nested structure: image.data.attributes.url
+        if (imageData?.data?.attributes?.url) {
+          const url = imageData.data.attributes.url;
+          return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+        }
+
+        // Case 2: Direct image object with url: image.url
+        if (typeof imageData === 'object' && imageData.url) {
+          const url = imageData.url;
+          return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+        }
+
+        // Case 3: String URL directly
+        if (typeof imageData === 'string') {
+          return imageData.startsWith('http') ? imageData : `https://mintdealsbackend-production.up.railway.app${imageData}`;
+        }
+
+        return null;
+      }
+
+      // Try multiple possible image field names (case-insensitive variations)
+      categoryImageUrl = getImageUrl(categoryData.image)
+        || getImageUrl(categoryData.Image)
+        || getImageUrl(categoryData.IMAGE)
+        || null;
     } else {
       return Astro.redirect('/404', 404);
     }

@@ -56,21 +56,43 @@ try {
   apiError = error.message;
 }
 
+// Helper function to get image URL from various possible structures
+function getImageUrl(imageData) {
+  if (!imageData || imageData === null) return null;
+
+  // Case 1: Strapi v4 nested structure: image.data.attributes.url
+  if (imageData?.data?.attributes?.url) {
+    const url = imageData.data.attributes.url;
+    return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+  }
+
+  // Case 2: Direct image object with url: image.url
+  if (typeof imageData === 'object' && imageData.url) {
+    const url = imageData.url;
+    return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+  }
+
+  // Case 3: String URL directly
+  if (typeof imageData === 'string') {
+    return imageData.startsWith('http') ? imageData : `https://mintdealsbackend-production.up.railway.app${imageData}`;
+  }
+
+  return null;
+}
+
 // Process categories for display
 const categories = categoriesData.map((category, index) => {
   // Check if it's Strapi v4 format (with attributes) or direct format
   const isV4 = !!category.attributes;
   const data = isV4 ? category.attributes : category;
 
-  const imageUrl = data.image?.data?.attributes?.url
-    ? (data.image.data.attributes.url.startsWith('http') ? data.image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.image.data.attributes.url}`)
-    : data.image?.url
-      ? (data.image.url.startsWith('http') ? data.image.url : `https://mintdealsbackend-production.up.railway.app${data.image.url}`)
-      : data.Image?.data?.attributes?.url
-        ? (data.Image.data.attributes.url.startsWith('http') ? data.Image.data.attributes.url : `https://mintdealsbackend-production.up.railway.app${data.Image.data.attributes.url}`)
-        : data.Image?.url
-          ? (data.Image.url.startsWith('http') ? data.Image.url : `https://mintdealsbackend-production.up.railway.app${data.Image.url}`)
-          : null;
+  // Try multiple possible image field names (case-insensitive variations)
+  const imageUrl = getImageUrl(data.image)
+    || getImageUrl(data.Image)
+    || getImageUrl(data.IMAGE)
+    || getImageUrl(category.image)
+    || getImageUrl(category.Image)
+    || null;
 
   console.log(`Category: ${data.Name || data.name}, Image URL: ${imageUrl}`);
 
