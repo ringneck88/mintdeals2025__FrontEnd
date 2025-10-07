@@ -40,7 +40,7 @@ function getCategoryColor(index) {
 try {
   console.log('🚀 Fetching product categories from Railway API');
 
-  const response = await fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=100&sort=Name:asc`);
+  const response = await fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=100`);
 
   if (response.ok) {
     const data = await response.json();
@@ -82,7 +82,8 @@ const categories = categoriesData.map((category, index) => {
     colorGradient: getCategoryColor(index),
     productCount: data.products?.data?.length || data.products?.length || 0
   };
-}).filter(category => category.name && category.isActive);
+}).filter(category => category.name && category.isActive)
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 // Calculate statistics
 const totalCategories = categories.length;
