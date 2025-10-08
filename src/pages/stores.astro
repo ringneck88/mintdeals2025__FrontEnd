@@ -43,16 +43,15 @@ try {
     return null;
   }
 
-  // Fetch regions first with deep Image population
-  const regionsResponse = await fetch(`${API_BASE}/regions?populate[Image][populate]=*&pagination[pageSize]=100`);
+  // Fetch regions first with deep Image population (no cache)
+  const regionsResponse = await fetch(`${API_BASE}/regions?populate[Image][populate]=*&pagination[pageSize]=100`, {
+    cache: 'no-store'
+  });
   if (regionsResponse.ok) {
     const regionsData = await regionsResponse.json();
     regions = regionsData?.data?.map(region => {
       // Check multiple possible image field names
       const imageUrl = getImageUrl(region.Image) || getImageUrl(region.image) || getImageUrl(region.RegionImage);
-
-      // Log each region's image status
-      console.log(`Region: ${region.name}, Has Image field: ${!!region.Image}, imageUrl: ${imageUrl}`);
 
       return {
         id: region.id,
@@ -327,9 +326,6 @@ try {
                   <div class="absolute top-0 left-0 w-full h-full" style="background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 50%);"></div>
                 </div>
                 <div class="text-white text-center z-10">
-                  <svg class="w-24 h-24 mx-auto mb-3 opacity-30" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                  </svg>
                   <div class="text-4xl font-bold drop-shadow-lg">{region.Name}</div>
                   <div class="text-sm font-semibold mt-2 opacity-80">{region.Code}</div>
                 </div>
