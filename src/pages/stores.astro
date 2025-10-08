@@ -51,6 +51,9 @@ try {
       // Check multiple possible image field names
       const imageUrl = getImageUrl(region.Image) || getImageUrl(region.image) || getImageUrl(region.RegionImage);
 
+      // Log each region's image status
+      console.log(`Region: ${region.name}, Has Image field: ${!!region.Image}, imageUrl: ${imageUrl}`);
+
       return {
         id: region.id,
         documentId: region.documentId,
