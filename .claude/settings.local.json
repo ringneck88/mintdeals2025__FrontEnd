@@ -13,7 +13,8 @@
       "Bash(npx wrangler pages deploy:*)",
       "Bash(npx wrangler pages project:*)",
       "Bash(python:*)",
-      "WebFetch(domain:mintdeals2025.pages.dev)"
+      "WebFetch(domain:mintdeals2025.pages.dev)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
