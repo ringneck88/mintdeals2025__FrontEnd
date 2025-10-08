@@ -196,6 +196,14 @@ h1, h2, h3, h4, h5, h6 {
 p {
   line-height: 0.99;
   letter-spacing: -0.04em;
+  max-width: 66ch;
+}
+
+/* Content containers - 66 CPL limit */
+main, article, section {
+  max-width: 66ch;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Navigation and UI text */
