@@ -267,7 +267,7 @@ const pageDescription = `Explore ${activeDiscounts.length} active deals and disc
             </div>
           </div>
         ) : (
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="discounts-grid">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8" id="discounts-grid">
             {activeDiscounts.map((discount) => {
               const constraint = discount.constraints?.[0];
               const reward = discount.reward;

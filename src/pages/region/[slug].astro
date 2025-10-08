@@ -246,7 +246,7 @@ const cities = Object.entries(citiesMap).map(([name, locations]) => ({
                   <p class="text-green-200">{city.locations.length} location{city.locations.length !== 1 ? 's' : ''}</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                   {city.locations.map((store, index) => (
                     <div class="bg-gray-900 rounded-lg shadow-lg border border-green-700 hover:border-yellow-500 transition-all overflow-hidden">
                       {store.storeImage?.url ? (
