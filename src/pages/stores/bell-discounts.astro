@@ -1,0 +1,486 @@
+---
+export const prerender = true;
+
+import Layout from '../../layouts/Layout.astro';
+import fs from 'fs';
+import path from 'path';
+
+// Load the JSON file
+const jsonPath = path.join(process.cwd(), 'discounts_bell.json');
+const jsonData = fs.readFileSync(jsonPath, 'utf-8');
+const discountsData = JSON.parse(jsonData);
+
+// Filter active discounts only
+const activeDiscounts = discountsData.filter((discount: any) => discount.isActive);
+
+// Group discounts by type
+const bundledDiscounts = activeDiscounts.filter(d => d.isBundledDiscount);
+const regularDiscounts = activeDiscounts.filter(d => !d.isBundledDiscount);
+
+// Helper function to format dates
+function formatDate(dateString: string) {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Helper function to get discount badge color
+function getDiscountBadgeColor(discount: any) {
+  if (discount.isBundledDiscount) return 'from-purple-500 to-pink-500';
+  if (discount.reward?.calculationMethod === 'PERCENT_OFF') return 'from-green-500 to-emerald-500';
+  return 'from-yellow-500 to-orange-500';
+}
+
+// Helper function to get discount value display
+function getDiscountValue(discount: any) {
+  const reward = discount.reward;
+  if (!reward) return 'Special Offer';
+
+  const method = reward.calculationMethod;
+  const value = reward.discountValue;
+
+  switch(method) {
+    case 'PERCENT_OFF':
+      return `${value}% OFF`;
+    case 'PRICE_TO_AMOUNT_TOTAL':
+      return `$${value.toFixed(2)} Total`;
+    case 'AMOUNT_OFF':
+      return `$${value.toFixed(2)} OFF`;
+    case 'FIXED_PRICE':
+      return `$${value.toFixed(2)} Each`;
+    default:
+      return 'Special Price';
+  }
+}
+
+// Helper function to get constraint description
+function getConstraintDescription(constraint: any) {
+  if (!constraint) return '';
+
+  const type = constraint.thresholdType;
+  const min = constraint.thresholdMin;
+
+  switch(type) {
+    case 'NUMBER_OF_ITEMS':
+      return `Buy ${min} items`;
+    case 'DOLLAR_AMOUNT':
+      return `Spend $${min.toFixed(2)}`;
+    case 'WEIGHT':
+      return `Purchase ${min}g`;
+    default:
+      return '';
+  }
+}
+
+const pageTitle = 'Bell Store Discounts - Mint Cannabis';
+const pageDescription = `Explore ${activeDiscounts.length} active deals and discounts at Bell Store. Find bundled offers, percentage discounts, and special pricing on premium cannabis products.`;
+---
+
+<style>
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .video-background video {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5));
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .discount-badge {
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .filter-btn {
+    transition: all 0.3s ease;
+  }
+  .filter-btn.active {
+    background: linear-gradient(to right, #10b981, #059669);
+    color: white;
+    transform: scale(1.05);
+  }
+</style>
+
+<Layout title={pageTitle} description={pageDescription}>
+  <!-- Video Background -->
+  <div class="video-background">
+    <video autoplay loop muted playsinline>
+      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+    <!-- Breadcrumbs -->
+    <nav class="bg-gray-900/80 backdrop-blur-sm border-b border-gray-700">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl py-4">
+        <ol class="flex items-center space-x-2 text-sm">
+          <li>
+            <a href="/" class="text-gray-400 hover:text-white transition-colors flex items-center">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+              </svg>
+              Home
+            </a>
+          </li>
+          <li class="text-gray-600">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </li>
+          <li>
+            <a href="/stores" class="text-gray-400 hover:text-white transition-colors">
+              Stores
+            </a>
+          </li>
+          <li class="text-gray-600">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+          </li>
+          <li class="text-yellow-400 font-medium flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+            </svg>
+            Bell Store Discounts
+          </li>
+        </ol>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-r from-green-900 via-emerald-800 to-teal-700 text-white py-20 lg:py-24">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        <div class="text-center">
+          <h1 class="text-4xl md:text-6xl font-bold mb-4 drop-shadow-2xl">
+            🔥 Bell Store Discounts
+          </h1>
+          <p class="text-xl md:text-2xl text-emerald-100 mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-lg">
+            Exclusive deals and special offers on premium cannabis products
+          </p>
+          <div class="flex flex-wrap justify-center gap-4">
+            <a href="/stores" class="bg-white text-emerald-700 hover:bg-emerald-50 px-8 py-3 rounded-lg font-semibold transition-all shadow-lg transform hover:scale-105">
+              📍 View All Stores
+            </a>
+            <a href="/" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg font-semibold transition-all shadow-lg transform hover:scale-105">
+              🏠 Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Bar -->
+    <div class="bg-gradient-to-r from-green-800 via-green-900 to-green-800 py-6">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        <div class="grid grid-cols-2 gap-6 text-center md:grid-cols-4">
+          <div class="text-white">
+            <div class="text-2xl font-bold text-yellow-400">{activeDiscounts.length}</div>
+            <div class="text-sm text-green-200">Active Deals</div>
+          </div>
+          <div class="text-white">
+            <div class="text-2xl font-bold text-yellow-400">{bundledDiscounts.length}</div>
+            <div class="text-sm text-green-200">Bundle Offers</div>
+          </div>
+          <div class="text-white">
+            <div class="text-2xl font-bold text-yellow-400">{regularDiscounts.length}</div>
+            <div class="text-sm text-green-200">Regular Discounts</div>
+          </div>
+          <div class="text-white">
+            <div class="text-2xl font-bold text-green-400">💚</div>
+            <div class="text-sm text-green-200">Bell Store Only</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-black/80 backdrop-blur-sm py-6 sticky top-0 z-20 border-b border-green-700">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+        <div class="flex flex-wrap justify-center gap-3" id="filter-buttons">
+          <button
+            class="filter-btn active px-6 py-2 bg-gray-800 text-white rounded-full font-medium hover:bg-gray-700"
+            data-filter="all"
+          >
+            All Discounts ({activeDiscounts.length})
+          </button>
+          <button
+            class="filter-btn px-6 py-2 bg-gray-800 text-white rounded-full font-medium hover:bg-gray-700"
+            data-filter="bundled"
+          >
+            🎁 Bundles ({bundledDiscounts.length})
+          </button>
+          <button
+            class="filter-btn px-6 py-2 bg-gray-800 text-white rounded-full font-medium hover:bg-gray-700"
+            data-filter="regular"
+          >
+            💰 Regular ({regularDiscounts.length})
+          </button>
+          <button
+            class="filter-btn px-6 py-2 bg-gray-800 text-white rounded-full font-medium hover:bg-gray-700"
+            data-filter="percent"
+          >
+            📊 % OFF
+          </button>
+          <button
+            class="filter-btn px-6 py-2 bg-gray-800 text-white rounded-full font-medium hover:bg-gray-700"
+            data-filter="dollar"
+          >
+            💵 $ OFF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Discounts Grid -->
+    <div class="bg-black min-h-screen py-12">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
+
+        {activeDiscounts.length === 0 ? (
+          <div class="text-center py-16">
+            <div class="bg-gray-900 rounded-lg p-12 border border-green-700">
+              <div class="text-6xl mb-4">🔍</div>
+              <h3 class="text-2xl font-bold text-white mb-4">No Active Discounts</h3>
+              <p class="text-gray-300 mb-6">Check back soon for amazing deals!</p>
+              <a href="/stores" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                Browse Other Stores
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="discounts-grid">
+            {activeDiscounts.map((discount) => {
+              const constraint = discount.constraints?.[0];
+              const reward = discount.reward;
+              const badgeColor = getDiscountBadgeColor(discount);
+              const discountValue = getDiscountValue(discount);
+              const constraintDesc = constraint ? getConstraintDescription(constraint) : '';
+
+              // Data attributes for filtering
+              const filterType = discount.isBundledDiscount ? 'bundled' : 'regular';
+              const calculationMethod = reward?.calculationMethod || '';
+              const isPercent = calculationMethod.includes('PERCENT');
+              const isDollar = calculationMethod.includes('AMOUNT') || calculationMethod.includes('PRICE');
+
+              return (
+                <div
+                  class="discount-card bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl overflow-hidden shadow-xl border-2 border-green-700/50 hover:border-yellow-500 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2"
+                  data-filter-type={filterType}
+                  data-is-percent={isPercent}
+                  data-is-dollar={isDollar}
+                >
+                  {/* Discount Badge with Title */}
+                  <div class={`bg-gradient-to-r ${badgeColor} text-white px-6 py-4`}>
+                    <div class="text-center mb-2">
+                      <div class="text-2xl font-bold discount-badge">{discountValue}</div>
+                      {discount.isBundledDiscount && (
+                        <div class="text-xs mt-1 opacity-90">🎁 Bundle Deal</div>
+                      )}
+                    </div>
+                    {/* Title in Banner */}
+                    <h3 class="text-sm font-bold text-white text-center line-clamp-2 mt-2 border-t border-white/20 pt-2">
+                      {discount.onlineName || discount.discountDescription}
+                    </h3>
+                  </div>
+
+                  {/* Discount Info */}
+                  <div class="p-6">
+
+                    {/* Description */}
+                    {discount.discountDescription && discount.discountDescription !== discount.onlineName && (
+                      <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        {discount.discountDescription}
+                      </p>
+                    )}
+
+                    {/* Constraint Info */}
+                    {constraintDesc && (
+                      <div class="bg-green-900/30 border border-green-700 rounded-lg p-3 mb-4">
+                        <div class="text-sm text-green-300 font-medium">
+                          📦 {constraintDesc}
+                        </div>
+                        {constraint.itemGroupType && constraint.itemGroupType !== 'ALL' && (
+                          <div class="text-xs text-green-400 mt-1">
+                            Applies to: {constraint.itemGroupType}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Application Method */}
+                    <div class="flex items-center gap-2 mb-4">
+                      <span class="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded-full">
+                        {discount.applicationMethod === 'Automatic' ? '✨ Auto Applied' : '🎫 Code Required'}
+                      </span>
+                      {discount.discountCode && (
+                        <span class="text-xs bg-yellow-900 text-yellow-300 px-3 py-1 rounded-full font-mono">
+                          {discount.discountCode}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Valid Dates */}
+                    <div class="border-t border-gray-700 pt-4 mt-4">
+                      <div class="flex items-center justify-between text-xs text-gray-400">
+                        <div>
+                          <span class="text-green-400">Valid from:</span>
+                          <br/>
+                          {formatDate(discount.validDateFrom)}
+                        </div>
+                        <div class="text-right">
+                          <span class="text-red-400">Expires:</span>
+                          <br/>
+                          {formatDate(discount.validDateTo)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Info */}
+                    {discount.firstTimeCustomerOnly === 1 && (
+                      <div class="mt-4 bg-blue-900/30 border border-blue-700 rounded-lg p-2 text-center">
+                        <span class="text-xs text-blue-300 font-medium">
+                          🌟 First-time customers only
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* No Results Message (Hidden by default) */}
+        <div id="no-results" class="hidden text-center py-16">
+          <div class="bg-gray-900 rounded-lg p-12 border border-green-700">
+            <div class="text-6xl mb-4">🔍</div>
+            <h3 class="text-2xl font-bold text-white mb-4">No Matching Discounts</h3>
+            <p class="text-gray-300 mb-6">Try selecting a different filter to see more deals.</p>
+            <button
+              class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              onclick="resetFilters()"
+            >
+              Show All Discounts
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-gradient-to-br from-green-900 via-black to-emerald-800 py-20">
+      <div class="px-4 mx-auto text-center sm:px-6 lg:px-8 max-w-[1600px]">
+        <h2 class="mb-4 text-3xl font-bold text-white md:text-4xl">
+          Ready to Save on Premium Cannabis?
+        </h2>
+        <p class="max-w-2xl mx-auto mb-8 text-lg text-gray-300">
+          Visit Bell Store today to take advantage of these exclusive deals. Limited time offers - don't miss out!
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="/stores" class="px-8 py-3 font-semibold text-black transition-all transform bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg shadow-lg hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+            📍 Find Bell Store
+          </a>
+          <a href="/specials" class="px-8 py-3 font-semibold text-white transition-all transform bg-gradient-to-r from-green-600 to-green-700 rounded-lg shadow-lg hover:from-green-700 hover:to-green-800 hover:scale-105">
+            🔥 All Store Specials
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Filter functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const discountCards = document.querySelectorAll('.discount-card');
+    const noResults = document.getElementById('no-results');
+    const discountsGrid = document.getElementById('discounts-grid');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Update active state
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        const filter = button.dataset.filter;
+        let visibleCount = 0;
+
+        discountCards.forEach(card => {
+          let shouldShow = false;
+
+          if (filter === 'all') {
+            shouldShow = true;
+          } else if (filter === 'bundled') {
+            shouldShow = card.dataset.filterType === 'bundled';
+          } else if (filter === 'regular') {
+            shouldShow = card.dataset.filterType === 'regular';
+          } else if (filter === 'percent') {
+            shouldShow = card.dataset.isPercent === 'true';
+          } else if (filter === 'dollar') {
+            shouldShow = card.dataset.isDollar === 'true';
+          }
+
+          if (shouldShow) {
+            card.style.display = 'block';
+            visibleCount++;
+            // Add animation
+            card.style.animation = 'fadeIn 0.3s ease-in';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        // Show/hide no results message
+        if (visibleCount === 0) {
+          noResults?.classList.remove('hidden');
+          discountsGrid?.classList.add('hidden');
+        } else {
+          noResults?.classList.add('hidden');
+          discountsGrid?.classList.remove('hidden');
+        }
+      });
+    });
+  });
+
+  // Reset filters function
+  function resetFilters() {
+    const allButton = document.querySelector('[data-filter="all"]');
+    allButton?.click();
+  }
+
+  // Add fadeIn animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+</script>

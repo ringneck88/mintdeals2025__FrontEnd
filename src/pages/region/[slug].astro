@@ -61,22 +61,23 @@ function getImageUrl(imageData) {
 }
 
 // Get region image URL - check both Image and image fields
-const regionImageUrl = getImageUrl(region.Image) || getImageUrl(region.image) || null;
+const regionImageUrl = region ? (getImageUrl(region.Image) || getImageUrl(region.image) || null) : null;
 
 // Fetch stores for this region
 let stores = [];
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
-try {
-  const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=500`);
-  if (storesResponse.ok) {
-    const storesData = await storesResponse.json();
-    const allStores = storesData?.data || [];
+if (region) {
+  try {
+    const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=500`);
+    if (storesResponse.ok) {
+      const storesData = await storesResponse.json();
+      const allStores = storesData?.data || [];
 
-    // Filter stores by this region
-    stores = allStores.filter(store => {
-      const storeRegionId = typeof store.region === 'object' ? store.region?.id : store.region;
-      return storeRegionId === region.id;
+      // Filter stores by this region
+      stores = allStores.filter(store => {
+        const storeRegionId = typeof store.region === 'object' ? store.region?.id : store.region;
+        return storeRegionId === region.id;
     }).map(store => ({
       id: store.id,
       name: store.name || 'Unnamed Store',
@@ -97,9 +98,10 @@ try {
             `https://mintdealsbackend-production.up.railway.app${store.store_image?.url || store.hero_image?.url}`) : null
       } : null
     }));
+    }
+  } catch (error) {
+    console.error('Error fetching stores:', error);
   }
-} catch (error) {
-  console.error('Error fetching stores:', error);
 }
 
 // Group stores by city
@@ -144,7 +146,14 @@ const cities = Object.entries(citiesMap).map(([name, locations]) => ({
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 0;
+    padding: 3rem 0;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-section {
+      min-height: 50vh;
+      padding: 4rem 0;
+    }
   }
 </style>
 
@@ -192,7 +201,7 @@ const cities = Object.entries(citiesMap).map(([name, locations]) => ({
     </div>
 
     <!-- Quick Stats Bar -->
-    <div class="bg-gradient-to-r from-green-800 via-green-900 to-green-800 py-3">
+    <div class="bg-gradient-to-r from-green-800 via-green-900 to-green-800 py-5">
       <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
         <div class="grid grid-cols-2 gap-6 text-center md:grid-cols-3">
           <div class="text-white">
@@ -212,8 +221,8 @@ const cities = Object.entries(citiesMap).map(([name, locations]) => ({
     </div>
 
     <!-- Main Content -->
-    <div class="bg-black py-12">
-      <div class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div class="bg-black py-16">
+      <div class="px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
 
         {stores.length === 0 ? (
           <div class="text-center py-16">
@@ -237,7 +246,7 @@ const cities = Object.entries(citiesMap).map(([name, locations]) => ({
                   <p class="text-green-200">{city.locations.length} location{city.locations.length !== 1 ? 's' : ''}</p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {city.locations.map((store, index) => (
                     <div class="bg-gray-900 rounded-lg shadow-lg border border-green-700 hover:border-yellow-500 transition-all overflow-hidden">
                       {store.storeImage?.url ? (

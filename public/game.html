@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannabis Leaf Bug Shooter - Mint Cannabis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            position: relative;
+            width: 90vw;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 600px;
+            background: linear-gradient(180deg, #87CEEB 0%, #98D98E 100%);
+            border: 5px solid #2d5016;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .score, .health, .ammo, .timer {
+            background: rgba(0, 0, 0, 0.7);
+            color: #7FFF00;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(127, 255, 0, 0.8);
+            border: 2px solid #7FFF00;
+        }
+
+        .game-over, .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .game-over h1, .start-screen h1 {
+            color: #7FFF00;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(127, 255, 0, 0.8);
+        }
+
+        .game-over h2, .start-screen h2 {
+            color: #FFD700;
+            font-size: 32px;
+            margin-bottom: 30px;
+        }
+
+        .game-over p, .start-screen p {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        button {
+            background: linear-gradient(135deg, #7FFF00, #32CD32);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(127, 255, 0, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(127, 255, 0, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .controls {
+            margin-top: 20px;
+            color: #7FFF00;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .controls kbd {
+            background: rgba(127, 255, 0, 0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #7FFF00;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="hud">
+            <div class="score">Score: <span id="scoreValue">0</span></div>
+            <div class="timer">Time: <span id="timerValue">60</span>s</div>
+        </div>
+
+        <div id="startScreen" class="start-screen">
+            <h1>🌿 Leaf Catcher 🌿</h1>
+            <h2>Catch the Falling Leaves!</h2>
+            <p>Catch as many cannabis leaves as you can!</p>
+            <p>🌿 Leaves = <span style="color: #7FFF00;">+10 points</span></p>
+            <p>⭐ Mint Logo = <span style="color: #FFD700;">+50 points BONUS!</span></p>
+            <p>🐛 Bugs = <span style="color: #FF0000;">Score resets to 0!</span></p>
+            <div class="controls">
+                <p>Move: <kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd></p>
+                <p>Catch leaves and bonuses to score points!</p>
+            </div>
+            <button onclick="startGame()">Start Game</button>
+        </div>
+
+        <div id="gameOver" class="game-over hidden">
+            <h1>Game Over!</h1>
+            <h2>Final Score: <span id="finalScore">0</span></h2>
+            <p id="gameOverMessage">Time's up!</p>
+            <button onclick="restartGame()">Play Again</button>
+            <button onclick="location.href='/'">Back to Home</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Load images
+        const leafImage = new Image();
+        leafImage.src = '/assets/pointer_leaf.png'; // Transparent PNG leaf
+
+        const bonusImage = new Image();
+        bonusImage.src = '/favicon.png';
+
+        let leafImageLoaded = false;
+        let bonusImageLoaded = false;
+        leafImage.onload = () => { leafImageLoaded = true; console.log('Leaf image loaded!'); };
+        bonusImage.onload = () => { bonusImageLoaded = true; console.log('Bonus image loaded!'); };
+        leafImage.onerror = () => { console.error('Failed to load leaf image'); };
+        bonusImage.onerror = () => { console.error('Failed to load bonus image'); };
+
+        // Game variables
+        let gameRunning = false;
+        let score = 0;
+        let timeLeft = 60;
+        let gameTimer = null;
+        let player = {
+            x: canvas.width / 2,
+            y: canvas.height - 100,
+            width: 50,
+            height: 80,
+            speed: 7
+        };
+        let leaves = [];
+        let bugs = [];
+        let bonusPrizes = [];
+        let particles = [];
+        let keys = {};
+        let leafSpawnRate = 800;
+        let bugSpawnRate = 3000;
+        let bonusSpawnRate = 8000; // Spawn bonus every 8 seconds
+        let lastLeafSpawn = 0;
+        let lastBugSpawn = 0;
+        let lastBonusSpawn = 0;
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Draw person (player)
+        function drawPerson(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Head
+            ctx.fillStyle = '#FFD1A3';
+            ctx.beginPath();
+            ctx.arc(0, -35, 12, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body
+            ctx.fillStyle = '#4169E1';
+            ctx.fillRect(-15, -20, 30, 35);
+
+            // Arms
+            ctx.strokeStyle = '#4169E1';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(-15, -15);
+            ctx.lineTo(-25, 5);
+            ctx.moveTo(15, -15);
+            ctx.lineTo(25, 5);
+            ctx.stroke();
+
+            // Legs
+            ctx.fillStyle = '#2C5282';
+            ctx.fillRect(-15, 15, 12, 25);
+            ctx.fillRect(3, 15, 12, 25);
+
+            // Basket/bucket in hands
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(-20, 5, 40, 15);
+            ctx.fillStyle = '#A0522D';
+            ctx.fillRect(-18, 7, 36, 11);
+
+            ctx.restore();
+        }
+
+        // Draw cannabis leaf using image
+        function drawLeaf(x, y, size, rotation = 0) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+
+            if (leafImageLoaded) {
+                // Draw the leaf image
+                const leafSize = size * 3;
+                ctx.drawImage(leafImage, -leafSize/2, -leafSize/2, leafSize, leafSize);
+            } else {
+                // Fallback: Draw a stylized cannabis leaf shape
+                ctx.fillStyle = '#FFD700';
+                ctx.strokeStyle = '#FFA500';
+                ctx.lineWidth = 2;
+
+                // Simple 7-pointed leaf shape
+                ctx.beginPath();
+                for (let i = 0; i < 7; i++) {
+                    const angle = (Math.PI * 2 / 7) * i - Math.PI / 2;
+                    const radius = i === 0 ? size * 1.2 : size;
+                    const x_point = Math.cos(angle) * radius;
+                    const y_point = Math.sin(angle) * radius;
+                    if (i === 0) {
+                        ctx.moveTo(x_point, y_point);
+                    } else {
+                        ctx.lineTo(x_point, y_point);
+                    }
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Add center detail
+                ctx.fillStyle = '#FFA500';
+                ctx.beginPath();
+                ctx.arc(0, 0, size * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        // Draw bonus prize (Mint logo)
+        function drawBonus(x, y, size) {
+            if (!bonusImageLoaded) return;
+
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Add glow effect
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 20;
+
+            const bonusSize = size * 2;
+            ctx.drawImage(bonusImage, -bonusSize/2, -bonusSize/2, bonusSize, bonusSize);
+
+            ctx.restore();
+        }
+
+        // Draw bug
+        function drawBug(x, y, size) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Body
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(-size/2, -size/2, size, size);
+
+            // Eyes
+            ctx.fillStyle = '#FF0000';
+            ctx.beginPath();
+            ctx.arc(-size/4, -size/4, size/8, 0, Math.PI * 2);
+            ctx.arc(size/4, -size/4, size/8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Antennae
+            ctx.strokeStyle = '#8B4513';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-size/4, -size/2);
+            ctx.lineTo(-size/2, -size);
+            ctx.moveTo(size/4, -size/2);
+            ctx.lineTo(size/2, -size);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // Spawn leaf
+        function spawnLeaf() {
+            leaves.push({
+                x: Math.random() * canvas.width,
+                y: -30,
+                width: 30,
+                height: 30,
+                speed: 2 + Math.random() * 2,
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.1
+            });
+        }
+
+        // Spawn bug
+        function spawnBug() {
+            bugs.push({
+                x: Math.random() * canvas.width,
+                y: -30,
+                width: 30,
+                height: 30,
+                speed: 2 + Math.random() * 3
+            });
+        }
+
+        // Spawn bonus prize
+        function spawnBonus() {
+            bonusPrizes.push({
+                x: Math.random() * canvas.width,
+                y: -40,
+                width: 40,
+                height: 40,
+                speed: 1.5 + Math.random()
+            });
+        }
+
+        // Create particle effect
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 10; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    life: 30,
+                    color: color,
+                    size: Math.random() * 4 + 2
+                });
+            }
+        }
+
+        // Update game state
+        function update() {
+            if (!gameRunning) return;
+
+            // Move player
+            if (keys['arrowleft'] || keys['a']) {
+                player.x = Math.max(player.width / 2, player.x - player.speed);
+            }
+            if (keys['arrowright'] || keys['d']) {
+                player.x = Math.min(canvas.width - player.width / 2, player.x + player.speed);
+            }
+
+            // Update leaves
+            for (let i = leaves.length - 1; i >= 0; i--) {
+                leaves[i].y += leaves[i].speed;
+                leaves[i].rotation += leaves[i].rotationSpeed;
+
+                // Check if player caught the leaf
+                if (leaves[i].y > player.y - 40 && leaves[i].y < player.y + 20 &&
+                    Math.abs(leaves[i].x - player.x) < 35) {
+                    score += 10;
+                    createParticles(leaves[i].x, leaves[i].y, '#7FFF00');
+                    leaves.splice(i, 1);
+                    continue;
+                }
+
+                // Remove if off screen
+                if (leaves[i].y > canvas.height) {
+                    leaves.splice(i, 1);
+                }
+            }
+
+            // Update bugs
+            for (let i = bugs.length - 1; i >= 0; i--) {
+                bugs[i].y += bugs[i].speed;
+
+                // Check if player hit by bug
+                if (bugs[i].y > player.y - 40 && bugs[i].y < player.y + 20 &&
+                    Math.abs(bugs[i].x - player.x) < 35) {
+                    score = 0;
+                    createParticles(bugs[i].x, bugs[i].y, '#FF0000');
+                    bugs.splice(i, 1);
+
+                    // Flash effect
+                    canvas.style.filter = 'brightness(1.5)';
+                    setTimeout(() => canvas.style.filter = 'brightness(1)', 100);
+                    continue;
+                }
+
+                // Remove if off screen
+                if (bugs[i].y > canvas.height) {
+                    bugs.splice(i, 1);
+                }
+            }
+
+            // Update bonus prizes
+            for (let i = bonusPrizes.length - 1; i >= 0; i--) {
+                bonusPrizes[i].y += bonusPrizes[i].speed;
+
+                // Check if player caught the bonus
+                if (bonusPrizes[i].y > player.y - 40 && bonusPrizes[i].y < player.y + 20 &&
+                    Math.abs(bonusPrizes[i].x - player.x) < 40) {
+                    score += 50; // Bonus prize worth 50 points!
+                    createParticles(bonusPrizes[i].x, bonusPrizes[i].y, '#FFD700');
+                    bonusPrizes.splice(i, 1);
+                    continue;
+                }
+
+                // Remove if off screen
+                if (bonusPrizes[i].y > canvas.height) {
+                    bonusPrizes.splice(i, 1);
+                }
+            }
+
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].x += particles[i].vx;
+                particles[i].y += particles[i].vy;
+                particles[i].life--;
+
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            // Spawn leaves
+            if (Date.now() - lastLeafSpawn > leafSpawnRate) {
+                spawnLeaf();
+                lastLeafSpawn = Date.now();
+            }
+
+            // Spawn bugs
+            if (Date.now() - lastBugSpawn > bugSpawnRate) {
+                spawnBug();
+                lastBugSpawn = Date.now();
+            }
+
+            // Spawn bonus prizes (rare)
+            if (Date.now() - lastBonusSpawn > bonusSpawnRate) {
+                spawnBonus();
+                lastBonusSpawn = Date.now();
+            }
+
+            // Update HUD
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('timerValue').textContent = timeLeft;
+        }
+
+        // Draw game
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#98D98E');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ground
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+
+            // Draw particles
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life / 30;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+
+            // Draw leaves
+            leaves.forEach(l => {
+                drawLeaf(l.x, l.y, l.width / 2, l.rotation);
+            });
+
+            // Draw bugs
+            bugs.forEach(b => {
+                drawBug(b.x, b.y, b.width);
+            });
+
+            // Draw bonus prizes
+            bonusPrizes.forEach(bonus => {
+                drawBonus(bonus.x, bonus.y, bonus.width);
+            });
+
+            // Draw player (person)
+            drawPerson(player.x, player.y);
+        }
+
+        // Game loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start game
+        function startGame() {
+            gameRunning = true;
+            score = 0;
+            timeLeft = 60;
+            leaves = [];
+            bugs = [];
+            bonusPrizes = [];
+            particles = [];
+            leafSpawnRate = 800;
+            bugSpawnRate = 3000;
+            bonusSpawnRate = 8000;
+            lastLeafSpawn = Date.now();
+            lastBugSpawn = Date.now();
+            lastBonusSpawn = Date.now();
+            player.x = canvas.width / 2;
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameOver').classList.add('hidden');
+
+            // Start timer
+            if (gameTimer) clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    gameOver('Time\'s up!');
+                }
+            }, 1000);
+        }
+
+        // Game over
+        function gameOver(message = 'Game Over!') {
+            gameRunning = false;
+            if (gameTimer) clearInterval(gameTimer);
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverMessage').textContent = message;
+            document.getElementById('gameOver').classList.remove('hidden');
+        }
+
+        // Restart game
+        function restartGame() {
+            startGame();
+        }
+
+        // Start game loop
+        gameLoop();
+    </script>
+</body>
+</html>
