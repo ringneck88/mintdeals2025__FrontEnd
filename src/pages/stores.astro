@@ -10,21 +10,57 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 try {
   console.log('🚀 Fetching stores and regions from API');
 
-  // Fetch regions first
-  const regionsResponse = await fetch(`${API_BASE}/regions?populate=*&pagination[pageSize]=100`);
+  // Helper function to get image URL from various possible structures
+  function getImageUrl(imageData) {
+    if (!imageData || imageData === null) return null;
+
+    // Case 1: Strapi v4 nested structure: image.data.attributes.url
+    if (imageData?.data?.attributes?.url) {
+      const url = imageData.data.attributes.url;
+      return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+    }
+
+    // Case 2: Direct image object with formats (Cloudinary or Strapi uploaded images)
+    if (typeof imageData === 'object' && imageData.formats) {
+      // Prefer larger formats for better quality
+      if (imageData.formats.large?.url) return imageData.formats.large.url;
+      if (imageData.formats.medium?.url) return imageData.formats.medium.url;
+      if (imageData.formats.small?.url) return imageData.formats.small.url;
+      if (imageData.formats.thumbnail?.url) return imageData.formats.thumbnail.url;
+    }
+
+    // Case 3: Direct image object with url: image.url
+    if (typeof imageData === 'object' && imageData.url) {
+      const url = imageData.url;
+      return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+    }
+
+    // Case 4: String URL directly
+    if (typeof imageData === 'string') {
+      return imageData.startsWith('http') ? imageData : `https://mintdealsbackend-production.up.railway.app${imageData}`;
+    }
+
+    return null;
+  }
+
+  // Fetch regions first with deep Image population
+  const regionsResponse = await fetch(`${API_BASE}/regions?populate[Image][populate]=*&pagination[pageSize]=100`);
   if (regionsResponse.ok) {
     const regionsData = await regionsResponse.json();
-    regions = regionsData?.data?.map(region => ({
-      id: region.id,
-      documentId: region.documentId,
-      Name: region.name || 'Unknown Region',
-      Code: region.code || 'XX',
-      State: region.name || 'Unknown State',
-      Description: region.description || `Cannabis dispensaries in ${region.name}`,
-      RegionImage: region.RegionImage ? {
-        url: region.RegionImage.url ? (region.RegionImage.url.startsWith('http') ? region.RegionImage.url : `https://mintdealsbackend-production.up.railway.app${region.RegionImage.url}`) : null
-      } : null
-    })) || [];
+    regions = regionsData?.data?.map(region => {
+      // Check multiple possible image field names
+      const imageUrl = getImageUrl(region.Image) || getImageUrl(region.image) || getImageUrl(region.RegionImage);
+
+      return {
+        id: region.id,
+        documentId: region.documentId,
+        Name: region.name || 'Unknown Region',
+        Code: region.code || 'XX',
+        State: region.name || 'Unknown State',
+        Description: region.description || `Cannabis dispensaries in ${region.name}`,
+        RegionImage: imageUrl ? { url: imageUrl } : null
+      };
+    }) || [];
     console.log('✅ Regions loaded:', regions.length);
   }
 
@@ -266,16 +302,33 @@ try {
             <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             
             {region.RegionImage ? (
-              <img 
-                src={region.RegionImage.url} 
-                alt={region.Name}
-                class="w-full h-56 object-cover"
-              />
+              <div class="relative w-full h-56 overflow-hidden">
+                <img
+                  src={region.RegionImage.url}
+                  alt={region.Name}
+                  class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+              </div>
             ) : (
-              <div class={`w-full h-56 bg-gradient-to-br ${index === 0 ? 'from-green-400 to-green-600' : index === 1 ? 'from-yellow-400 to-yellow-600' : 'from-green-500 to-yellow-500'} flex items-center justify-center`}>
-                <div class="text-white text-center">
-                  <div class="text-6xl font-bold opacity-20">{region.Code}</div>
-                  <div class="text-lg font-semibold">{region.Name}</div>
+              <div class={`w-full h-56 bg-gradient-to-br ${
+                region.Name.includes('Arizona') ? 'from-orange-400 to-red-600' :
+                region.Name.includes('Nevada') ? 'from-purple-400 to-pink-600' :
+                region.Name.includes('Michigan') ? 'from-blue-400 to-indigo-600' :
+                region.Name.includes('Florida') ? 'from-cyan-400 to-blue-600' :
+                region.Name.includes('Illinois') ? 'from-yellow-400 to-orange-600' :
+                region.Name.includes('Missouri') ? 'from-red-400 to-pink-600' :
+                'from-green-400 to-emerald-600'
+              } flex items-center justify-center relative overflow-hidden`}>
+                <div class="absolute inset-0 opacity-10">
+                  <div class="absolute top-0 left-0 w-full h-full" style="background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 50%);"></div>
+                </div>
+                <div class="text-white text-center z-10">
+                  <svg class="w-24 h-24 mx-auto mb-3 opacity-30" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                  </svg>
+                  <div class="text-4xl font-bold drop-shadow-lg">{region.Name}</div>
+                  <div class="text-sm font-semibold mt-2 opacity-80">{region.Code}</div>
                 </div>
               </div>
             )}
