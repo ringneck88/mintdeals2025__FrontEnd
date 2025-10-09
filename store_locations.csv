@@ -1,0 +1,33 @@
+Store ID,Store Name,Address,City,State,Zip Code,Latitude,Longitude,Phone,Email,Region,Active
+1,"Mint Cannabis Buckeye","1629 N 195th Ave Suite #101","Buckeye",AZ,85396,,,(480) 749-6468,,"Arizona",Yes
+2,"Mint Cannabis 75th Ave Phoenix","1211 North 75th Avenue","Phoenix",Arizona,85043,,,(480) 749-6468,,"Arizona",Yes
+3,"Mint Cannabis El Mirage","15235 North Dysart Road ste 111d"," El Mirage",Arizona,85335,,,(480) 749-6468,,"Arizona",Yes
+4,"Mint Cannabis Mesa","330 E Southern Ave","Mesa",AZ,85210,,,(480) 749-6468,,"Arizona",Yes
+5,"Mint Cannabis Tempe","5210 South Priest Drive","Guadalupe",AZ,85283,,,(480) 749-6468,,"Arizona",Yes
+7,"Mint Cannabis Phoenix","17036 North Cave Creek Road","Phoenix",AZ,85032,,,(480) 749-6468,,"Arizona",Yes
+10,"Mint Cannabis - St. Peters Dispensary","150 Mid Rivers Mall Circle","St. Peters",Missouri,63376,,,(636) 387-1144,,"Missouri",Yes
+11,"Mint Cannabis Las Vegas Strip Dispensary","4503 Paradise Road","Las Vegas",Nevada ,89119,,,(702) 389-8556,,"Nevada",Yes
+12,"Mint Cannabis West Las Vegas Dispensary","6332 South Rainbow Boulevard #105","Las Vegas",Nevada ,89118,,,(702) 659-7356,,"Nevada",Yes
+13,"Mint Cannabis Monroe MI Dispensary","760 South Telegraph Road","Monroe",Michigan,48161,,,(734) 384-3248,,"Michigan",Yes
+14,"Mint Cannabis Kalamazoo MI Dispensary","730 E. Cork St","Kalamazoo",Michigan,49001,,,(269) 743-7444,,"Michigan",Yes
+15,"Mint Cannabis Coldwater MI Dispensary","365 N Willowbrook Rd","Coldwater",Michigan,49036,,,(517) 924-1232,,"Michigan",Yes
+16,"Mint Cannabis Portage MI Dispensary","5747 S Westnedge Ave","Portage",Michigan,49002,,,(269) 459-1204,,"Michigan",Yes
+17,"Mint Cannabis Roseville MI Dispensary","28970 Hayes Road","Roseville",Michigan,48066,,,(586) 541-8897,,"Michigan",Yes
+19,"Mint Cannabis Bonita Springs FL Dispensary","8800 Terrene Ct.","Bonita Springs",Florida,34135,,,(239) 345-4024,,"Florida",Yes
+20,"Mint Cannabis Bradenton FL Dispensary","4549 14th St. West","Bradenton",Florida,34207,,,(941) 216-7838,,"Florida",Yes
+22,"Mint Cannabis Cape Coral FL Dispensary","2126 Del Prado Boulevard South","Cape Coral",Florida,33990,,,(239) 347-4574,,"Florida",Yes
+23,"Mint Cannabis Delray Beach FL Dispensary","6110 West Atlantic Avenue","Delray Beach",Florida,33484,,,(561) 303-0551,,"Florida",Yes
+24,"Mint Cannabis Gainesville FL Dispensary","318 NW 13th St.","Gainesville",Florida,32601,,,(352) 415-1824,,"Florida",Yes
+25,"Mint Cannabis Jacksonville FL Dispensary","4332 University Blvd S.","Jacksonville",Florida,32216,,,(904) 694-2174,,"Florida",Yes
+26,"Mint Cannabis Longwood FL Dispensary","1415 West State Road 434","Longwood",Florida,32750,,,(407) 357-0805,,"Florida",Yes
+27,"Mint Cannabis Melbourne FL Dispensary","21 Suntree Place","Melbourne",Florida,32940,,,(321) 294-4465,,"Florida",Yes
+29,"Mint Cannabis  Orlando FL Dispensary","10615 East Colonial Dr.","Orlando",Florida,32817,,,(407) 843-3445,,"Florida",Yes
+30,"Mint Cannabis Sarasota FL Dispensary","6979 S. Tamiami Trail","Sarasota",Florida,34231,,,(941) 500-3128,,"Florida",Yes
+31,"Mint Cannabis St. Augustine FL Dispensary","160 King St","St Augustine",Florida,32084,,,(904) 830-0011,,"Florida",Yes
+32,"Mint Cannabis Stuart FL Dispensary","4203 SE Federal Hwy #103","Stuart",Florida,34997,,,(772) 678-3958,,"Florida",Yes
+6,"Mint Cannabis Northern Phoenix","2444 W Northern Ave","Phoenix",AZ,85021,,,(480) 749-6468,,"Arizona",Yes
+8,"Mint Cannabis Scottsdale","8729 East Manzanita Drive","Phoenix",AZ,85258,,,(480) 659-9728,,"ASU Main",Yes
+9,"Mint Cannabis - Willowbrook IL Dispensary","900 75th Street","Willowbrook",Illinois,60527,,,(630) 216-9135,,"Illinois",Yes
+18,"Mint Cannabis New Buffalo MI Dispensary","18300 US-12","New Buffalo",Michigan,49117,,,(269) 231-5473,,"Michigan",Yes
+21,"Mint Cannabis Brandon FL Dispensary","2116 West Brandon Boulevard","Brandon",Florida,33511,,,(813) 502-1122,,"Florida",Yes
+28,"Mint Cannabis Miami FL Dispensary","12083 SW 117th Ave","Miami",Florida,33186,,,(305) 692-0317,,"Florida",Yes

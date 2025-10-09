@@ -1,0 +1,10 @@
+name = "mintdeals2025"
+compatibility_date = "2024-01-01"
+
+pages_build_output_dir = "./dist"
+
+[env.production]
+vars = { BUN_VERSION = "1.1.27" }
+
+[env.preview]
+vars = { BUN_VERSION = "1.1.27" }
