@@ -1,5 +1,5 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
 import Layout from '../layouts/Layout.astro';
 
@@ -188,7 +188,7 @@ try {
 
 <Layout title={pageData.title} description={pageData.description}>
   <!-- Breadcrumb Navigation -->
-  <div class="bg-gray-100 dark:bg-gray-800 py-4">
+  <div class="py-4 bg-gray-100 dark:bg-gray-800">
     <div class="px-4 sm:px-6 lg:px-8 max-w-[2080px] mx-auto">
       <nav class="flex" aria-label="Breadcrumb">
         <ol class="flex items-center space-x-2 text-sm">
@@ -201,7 +201,7 @@ try {
                 <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
               </svg>
               {index === pageData.breadcrumbs.length - 1 ? (
-                <span class="text-gray-900 dark:text-white font-medium">{crumb.label}</span>
+                <span class="font-medium text-gray-900 dark:text-white">{crumb.label}</span>
               ) : (
                 <a href={crumb.url} class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">{crumb.label}</a>
               )}
@@ -217,8 +217,8 @@ try {
     {pageData.isMenu && pageContent ? (
       <!-- Location Menu Page -->
       <div>
-        <div class="text-center mb-12">
-          <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        <div class="mb-12 text-center">
+          <h1 class="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
             {pageData.category} Menu
           </h1>
           <p class="text-xl text-gray-600 dark:text-gray-300">
@@ -232,8 +232,8 @@ try {
         </div>
 
         {products.length === 0 ? (
-          <div class="text-center py-16">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="py-16 text-center">
+            <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
             </svg>
             <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">No products found</h3>
@@ -242,17 +242,17 @@ try {
             </p>
           </div>
         ) : (
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 xl:grid-cols-4 gap-6">
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {products.map(product => (
-              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <div class="overflow-hidden transition-shadow bg-white rounded-lg shadow-lg dark:bg-gray-800 hover:shadow-xl">
                 {product.Image?.data?.attributes?.url ? (
                   <img
                     src={`http://localhost:1337${product.Image.data.attributes.url}`}
                     alt={product.Name || 'Product'}
-                    class="w-full h-48 object-cover"
+                    class="object-cover w-full h-48"
                   />
                 ) : (
-                  <div class="h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <div class="flex items-center justify-center h-48 bg-gray-100 dark:bg-gray-700">
                     <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
@@ -260,12 +260,12 @@ try {
                 )}
 
                 <div class="p-6">
-                  <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                  <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">
                     {product.Name || 'Product Name'}
                   </h3>
 
                   {product.Discription && (
-                    <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                    <p class="mb-3 text-gray-600 dark:text-gray-300 line-clamp-2">
                       {product.Discription}
                     </p>
                   )}
@@ -281,7 +281,7 @@ try {
                   <div class="flex space-x-2">
                     <a
                       href={`/products/${product.documentId}`}
-                      class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
+                      class="flex-1 px-4 py-2 font-medium text-center text-white transition-colors bg-purple-600 rounded-lg hover:bg-purple-700"
                     >
                       View Details
                     </a>
@@ -296,8 +296,8 @@ try {
     ) : pageContent ? (
       <!-- Location Detail Page -->
       <div>
-        <div class="text-center mb-12">
-          <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        <div class="mb-12 text-center">
+          <h1 class="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
             {pageContent.Name}
           </h1>
           <p class="text-xl text-gray-600 dark:text-gray-300">
@@ -310,9 +310,9 @@ try {
           )}
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Location Information</h2>
+            <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Location Information</h2>
             <div class="space-y-4">
               {pageContent.Phone && (
                 <div class="flex items-center">
@@ -326,7 +326,7 @@ try {
               <div class="mt-6">
                 <a
                   href={`/${slugParams.join('/')}/menu`}
-                  class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                  class="inline-flex items-center px-6 py-3 font-medium text-white transition-colors bg-purple-600 rounded-lg hover:bg-purple-700"
                 >
                   View {pageData.category} Menu
                 </a>
@@ -335,12 +335,12 @@ try {
           </div>
 
           <div>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Available Categories</h2>
+            <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Available Categories</h2>
             <div class="grid grid-cols-2 gap-4">
               {pageContent.product_categories?.map(category => (
                 <a
                   href={`/${category.Slug}/${slugParams.slice(1).join('/')}`}
-                  class="p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  class="p-4 transition-colors border border-gray-200 rounded-lg dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   <h3 class="font-medium text-gray-900 dark:text-white">{category.Name}</h3>
                 </a>
@@ -353,8 +353,8 @@ try {
     ) : locations.length > 0 ? (
       <!-- Regional Locations Page -->
       <div>
-        <div class="text-center mb-12">
-          <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        <div class="mb-12 text-center">
+          <h1 class="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
             {pageData.title}
           </h1>
           <p class="text-xl text-gray-600 dark:text-gray-300">
@@ -362,24 +362,24 @@ try {
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {locations.map(location => (
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+            <div class="overflow-hidden transition-shadow bg-white rounded-lg shadow-lg dark:bg-gray-800 hover:shadow-xl">
               {location.HeroImage?.url && (
                 <img
                   src={`http://localhost:1337${location.HeroImage.url}`}
                   alt={location.Name}
-                  class="w-full h-48 object-cover"
+                  class="object-cover w-full h-48"
                 />
               )}
 
               <div class="p-6">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">
                   {location.Name}
                 </h3>
 
                 {location.Address && (
-                  <p class="text-gray-600 dark:text-gray-300 mb-4">
+                  <p class="mb-4 text-gray-600 dark:text-gray-300">
                     {location.Address.street}, {location.Address.city}, {location.Address.state}
                   </p>
                 )}
@@ -387,7 +387,7 @@ try {
                 <div class="flex space-x-2">
                   <a
                     href={`/${pageData.category}/${pageData.category}-in-${pageData.state}/${pageData.category}-in-${pageData.city || location.Address.city.toLowerCase()}/${location.Slug}`}
-                    class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
+                    class="flex-1 px-4 py-2 font-medium text-center text-white transition-colors bg-purple-600 rounded-lg hover:bg-purple-700"
                   >
                     View Location
                   </a>
@@ -400,8 +400,8 @@ try {
 
     ) : (
       <!-- 404 Page -->
-      <div class="text-center py-16">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="py-16 text-center">
+        <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.034 0-3.9.785-5.291 2.09M6.343 6.343A8 8 0 1117.657 17.657 8 8 0 016.343 6.343z"/>
         </svg>
         <h1 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">Page not found</h1>
@@ -411,7 +411,7 @@ try {
         <div class="mt-6">
           <a
             href="/"
-            class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+            class="inline-flex items-center px-4 py-2 font-medium text-white transition-colors bg-purple-600 rounded-lg hover:bg-purple-700"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
