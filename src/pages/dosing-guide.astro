@@ -87,7 +87,7 @@ if (dosingForms.length > 0) {
 
       formDetailsMap[formSlug] = {
         name: formName,
-        description: safeString(form.description || form.Description || ''),
+        description: safeString(form.Discription || form.discription || form.Description || form.description || ''),
         servingInfo: safeString(form.serving_info || form.ServingInfo || ''),
         instructions: safeString(form.instructions || form.Instructions || ''),
         brands: safeString(form.brands || form.Brands || '')
