@@ -76,21 +76,20 @@ const safeString = (value) => {
 
 // Group products by dosage form using API data
 const productsByForm = {};
-const formDetailsMap = {};
 
-// First, create a map of dosage forms for quick lookup
+// First, initialize ALL dosage forms from the database
 if (dosingForms.length > 0) {
   dosingForms.forEach(form => {
     try {
       const formName = safeString(form.name || form.Name || 'Other');
-      const formSlug = safeString(form.slug || form.Slug || formName).toLowerCase().replace(/\s+/g, '-');
 
-      formDetailsMap[formSlug] = {
-        name: formName,
+      // Initialize the form with its details and empty products array
+      productsByForm[formName] = {
         description: safeString(form.Discription || form.discription || form.Description || form.description || ''),
         servingInfo: safeString(form.serving_info || form.ServingInfo || ''),
         instructions: safeString(form.instructions || form.Instructions || ''),
-        brands: safeString(form.brands || form.Brands || '')
+        brands: safeString(form.brands || form.Brands || ''),
+        products: []
       };
     } catch (err) {
       console.error('Error processing dosing form:', form, err);
@@ -98,7 +97,7 @@ if (dosingForms.length > 0) {
   });
 }
 
-// Group products by their dosage form
+// Then, add products to their respective dosage forms
 if (dosingProducts.length > 0) {
   dosingProducts.forEach(product => {
     try {
@@ -111,16 +110,13 @@ if (dosingProducts.length > 0) {
         formName = safeString(dosingForm.name);
       }
 
-      const formSlug = safeString(dosingForm?.Slug || dosingForm?.slug || formName).toLowerCase().replace(/\s+/g, '-');
-
-      // Initialize form group if not exists
+      // Initialize form group if it doesn't exist (for products with unrecognized forms)
       if (!productsByForm[formName]) {
-        const formDetails = formDetailsMap[formSlug] || {};
         productsByForm[formName] = {
-          description: formDetails.description || '',
-          servingInfo: formDetails.servingInfo || '',
-          instructions: formDetails.instructions || '',
-          brands: formDetails.brands || '',
+          description: '',
+          servingInfo: '',
+          instructions: '',
+          brands: '',
           products: []
         };
       }
@@ -198,34 +194,40 @@ if (dosingProducts.length > 0) {
                 <p class="mb-4 text-base leading-relaxed text-black" set:html={formData.servingInfo}></p>
               )}
 
-            {/* Products Table */}
-            <div class="overflow-x-auto mb-4">
-              <table class="w-full border-collapse">
-                <thead>
-                  <tr class="bg-black text-white">
-                    <th class="border border-black px-4 py-3 text-left font-bold">Product</th>
-                    <th class="border border-black px-4 py-3 text-left font-bold">Cannabinoids per Dose</th>
-                    <th class="border border-black px-4 py-3 text-left font-bold">Ingredients</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {formData.products.map((product, idx) => (
-                    <tr key={idx} class={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td class="border border-gray-300 px-4 py-3 align-top text-black">
-                        <div class="font-medium">{product.product}</div>
-                        {product.quantity && <div class="text-sm text-gray-700">{product.quantity}</div>}
-                      </td>
-                      <td class="border border-gray-300 px-4 py-3 align-top whitespace-pre-line text-black">
-                        {product.cannabinoids || 'Varies by Strain/Dose'}
-                      </td>
-                      <td class="border border-gray-300 px-4 py-3 align-top text-black">
-                        {product.ingredients || '-'}
-                      </td>
+            {/* Products Table or No Products Message */}
+            {formData.products.length > 0 ? (
+              <div class="overflow-x-auto mb-4">
+                <table class="w-full border-collapse">
+                  <thead>
+                    <tr class="bg-black text-white">
+                      <th class="border border-black px-4 py-3 text-left font-bold">Product</th>
+                      <th class="border border-black px-4 py-3 text-left font-bold">Cannabinoids per Dose</th>
+                      <th class="border border-black px-4 py-3 text-left font-bold">Ingredients</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {formData.products.map((product, idx) => (
+                      <tr key={idx} class={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td class="border border-gray-300 px-4 py-3 align-top text-black">
+                          <div class="font-medium">{product.product}</div>
+                          {product.quantity && <div class="text-sm text-gray-700">{product.quantity}</div>}
+                        </td>
+                        <td class="border border-gray-300 px-4 py-3 align-top whitespace-pre-line text-black">
+                          {product.cannabinoids || 'Varies by Strain/Dose'}
+                        </td>
+                        <td class="border border-gray-300 px-4 py-3 align-top text-black">
+                          {product.ingredients || '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div class="mb-4 p-4 bg-gray-50 border border-gray-300 rounded text-center">
+                <p class="text-sm text-gray-600 italic">No products currently available for this dosage form.</p>
+              </div>
+            )}
 
             {/* Brands */}
             {formData.brands && (
