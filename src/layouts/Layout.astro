@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import AgeGate from '../components/AgeGate.astro';
 
 export interface Props {
   title: string;
@@ -7,6 +8,53 @@ export interface Props {
 }
 
 const { title, description = "Mint Cannabis Deals" } = Astro.props;
+
+// Fetch categories for navigation
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+let categories: any[] = [];
+
+try {
+  const response = await fetch(`${API_BASE}/categories?pagination[pageSize]=100`);
+  if (response.ok) {
+    const data = await response.json();
+    console.log('Categories API response:', data);
+
+    categories = (data?.data || []).map((cat: any) => {
+      // Handle both direct and nested attribute structures
+      const catData = cat.attributes || cat;
+      const name = catData.Name || catData.name || '';
+      const slug = catData.slug || catData.Slug || cat.documentId || '';
+
+      console.log('Processing category:', { name, slug });
+
+      return {
+        name,
+        slug,
+        icon: getCategoryIcon(slug)
+      };
+    }).filter((cat: any) => cat.name && cat.slug);
+
+    console.log('Final categories for nav:', categories.length);
+  } else {
+    console.error('Categories API error:', response.status, response.statusText);
+  }
+} catch (error) {
+  console.error('Error fetching categories for nav:', error);
+}
+
+function getCategoryIcon(slug: string) {
+  const icons: Record<string, string> = {
+    'flower': '🌿',
+    'pre-rolls': '🚬',
+    'vaporizers': '💨',
+    'concentrates': '🍯',
+    'edibles': '🍭',
+    'topicals': '🧴',
+    'cartridges': '🖊️',
+    'tinctures': '💧'
+  };
+  return icons[slug] || '🌱';
+}
 ---
 
 <!DOCTYPE html>
@@ -20,6 +68,8 @@ const { title, description = "Mint Cannabis Deals" } = Astro.props;
     <title>{title}</title>
   </head>
   <body class="bg-gray-50 min-h-screen">
+    <AgeGate />
+
     <header class="bg-black shadow-lg">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center py-6">
@@ -33,13 +83,42 @@ const { title, description = "Mint Cannabis Deals" } = Astro.props;
             </a>
           </div>
 
-          <nav class="hidden md:flex space-x-8">
+          <nav class="hidden md:flex space-x-8 items-center">
             <a href="/" class="text-gray-200 hover:text-yellow-600 px-3 py-2 rounded-md text-sm font-semibold">
               Home
             </a>
-            <a href="/categories" class="text-gray-200 hover:text-emerald-600 px-3 py-2 rounded-md text-sm font-semibold">
-              Categories
-            </a>
+
+            <!-- Categories Dropdown -->
+            <div class="relative" id="categoriesDropdown">
+              <a href="/categories" class="text-gray-200 hover:text-emerald-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
+                Categories
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </a>
+
+              <!-- Dropdown Menu -->
+              <div id="categoriesMenu" class="absolute left-0 mt-1 w-72 bg-black border-2 border-emerald-600 rounded-lg shadow-2xl hidden z-50">
+                <div class="py-2 max-h-96 overflow-y-auto">
+                  <div class="px-4 py-3 border-b-2 border-emerald-800 bg-emerald-900">
+                    <p class="text-yellow-400 font-bold text-sm">Browse by Category</p>
+                  </div>
+                  {categories.map(category => (
+                    <a
+                      href={`/${category.slug}`}
+                      class="block px-4 py-3 text-sm text-gray-200 hover:bg-emerald-900 hover:text-emerald-400 transition-colors border-b border-gray-800 last:border-b-0"
+                    >
+                      <span class="text-lg mr-2">{category.icon}</span>
+                      <span class="font-medium">{category.name}</span>
+                    </a>
+                  ))}
+                  <a href="/categories" class="block px-4 py-3 text-sm text-yellow-400 hover:bg-yellow-900 hover:text-yellow-300 font-bold text-center border-t-2 border-emerald-800">
+                    📋 View All Categories →
+                  </a>
+                </div>
+              </div>
+            </div>
+
             <a href="/stores" class="text-gray-200 hover:text-green-600 px-3 py-2 rounded-md text-sm font-semibold">
               Locations
             </a>
@@ -64,5 +143,44 @@ const { title, description = "Mint Cannabis Deals" } = Astro.props;
         </div>
       </div>
     </footer>
+
+    <script>
+      // Categories dropdown functionality
+      const categoriesDropdown = document.getElementById('categoriesDropdown');
+      const categoriesMenu = document.getElementById('categoriesMenu');
+
+      if (categoriesDropdown && categoriesMenu) {
+        let isOpen = false;
+        let closeTimeout: NodeJS.Timeout | null = null;
+
+        // Open dropdown on mouseenter
+        categoriesDropdown.addEventListener('mouseenter', () => {
+          if (closeTimeout) clearTimeout(closeTimeout);
+          categoriesMenu.classList.remove('hidden');
+          isOpen = true;
+        });
+
+        // Keep open when hovering over menu
+        categoriesMenu.addEventListener('mouseenter', () => {
+          if (closeTimeout) clearTimeout(closeTimeout);
+          isOpen = true;
+        });
+
+        // Close dropdown with delay on mouseleave
+        categoriesDropdown.addEventListener('mouseleave', () => {
+          closeTimeout = setTimeout(() => {
+            categoriesMenu.classList.add('hidden');
+            isOpen = false;
+          }, 200);
+        });
+
+        categoriesMenu.addEventListener('mouseleave', () => {
+          closeTimeout = setTimeout(() => {
+            categoriesMenu.classList.add('hidden');
+            isOpen = false;
+          }, 200);
+        });
+      }
+    </script>
   </body>
 </html>

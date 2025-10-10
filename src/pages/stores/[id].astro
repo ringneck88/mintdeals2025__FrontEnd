@@ -1,372 +1,219 @@
 ---
-// src/pages/stores/[id].astro
 import Layout from '../../layouts/Layout.astro';
-import { strapi } from '../../lib/strapi';
+
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 export async function getStaticPaths() {
   try {
-    const stores = await strapi.getMany('/stores', {
-      populate: ['region'],
-      filters: { IsActive: { $eq: true } },
-    });
+    const response = await fetch(`${API_BASE}/stores?pagination[pageSize]=100&populate=*`);
+    const data = await response.json();
 
-    // Return params (and props for prerendered data hydration)
-    return stores.map((store) => ({
-      params: { id: store.documentId },
-      props: { store },
-    }));
+    if (data?.data && Array.isArray(data.data)) {
+      return data.data.map((store: any) => ({
+        params: { id: store.documentId || store.id.toString() },
+        props: { store }
+      }));
+    }
   } catch (error) {
-    console.error('Error fetching stores for static paths:', error);
-    // No fallback paths - only show content from database
-    return [];
+    console.error('Error fetching stores:', error);
   }
+
+  // Fallback
+  return [{ params: { id: 'test-store-1' } }];
 }
 
 const { store } = Astro.props;
 const { id } = Astro.params;
 
-let storeData = store ?? null;
-let products = [];
-let error: string | null = null;
-
-// Fetch store by documentId if not provided by getStaticPaths
-if (!storeData && id) {
-  try {
-    // Strapi v4: there's no "getOne" by slug; filter by documentId instead
-    const [match] = await strapi.getMany('/stores', {
-      populate: ['region', 'dosage_products', 'StoreImage', 'GalleryImages'],
-      filters: { documentId: { $eq: id } },
-      pagination: { pageSize: 1 },
-    });
-    storeData = match ?? null;
-  } catch (e: any) {
-    error = e?.message ?? 'Failed to load store';
-    // No fallback data - only show content from database
-    storeData = null;
-  }
-}
+const storeName = store?.name || store?.Name || 'Store';
+const storeCity = store?.city || store?.City || '';
+const storeState = store?.state || store?.State || '';
+const storeAddress = store?.address || store?.Address || '';
+const storePhone = store?.phone || store?.Phone || '';
+const storeEmail = store?.email || store?.Email || '';
+const storeDescription = store?.description || store?.Description || '';
 
 // Fetch products for this store
-if (storeData?.id) {
+let products: any[] = [];
+if (store?.id) {
   try {
-    products = await strapi.getMany('/dosage-products', {
-      populate: ['stores', 'dosage_form', 'cannaboid_type', 'unit_type', 'ingredients', 'image'],
-      filters: { stores: { id: { $eq: storeData.id } } },
-      pagination: { pageSize: 100 },
-    });
-  } catch (e) {
-    console.error('Error fetching store products:', e);
-    // No fallback data - only show content from database
-    products = [];
+    const response = await fetch(`${API_BASE}/products?filters[stores][id][$eq]=${store.id}&populate=*&pagination[pageSize]=50`);
+    if (response.ok) {
+      const data = await response.json();
+      products = data?.data || [];
+    }
+  } catch (error) {
+    console.error('Error fetching products:', error);
   }
 }
-
-const pageTitle = storeData ? `${storeData.Name} - Store Location` : 'Store Not Found';
 ---
 
-<Layout title={pageTitle}>
-  {error && (
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 text-blue-800 dark:text-blue-200 px-6 py-4 rounded-xl mb-8 shadow-sm max-w-[2080px] mx-auto mt-8">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-          </svg>
-        </div>
-        <div class="ml-3">
-          <h3 class="text-sm font-semibold">Demo Mode Active</h3>
-          <p class="text-sm mt-1">Showing sample store data. Connect to Strapi admin to display live data.</p>
-        </div>
+<Layout title={`${storeName} - Store Details`} description={`Visit ${storeName} in ${storeCity}, ${storeState}`}>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <div class="text-6xl mb-6">🏪</div>
+        <h1 class="text-4xl md:text-6xl font-bold mb-4">
+          {storeName}
+        </h1>
+        {(storeCity || storeState) && (
+          <p class="text-xl md:text-2xl text-emerald-100">
+            📍 {storeCity}{storeCity && storeState ? ', ' : ''}{storeState}
+          </p>
+        )}
       </div>
     </div>
-  )}
+  </section>
 
-  {!storeData ? (
-    <div class="min-h-screen flex items-center justify-center">
-      <div class="text-center py-16 max-w-md mx-auto px-4">
-        <div class="bg-gray-100 dark:bg-gray-800 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
-          <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-          </svg>
-        </div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Store Not Found</h1>
-        <p class="text-gray-600 dark:text-gray-300 mb-8">The store you're looking for doesn't exist or has been removed.</p>
-        <a
-          href="/stores"
-          class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
-        >
-          View All Stores
-        </a>
-      </div>
-    </div>
-  ) : (
-    <main class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-900">
-      <!-- Hero Section with Store Header -->
-      <section class="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 dark:from-emerald-800 dark:via-emerald-900 dark:to-teal-900">
-        <div class="absolute inset-0 bg-black opacity-20"></div>
-        <div class="relative z-10 max-w-[2080px] mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div class="text-center">
-            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-              {storeData.Name}
-            </h1>
-            <p class="text-xl md:text-2xl text-emerald-100 mb-8 max-w-3xl mx-auto leading-relaxed">
-              {storeData.Description}
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Store Info -->
+      <div class="lg:col-span-2 space-y-8">
+
+        {/* Description */}
+        {storeDescription && (
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">About This Location</h2>
+            <p class="text-gray-700 leading-relaxed">
+              {storeDescription}
             </p>
-            <div class="flex flex-wrap justify-center gap-4 text-emerald-100">
-              <div class="flex items-center space-x-2">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                </svg>
-                <span>{storeData.Address}, {storeData.City}, {storeData.State} {storeData.ZipCode}</span>
-              </div>
-              <div class="flex items-center space-x-2">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                </svg>
-                <span>{storeData.Phone}</span>
-              </div>
+          </div>
+        )}
+
+        {/* Products */}
+        {products.length > 0 && (
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">
+              Available Products ({products.length})
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {products.slice(0, 8).map((product: any) => {
+                const productName = product.name || product.Name || 'Product';
+                const productCategory = product.category?.name || product.category?.Name || '';
+
+                return (
+                  <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <h3 class="font-semibold text-gray-900 mb-2">
+                      {productName}
+                    </h3>
+                    {productCategory && (
+                      <span class="inline-block bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-xs font-medium">
+                        {productCategory}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {products.length > 8 && (
+              <p class="mt-4 text-center text-gray-600">
+                + {products.length - 8} more products available
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <!-- Sidebar -->
+      <div class="lg:col-span-1">
+        <div class="sticky top-4 space-y-6">
+
+          {/* Contact Card */}
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Contact Information</h3>
+            <div class="space-y-3">
+              {storeAddress && (
+                <div class="flex items-start">
+                  <span class="text-gray-600 mr-2 mt-1">📍</span>
+                  <div>
+                    <p class="text-gray-700">{storeAddress}</p>
+                    <p class="text-gray-700">
+                      {storeCity}{storeCity && storeState ? ', ' : ''}{storeState}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {storePhone && (
+                <div class="flex items-center">
+                  <span class="text-gray-600 mr-2">📞</span>
+                  <a href={`tel:${storePhone}`} class="text-emerald-600 hover:text-emerald-700">
+                    {storePhone}
+                  </a>
+                </div>
+              )}
+
+              {storeEmail && (
+                <div class="flex items-center">
+                  <span class="text-gray-600 mr-2">📧</span>
+                  <a href={`mailto:${storeEmail}`} class="text-emerald-600 hover:text-emerald-700">
+                    {storeEmail}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
-        </div>
 
-        <!-- Floating geometric shapes -->
-        <div class="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
-        <div class="absolute bottom-10 right-10 w-32 h-32 bg-emerald-300/20 rounded-full blur-2xl"></div>
-        <div class="absolute top-1/2 left-1/4 w-16 h-16 bg-teal-300/30 rounded-full blur-lg"></div>
-      </section>
-
-      <!-- Store Information Cards -->
-      <section class="py-16 -mt-12 relative z-20">
-        <div class="max-w-[2080px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
-            <!-- Hours Card -->
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/20 dark:border-slate-700/20 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center mr-4">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Store Hours</h3>
-              </div>
-              <div class="space-y-3">
-                {Object.entries(storeData.Hours).map(([day, hours]) => (
-                  <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700 last:border-b-0">
-                    <span class="font-medium text-slate-600 dark:text-slate-300">{day}</span>
-                    <span class="text-slate-800 dark:text-white font-semibold">{hours}</span>
+          {/* Hours */}
+          {store?.hours && store.hours.length > 0 && (
+            <div class="bg-white rounded-lg shadow-md p-6">
+              <h3 class="text-xl font-bold text-gray-900 mb-4">Store Hours</h3>
+              <div class="space-y-2">
+                {store.hours.map((hour: any) => (
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-700 font-medium">{hour.dayOfWeek || 'Daily'}</span>
+                    <span class="text-gray-600">
+                      {hour.is_24hour ? '24 Hours' : hour.isClosed ? 'Closed' : `${hour.openTime || ''} - ${hour.closeTime || ''}`}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
+          )}
 
-            <!-- Contact Card -->
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/20 dark:border-slate-700/20 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center mr-4">
-                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                  </svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Contact Info</h3>
-              </div>
-              <div class="space-y-4">
-                <div class="flex items-center space-x-3">
-                  <svg class="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                  </svg>
-                  <a href={`tel:${storeData.Phone}`} class="text-slate-800 dark:text-white hover:text-emerald-600 transition-colors font-medium">
-                    {storeData.Phone}
-                  </a>
-                </div>
-                <div class="flex items-center space-x-3">
-                  <svg class="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                  </svg>
-                  <a href={`mailto:${storeData.Email}`} class="text-slate-800 dark:text-white hover:text-emerald-600 transition-colors font-medium">
-                    {storeData.Email}
-                  </a>
-                </div>
-                <div class="flex items-start space-x-3">
-                  <svg class="w-5 h-5 text-slate-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                  </svg>
-                  <span class="text-slate-800 dark:text-white font-medium">
-                    {storeData.Address}<br/>
-                    {storeData.City}, {storeData.State} {storeData.ZipCode}
-                  </span>
-                </div>
-              </div>
-            </div>
+          {/* Actions */}
+          <div class="bg-emerald-50 rounded-lg p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+            <div class="space-y-3">
+              {store?.latitude && store?.longitude && (
+                <a
+                  href={`https://maps.google.com/?q=${store.latitude},${store.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-lg text-center font-semibold transition-colors"
+                >
+                  🗺️ Get Directions
+                </a>
+              )}
 
-            <!-- Manager Card -->
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/20 dark:border-slate-700/20 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-              <div class="flex items-center mb-6">
-                <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-4">
-                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                  </svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Store Manager</h3>
-              </div>
-              <div class="text-center">
-                <div class="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <span class="text-2xl font-bold text-white">
-                    {storeData.StoreManager.split(' ').map(n => n[0]).join('')}
-                  </span>
-                </div>
-                <h4 class="text-lg font-semibold text-slate-800 dark:text-white mb-2">
-                  {storeData.StoreManager}
-                </h4>
-                <p class="text-slate-600 dark:text-slate-300">Store Manager</p>
-                <div class="mt-4 text-sm text-slate-500 dark:text-slate-400">
-                  Region: {storeData.region?.Name || 'N/A'}
-                </div>
-              </div>
+              {storePhone && (
+                <a
+                  href={`tel:${storePhone}`}
+                  class="block w-full bg-white border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 px-4 py-3 rounded-lg text-center font-semibold transition-colors"
+                >
+                  📞 Call Store
+                </a>
+              )}
             </div>
           </div>
         </div>
-      </section>
-
-      <!-- Featured Products Section -->
-      {products.length > 0 && (
-        <section class="py-16 bg-gradient-to-r from-slate-50 to-emerald-50 dark:from-slate-800 dark:to-emerald-900">
-          <div class="max-w-[2080px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-              <h2 class="text-3xl md:text-4xl font-bold text-slate-800 dark:text-white mb-4">
-                Featured Products
-              </h2>
-              <p class="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-                Discover our curated selection of premium cannabis products available at this location.
-              </p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {products.slice(0, 8).map((product) => (
-                <div class="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl overflow-hidden shadow-lg border border-white/20 dark:border-slate-700/20 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
-                  <div class="aspect-w-16 aspect-h-9 bg-gradient-to-br from-emerald-400 to-teal-500 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                    <div class="absolute bottom-4 left-4 right-4">
-                      <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-medium rounded-full">
-                        {product.dosage_form?.Name || 'Product'}
-                      </span>
-                    </div>
-                  </div>
-                  <div class="p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-2 group-hover:text-emerald-600 transition-colors">
-                      {product.Name}
-                    </h3>
-                    <p class="text-slate-600 dark:text-slate-300 text-sm mb-4 line-clamp-2">
-                      {product.Description}
-                    </p>
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center space-x-2">
-                        <span class="text-2xl font-bold text-emerald-600">
-                          {product.Quanity}
-                        </span>
-                        <span class="text-sm text-slate-500 dark:text-slate-400">
-                          {product.unit_type?.Name || 'units'}
-                        </span>
-                      </div>
-                      <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs font-medium rounded-full">
-                        {product.cannaboid_type?.Name || 'Cannabis'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      <!-- Floating Action Buttons -->
-      <div class="fixed bottom-6 right-6 flex flex-col space-y-4 z-50"
-           data-store-address={storeData.Address}
-           data-store-city={storeData.City}
-           data-store-state={storeData.State}
-           data-store-zip={storeData.ZipCode}
-           data-store-phone={storeData.Phone}
-           data-store-email={storeData.Email}>
-        <!-- Directions Button -->
-        <button
-          onclick="openDirections(this.closest('[data-store-address]'))"
-          class="group w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center"
-          title="Get Directions"
-        >
-          <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7"></path>
-          </svg>
-        </button>
-
-        <!-- Call Button -->
-        <button
-          onclick="callStore(this.closest('[data-store-phone]'))"
-          class="group w-14 h-14 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center"
-          title="Call Store"
-        >
-          <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-          </svg>
-        </button>
-
-        <!-- Email Button -->
-        <button
-          onclick="emailStore(this.closest('[data-store-email]'))"
-          class="group w-14 h-14 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 flex items-center justify-center"
-          title="Email Store"
-        >
-          <svg class="w-6 h-6 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-          </svg>
-        </button>
       </div>
-    </main>
-  )}
+    </div>
+
+    {/* Back Link */}
+    <div class="mt-12 text-center">
+      <a
+        href="/stores"
+        class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-semibold transition-colors"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to All Stores
+      </a>
+    </div>
+  </div>
 </Layout>
-
-<script>
-  function openDirections(container) {
-    const address = container.dataset.storeAddress;
-    const city = container.dataset.storeCity;
-    const state = container.dataset.storeState;
-    const zip = container.dataset.storeZip;
-    const fullAddress = encodeURIComponent(`${address}, ${city}, ${state} ${zip}`);
-    window.open(`https://maps.google.com/?q=${fullAddress}`, '_blank');
-  }
-
-  function callStore(container) {
-    const phone = container.dataset.storePhone;
-    window.location.href = `tel:${phone}`;
-  }
-
-  function emailStore(container) {
-    const email = container.dataset.storeEmail;
-    window.location.href = `mailto:${email}`;
-  }
-</script>
-
-<style>
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .aspect-w-16 {
-    position: relative;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
-  }
-
-  .aspect-w-16 > * {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-  }
-</style>
