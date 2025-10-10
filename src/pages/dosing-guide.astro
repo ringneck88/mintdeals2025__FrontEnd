@@ -169,26 +169,27 @@ if (dosingProducts.length > 0) {
   </div>
 
   <!-- Main Content -->
-  <div class="max-w-[2080px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="bg-white min-h-screen">
+    <div class="max-w-[2080px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    {Object.keys(productsByForm).length > 0 ? (
-      <>
-        {/* Dosage and Strength Introduction */}
-        <div class="mb-8">
-          <p class="text-base leading-relaxed text-black">
-            <strong>Dosage and Strength:</strong> Product dosage and strength are dependent on personal marijuana use, tolerance, and qualifying condition. New users should start with the lowest dose possible and increase the dosage slowly to determine the appropriate dose. Please consult your doctor for condition-specific questions.
-          </p>
-        </div>
+      {Object.keys(productsByForm).length > 0 ? (
+        <>
+          {/* Dosage and Strength Introduction */}
+          <div class="mb-8">
+            <p class="text-base leading-relaxed text-black">
+              <strong>Dosage and Strength:</strong> Product dosage and strength are dependent on personal marijuana use, tolerance, and qualifying condition. New users should start with the lowest dose possible and increase the dosage slowly to determine the appropriate dose. Please consult your doctor for condition-specific questions.
+            </p>
+          </div>
 
-        {/* Dosage Forms */}
-        {Object.entries(productsByForm).map(([formName, formData]) => (
-          <div class="mb-10" key={formName}>
-            <h2 class="text-xl font-bold mb-3">Dosage Form: {formName}</h2>
+          {/* Dosage Forms */}
+          {Object.entries(productsByForm).map(([formName, formData]) => (
+            <div class="mb-10" key={formName}>
+              <h2 class="text-xl font-bold mb-3 text-black">Dosage Form: {formName}</h2>
 
-            {/* Serving Info */}
-            {formData.servingInfo && (
-              <p class="mb-4 text-base leading-relaxed text-black" set:html={formData.servingInfo}></p>
-            )}
+              {/* Serving Info */}
+              {formData.servingInfo && (
+                <p class="mb-4 text-base leading-relaxed text-black" set:html={formData.servingInfo}></p>
+              )}
 
             {/* Products Table */}
             <div class="overflow-x-auto mb-4">
@@ -203,14 +204,14 @@ if (dosingProducts.length > 0) {
                 <tbody>
                   {formData.products.map((product, idx) => (
                     <tr key={idx} class={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td class="border border-gray-300 px-4 py-3 align-top">
+                      <td class="border border-gray-300 px-4 py-3 align-top text-black">
                         <div class="font-medium">{product.product}</div>
-                        {product.quantity && <div class="text-sm text-gray-600">{product.quantity}</div>}
+                        {product.quantity && <div class="text-sm text-gray-700">{product.quantity}</div>}
                       </td>
-                      <td class="border border-gray-300 px-4 py-3 align-top whitespace-pre-line">
+                      <td class="border border-gray-300 px-4 py-3 align-top whitespace-pre-line text-black">
                         {product.cannabinoids || 'Varies by Strain/Dose'}
                       </td>
-                      <td class="border border-gray-300 px-4 py-3 align-top">
+                      <td class="border border-gray-300 px-4 py-3 align-top text-black">
                         {product.ingredients || '-'}
                       </td>
                     </tr>
@@ -226,21 +227,22 @@ if (dosingProducts.length > 0) {
               </p>
             )}
           </div>
-        ))}
-      </>
-    ) : (
-      <div class="text-center py-16">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-        </svg>
-        <h3 class="mt-2 text-lg font-medium text-gray-900">No Dosing Data Available</h3>
-        <p class="mt-1 text-sm text-gray-500">
-          {apiError ?
-            `Error loading data: ${apiError}. Please ensure the API server is running.` :
-            `No dosing information is available. Please check that the API server is running and the content is published.`}
-        </p>
-      </div>
-    )}
+          ))}
+        </>
+      ) : (
+        <div class="text-center py-16">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <h3 class="mt-2 text-lg font-medium text-black">No Dosing Data Available</h3>
+          <p class="mt-1 text-sm text-black">
+            {apiError ?
+              `Error loading data: ${apiError}. Please ensure the API server is running.` :
+              `No dosing information is available. Please check that the API server is running and the content is published.`}
+          </p>
+        </div>
+      )}
+    </div>
   </div>
 </Layout>
 
