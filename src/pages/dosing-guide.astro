@@ -74,36 +74,36 @@ const safeString = (value) => {
   return String(value);
 };
 
-// Function to get color scheme for any dosage form
+// Function to get color scheme for any dosage form - using site's green and yellow
 const getColorScheme = (formName) => {
   const formLower = formName.toLowerCase();
 
-  // Color schemes based on dosage form type
+  // Color schemes based on dosage form type - using emerald (green) and yellow
   if (formLower.includes('edible') || formLower.includes('oral') || formLower === 'edibles') {
     return {
-      gradient: 'from-green-600 to-green-700',
-      bg: 'bg-green-50 dark:bg-green-900/20'
+      gradient: 'from-emerald-600 to-emerald-700',
+      bg: 'bg-emerald-50 dark:bg-emerald-900/20'
     };
   } else if (formLower.includes('inhal') || formLower.includes('smoke') || formLower.includes('vapor')) {
     return {
-      gradient: 'from-blue-600 to-blue-700',
-      bg: 'bg-blue-50 dark:bg-blue-900/20'
+      gradient: 'from-yellow-500 to-yellow-600',
+      bg: 'bg-yellow-50 dark:bg-yellow-900/20'
     };
   } else if (formLower.includes('sublingual') || formLower.includes('tincture')) {
     return {
-      gradient: 'from-purple-600 to-purple-700',
-      bg: 'bg-purple-50 dark:bg-purple-900/20'
+      gradient: 'from-emerald-500 to-teal-600',
+      bg: 'bg-teal-50 dark:bg-teal-900/20'
     };
   } else if (formLower.includes('topical') || formLower.includes('cream') || formLower.includes('lotion')) {
     return {
-      gradient: 'from-orange-600 to-orange-700',
-      bg: 'bg-orange-50 dark:bg-orange-900/20'
+      gradient: 'from-yellow-600 to-amber-600',
+      bg: 'bg-amber-50 dark:bg-amber-900/20'
     };
   } else {
-    // Default color scheme
+    // Default color scheme - emerald green
     return {
-      gradient: 'from-gray-600 to-gray-700',
-      bg: 'bg-gray-50 dark:bg-gray-900/20'
+      gradient: 'from-emerald-600 to-emerald-700',
+      bg: 'bg-emerald-50 dark:bg-emerald-900/20'
     };
   }
 };
@@ -242,17 +242,17 @@ if (dosingProducts.length > 0) {
     {Object.keys(productsByForm).length > 0 ? (
       <>
         {/* Important Notice Section */}
-        <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 mb-8">
+        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 mb-8">
           <div class="px-6 py-4">
             <div class="flex">
               <div class="flex-shrink-0">
-                <svg class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
               </div>
               <div class="ml-3">
-                <h3 class="text-lg font-semibold text-amber-800 dark:text-amber-200">Dosage and Strength</h3>
-                <p class="mt-2 text-sm text-amber-700 dark:text-amber-300">
+                <h3 class="text-lg font-semibold text-yellow-800 dark:text-yellow-200">Dosage and Strength</h3>
+                <p class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
                   Product dosage and strength is dependent on personal marijuana use, tolerance and qualifying condition.
                   Please follow the medication directions as directed. Please consult your doctor for condition specific questions.
                 </p>
@@ -334,35 +334,35 @@ if (dosingProducts.length > 0) {
         })}
 
         {/* Additional Information */}
-        <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Important Information</h3>
-          <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+        <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-emerald-900 dark:text-emerald-100 mb-4">Important Information</h3>
+          <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
             <li class="flex items-start">
-              <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               Always start with a low dose and gradually increase as needed
             </li>
             <li class="flex items-start">
-              <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               Consult with your healthcare provider for personalized dosing recommendations
             </li>
             <li class="flex items-start">
-              <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               Keep all cannabis products out of reach of children and pets
             </li>
             <li class="flex items-start">
-              <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               Store products in a cool, dry place away from direct sunlight
             </li>
             <li class="flex items-start">
-              <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               Do not drive or operate machinery after using cannabis products
@@ -391,9 +391,9 @@ if (dosingProducts.length > 0) {
     )}
 
     {/* API Status Debug Info */}
-    <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-      <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">Data Status</h4>
-      <p class="text-xs text-blue-700 dark:text-blue-300">
+    <div class="mt-8 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4">
+      <h4 class="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-2">Data Status</h4>
+      <p class="text-xs text-emerald-700 dark:text-emerald-300">
         Products Loaded: {dosingProducts.length}<br/>
         Dosage Forms: {dosingForms.length}<br/>
         Ingredients: {dosingIngredients.length}<br/>
@@ -401,7 +401,7 @@ if (dosingProducts.length > 0) {
       </p>
       {dosingProducts.length > 0 && (
         <details class="mt-2">
-          <summary class="text-xs cursor-pointer text-blue-600 dark:text-blue-400">View Raw Data</summary>
+          <summary class="text-xs cursor-pointer text-emerald-600 dark:text-emerald-400">View Raw Data</summary>
           <pre class="text-xs mt-2 p-2 bg-white dark:bg-gray-800 rounded overflow-auto max-h-32">
             {JSON.stringify({ dosingProducts, dosingForms, dosingIngredients }, null, 2)}
           </pre>

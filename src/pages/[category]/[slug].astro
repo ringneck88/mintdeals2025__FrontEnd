@@ -10,8 +10,7 @@ function getCategoryIcon(slug: string) {
     'pre-rolls': '🚬',
     'vaporizers': '💨',
     'concentrates': '🍯',
-    'edibles': '🍭',
-    'topicals': '🧴',
+    'edibles': '🍭',    'topicals': '🧴',
     'cartridges': '🖊️',
     'tinctures': '💧'
   };
@@ -77,7 +76,7 @@ try {
 <Layout title={pageTitle} description={description}>
   <!-- Breadcrumb Navigation -->
   <nav class="py-4 bg-slate-50 dark:bg-slate-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <div class="flex items-center space-x-2 text-sm">
         <a href="/" class="text-emerald-600 hover:text-emerald-800">Home</a>
         <span class="text-slate-400">/</span>
@@ -93,7 +92,7 @@ try {
   <!-- Hero Section -->
   <section class="relative bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 dark:from-emerald-800 dark:via-emerald-900 dark:to-teal-900">
     <div class="absolute inset-0 bg-black opacity-20"></div>
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+    <div class="relative z-10 px-4 py-24 mx-auto text-center max-w-7xl sm:px-6 lg:px-8">
       <div class="mb-8 text-8xl">{categoryIcon}</div>
       <h1 class="mb-6 text-4xl font-bold tracking-tight text-white md:text-6xl">
         {categoryName} in {stateName}
@@ -114,7 +113,7 @@ try {
 
   <!-- Featured Products Section -->
   <section id="products" class="py-16 bg-white dark:bg-gray-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
           {categoryName} Products
@@ -125,7 +124,7 @@ try {
       </div>
 
       {products.length > 0 ? (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product: any) => {
             const productName = product.name || product.Name || 'Product';
             const productDescription = product.description || product.Description || '';
@@ -135,31 +134,31 @@ try {
               null;
 
             return (
-              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              <div class="overflow-hidden transition-shadow duration-300 bg-white rounded-lg shadow-md dark:bg-gray-800 hover:shadow-xl">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
                     alt={productName}
-                    class="w-full h-48 object-cover"
+                    class="object-cover w-full h-48"
                   />
                 ) : (
-                  <div class="w-full h-48 bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                  <div class="flex items-center justify-center w-full h-48 bg-gradient-to-br from-emerald-500 to-teal-600">
                     <span class="text-6xl">{categoryIcon}</span>
                   </div>
                 )}
 
                 <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                  <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
                     {productName}
                   </h3>
 
                   {productDescription && (
-                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
+                    <p class="mb-4 text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
                       {productDescription}
                     </p>
                   )}
 
-                  <span class="inline-block bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-1 rounded-full text-xs font-medium">
+                  <span class="inline-block px-3 py-1 text-xs font-medium rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200">
                     {categoryName}
                   </span>
                 </div>
@@ -169,7 +168,7 @@ try {
         </div>
       ) : (
         <div class="py-12 text-center">
-          <div class="text-6xl mb-4">{categoryIcon}</div>
+          <div class="mb-4 text-6xl">{categoryIcon}</div>
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">No Products Available</h3>
           <p class="text-gray-600 dark:text-gray-300">Check back soon for {categoryName.toLowerCase()} products!</p>
         </div>
@@ -179,7 +178,7 @@ try {
 
   <!-- Dispensaries Section -->
   <section id="stores" class="py-16 bg-gray-50 dark:bg-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
           Dispensaries in {stateName}
@@ -190,9 +189,9 @@ try {
       </div>
 
       {stores.length > 0 ? (
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {stores.map((store: any) => (
-            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+            <div class="p-6 transition-shadow bg-white rounded-lg shadow-md dark:bg-gray-700 hover:shadow-lg">
               <div class="flex items-center mb-4">
                 <div class="flex items-center justify-center w-12 h-12 mr-4 text-xl text-white rounded-lg bg-emerald-500">
                   🏪
@@ -216,7 +215,7 @@ try {
               <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-600">
                 <a
                   href={`/location/${store.slug}`}
-                  class="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition-colors"
+                  class="inline-block px-4 py-2 text-sm font-semibold text-white transition-colors rounded-lg bg-emerald-600 hover:bg-emerald-700"
                 >
                   View Store Details
                 </a>
@@ -226,7 +225,7 @@ try {
         </div>
       ) : (
         <div class="py-12 text-center">
-          <div class="text-6xl mb-4">🏪</div>
+          <div class="mb-4 text-6xl">🏪</div>
           <h3 class="text-lg font-medium text-gray-900 dark:text-white">Finding Dispensaries</h3>
           <p class="text-gray-600 dark:text-gray-300">We're updating our dispensary database for {stateName}. Check back soon!</p>
         </div>
@@ -236,7 +235,7 @@ try {
 
   <!-- Related States -->
   <section class="py-16 bg-emerald-50 dark:bg-emerald-900/20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
           {categoryName} in Other States
@@ -246,7 +245,7 @@ try {
         </p>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
         {['florida', 'california', 'colorado', 'nevada', 'arizona', 'massachusetts', 'michigan', 'illinois']
           .filter(state => state !== statePart)
           .slice(0, 7)

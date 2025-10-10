@@ -3,9 +3,9 @@ import Layout from '../layouts/Layout.astro';
 
 export const prerender = true;
 
-const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
-
 export async function getStaticPaths() {
+  const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
   try {
     const response = await fetch(`${API_BASE}/categories?pagination[pageSize]=100`);
     const data = await response.json();
@@ -44,6 +44,7 @@ export async function getStaticPaths() {
 }
 
 const { category } = Astro.params;
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 // Fetch category details
 let categoryName = category.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
@@ -57,12 +58,16 @@ try {
     const data = await response.json();
     if (data?.data?.[0]) {
       const cat = data.data[0];
-      categoryName = cat.Name || cat.name || categoryName;
-      categoryDescription = cat.Description || cat.description || cat.Discription || '';
-      categoryRichText = cat.RichText || cat.richText || cat.rich_text || '';
+      const catData = cat.attributes || cat;
+
+      categoryName = catData.Name || catData.name || categoryName;
+      categoryDescription = catData.Description || catData.description || catData.Discription || '';
+      categoryRichText = catData.RichText || catData.richText || catData.rich_text || '';
+
+      console.log('Category details:', { categoryName, hasRichText: !!categoryRichText });
 
       // Try to get image
-      const imageData = cat.Image || cat.image;
+      const imageData = catData.Image || catData.image;
       if (imageData?.url) {
         categoryImage = imageData.url.startsWith('http') ? imageData.url : `${API_BASE}${imageData.url}`;
       } else if (imageData?.data?.attributes?.url) {
