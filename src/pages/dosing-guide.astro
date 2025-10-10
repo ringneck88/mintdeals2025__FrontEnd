@@ -175,7 +175,7 @@ if (dosingProducts.length > 0) {
       <>
         {/* Dosage and Strength Introduction */}
         <div class="mb-8">
-          <p class="text-base leading-relaxed">
+          <p class="text-base leading-relaxed text-black">
             <strong>Dosage and Strength:</strong> Product dosage and strength are dependent on personal marijuana use, tolerance, and qualifying condition. New users should start with the lowest dose possible and increase the dosage slowly to determine the appropriate dose. Please consult your doctor for condition-specific questions.
           </p>
         </div>
@@ -187,7 +187,7 @@ if (dosingProducts.length > 0) {
 
             {/* Serving Info */}
             {formData.servingInfo && (
-              <p class="mb-4 text-base leading-relaxed" set:html={formData.servingInfo}></p>
+              <p class="mb-4 text-base leading-relaxed text-black" set:html={formData.servingInfo}></p>
             )}
 
             {/* Products Table */}
@@ -221,7 +221,7 @@ if (dosingProducts.length > 0) {
 
             {/* Brands */}
             {formData.brands && (
-              <p class="text-sm italic mb-6">
+              <p class="text-sm italic mb-6 text-black">
                 <strong>Brands:</strong> {formData.brands}
               </p>
             )}
