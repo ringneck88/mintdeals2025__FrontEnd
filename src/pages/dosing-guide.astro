@@ -68,44 +68,10 @@ try {
 
 // Helper function to safely get string value
 const safeString = (value) => {
-  if (value === null || value === undefined) return 'Other';
+  if (value === null || value === undefined) return '';
   if (typeof value === 'string') return value;
   if (typeof value === 'object' && value !== null) return JSON.stringify(value);
   return String(value);
-};
-
-// Function to get color scheme for any dosage form - using site's green and yellow
-const getColorScheme = (formName) => {
-  const formLower = formName.toLowerCase();
-
-  // Color schemes based on dosage form type - using emerald (green) and yellow
-  if (formLower.includes('edible') || formLower.includes('oral') || formLower === 'edibles') {
-    return {
-      gradient: 'from-emerald-600 to-emerald-700',
-      bg: 'bg-emerald-50 dark:bg-emerald-900/20'
-    };
-  } else if (formLower.includes('inhal') || formLower.includes('smoke') || formLower.includes('vapor')) {
-    return {
-      gradient: 'from-yellow-500 to-yellow-600',
-      bg: 'bg-yellow-50 dark:bg-yellow-900/20'
-    };
-  } else if (formLower.includes('sublingual') || formLower.includes('tincture')) {
-    return {
-      gradient: 'from-emerald-500 to-teal-600',
-      bg: 'bg-teal-50 dark:bg-teal-900/20'
-    };
-  } else if (formLower.includes('topical') || formLower.includes('cream') || formLower.includes('lotion')) {
-    return {
-      gradient: 'from-yellow-600 to-amber-600',
-      bg: 'bg-amber-50 dark:bg-amber-900/20'
-    };
-  } else {
-    // Default color scheme - emerald green
-    return {
-      gradient: 'from-emerald-600 to-emerald-700',
-      bg: 'bg-emerald-50 dark:bg-emerald-900/20'
-    };
-  }
 };
 
 // Group products by dosage form using API data
@@ -116,15 +82,14 @@ const formDetailsMap = {};
 if (dosingForms.length > 0) {
   dosingForms.forEach(form => {
     try {
-      // Handle different possible field names from Strapi
-      const formName = safeString(form.attributes?.name || form.name || form.Name || form.title || 'Other');
-      const formSlug = safeString(form.attributes?.slug || form.slug || form.Slug || formName).toLowerCase().replace(/\s+/g, '-');
+      const formName = safeString(form.name || form.Name || 'Other');
+      const formSlug = safeString(form.slug || form.Slug || formName).toLowerCase().replace(/\s+/g, '-');
 
       formDetailsMap[formSlug] = {
         name: formName,
-        servingInfo: safeString(form.attributes?.serving_info || form.serving_info || form.ServingInfo || form.description || ''),
-        instructions: safeString(form.attributes?.instructions || form.instructions || form.Instructions || ''),
-        color: safeString(form.attributes?.color || form.color || 'gray')
+        servingInfo: safeString(form.serving_info || form.ServingInfo || form.description || ''),
+        instructions: safeString(form.instructions || form.Instructions || ''),
+        brands: safeString(form.brands || form.Brands || '')
       };
     } catch (err) {
       console.error('Error processing dosing form:', form, err);
@@ -132,49 +97,20 @@ if (dosingForms.length > 0) {
   });
 }
 
-// Group products by their dosage form - Map to "Edibles" and "Inhalation" only
+// Group products by their dosage form
 if (dosingProducts.length > 0) {
   dosingProducts.forEach(product => {
     try {
-      // The API returns products directly (not Strapi v4 with attributes wrapper)
-      const attrs = product;
-
-      // Get the dosage form directly from the product
-      const dosingForm = attrs.dosing_form;
-
-      // Safely get form name and map to our two categories
-      let rawFormName = 'Other';
-      if (dosingForm?.Name) {
-        rawFormName = safeString(dosingForm.Name);
-      } else if (dosingForm?.name) {
-        rawFormName = safeString(dosingForm.name);
-      } else if (typeof dosingForm === 'string') {
-        rawFormName = safeString(dosingForm);
-      }
-
-      // Use the actual dosage form name from API, or determine from product name if null
-      let formName;
-      const productNameLower = safeString(attrs.Name || attrs.name || '').toLowerCase();
+      const dosingForm = product.dosing_form;
+      let formName = 'Other';
 
       if (dosingForm?.Name) {
-        // Use the actual dosage form name from API
         formName = safeString(dosingForm.Name);
       } else if (dosingForm?.name) {
         formName = safeString(dosingForm.name);
-      } else {
-        // If dosage form is null, determine from product name
-        if (productNameLower.includes('chew') || productNameLower.includes('gummy') ||
-            productNameLower.includes('edible') || productNameLower.includes('chocolate') ||
-            productNameLower.includes('candy') || productNameLower.includes('capsule') ||
-            productNameLower.includes('tablet') || productNameLower.includes('pill') ||
-            productNameLower.includes('oral')) {
-          formName = 'Edibles';
-        } else {
-          formName = 'Inhalation'; // Default fallback
-        }
       }
 
-      const formSlug = safeString(dosingForm?.Slug || dosingForm?.slug || rawFormName).toLowerCase().replace(/\s+/g, '-');
+      const formSlug = safeString(dosingForm?.Slug || dosingForm?.slug || formName).toLowerCase().replace(/\s+/g, '-');
 
       // Initialize form group if not exists
       if (!productsByForm[formName]) {
@@ -182,35 +118,35 @@ if (dosingProducts.length > 0) {
         productsByForm[formName] = {
           servingInfo: formDetails.servingInfo || '',
           instructions: formDetails.instructions || '',
-          color: 'gray',
+          brands: formDetails.brands || '',
           products: []
         };
       }
 
-      // Get ingredients - API returns array directly
+      // Get ingredients
       let ingredientsList = '';
-      if (attrs.dosing_ingredints && Array.isArray(attrs.dosing_ingredints)) {
-        ingredientsList = attrs.dosing_ingredints
+      if (product.dosing_ingredints && Array.isArray(product.dosing_ingredints)) {
+        ingredientsList = product.dosing_ingredints
           .map(ing => safeString(ing.Name || ing.name || ''))
-          .filter(name => name && name !== 'Other')
+          .filter(name => name)
           .join(', ');
       }
 
       // Process DosingPerDose to get cannabinoids info
       let cannabinoidsInfo = '';
-      if (attrs.DosingPerDose && Array.isArray(attrs.DosingPerDose)) {
-        const validDoses = attrs.DosingPerDose.filter(dose => dose.Cannabinoid && dose.Amount > 0);
+      if (product.DosingPerDose && Array.isArray(product.DosingPerDose)) {
+        const validDoses = product.DosingPerDose.filter(dose => dose.Cannabinoid && dose.Amount > 0);
         if (validDoses.length > 0) {
           cannabinoidsInfo = validDoses
-            .map(dose => `${dose.Amount} ${dose.unite} ${dose.Cannabinoid} per ${dose.Per}`)
-            .join(', ');
+            .map(dose => `${dose.Amount}${dose.unite || 'mg'} ${dose.Cannabinoid}${dose.Per ? ' per ' + dose.Per : ''}`)
+            .join('\n');
         }
       }
 
-      // Add product with current API structure
+      // Add product
       productsByForm[formName].products.push({
-        product: safeString(attrs.Name || attrs.name || 'Unknown Product'),
-        quantity: safeString(attrs.quantity || attrs.Quantity || ''),
+        product: safeString(product.Name || product.name || 'Unknown Product'),
+        quantity: safeString(product.quantity || product.Quantity || ''),
         cannabinoids: cannabinoidsInfo,
         ingredients: ingredientsList
       });
@@ -221,192 +157,114 @@ if (dosingProducts.length > 0) {
 }
 ---
 
-<Layout title="Dosing Guide - FLMintDeals" description="Cannabis dosing guide for medical marijuana patients">
-  <!-- Hero Section -->
-  <div class="bg-gradient-to-br from-emerald-800 via-emerald-700 to-green-700 text-white py-16">
-    <div class="px-4 sm:px-6 lg:px-8 max-w-[2080px] mx-auto">
-      <div class="text-center">
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
-          Dosing Guide
-        </h1>
-        <p class="text-xl lg:text-2xl text-emerald-100 max-w-3xl mx-auto">
-          Medical Cannabis Product Dosage Information
-        </p>
+<Layout title="Dosing Guide - Mint Cannabis" description="Cannabis dosing guide for medical marijuana patients">
+  <!-- Header Banner -->
+  <div class="bg-black text-white py-8">
+    <div class="max-w-[2080px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between">
+        <h1 class="text-4xl sm:text-5xl font-bold">DOSING GUIDE</h1>
+        <img src="/assets/Mint_Full_Logo.png" alt="Mint Cannabis" class="h-16 md:h-20 object-contain" />
       </div>
     </div>
   </div>
 
-  <!-- Main Content - Display data from API only -->
-  <div class="px-4 sm:px-6 lg:px-8 max-w-[2080px] mx-auto py-12">
+  <!-- Main Content -->
+  <div class="max-w-[2080px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     {Object.keys(productsByForm).length > 0 ? (
       <>
-        {/* Important Notice Section */}
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 mb-8">
-          <div class="px-6 py-4">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-              </div>
-              <div class="ml-3">
-                <h3 class="text-lg font-semibold text-yellow-800 dark:text-yellow-200">Dosage and Strength</h3>
-                <p class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                  Product dosage and strength is dependent on personal marijuana use, tolerance and qualifying condition.
-                  Please follow the medication directions as directed. Please consult your doctor for condition specific questions.
-                </p>
-              </div>
-            </div>
-          </div>
+        {/* Dosage and Strength Introduction */}
+        <div class="mb-8">
+          <p class="text-base leading-relaxed">
+            <strong>Dosage and Strength:</strong> Product dosage and strength are dependent on personal marijuana use, tolerance, and qualifying condition. New users should start with the lowest dose possible and increase the dosage slowly to determine the appropriate dose. Please consult your doctor for condition-specific questions.
+          </p>
         </div>
 
         {/* Dosage Forms */}
-        {Object.entries(productsByForm).map(([formName, formData]) => {
-          const colorScheme = getColorScheme(formName);
+        {Object.entries(productsByForm).map(([formName, formData]) => (
+          <div class="mb-10" key={formName}>
+            <h2 class="text-xl font-bold mb-3">Dosage Form: {formName}</h2>
 
-          return (
-            <div class="mb-12" key={formName}>
-              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                <div class={`bg-gradient-to-r ${colorScheme.gradient} px-6 py-4`}>
-                  <h2 class="text-2xl font-bold text-white">Dosage Form: {formName}</h2>
-                </div>
-                <div class="p-6">
-                  {(formData.servingInfo && formData.servingInfo !== 'Other' && formData.servingInfo !== '') && (
-                    <div class={`${colorScheme.bg} rounded-lg p-4 mb-6`}>
-                      <p class="text-sm text-gray-700 dark:text-gray-300">
-                        <strong>Serving Information:</strong> {formData.servingInfo}
-                      </p>
-                      {(formData.instructions && formData.instructions !== 'Other' && formData.instructions !== '') && (
-                        <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">
-                          <strong>Instructions:</strong> {formData.instructions}
-                        </p>
-                      )}
-                    </div>
-                  )}
+            {/* Serving Info */}
+            {formData.servingInfo && (
+              <p class="mb-4 text-base leading-relaxed" set:html={formData.servingInfo}></p>
+            )}
 
-                  <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
-                          {formData.products.some(p => p.quantity && p.quantity !== 'Other' && p.quantity !== '') && (
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Qty per package</th>
-                          )}
-                          {formData.products.some(p => p.cannabinoids && p.cannabinoids !== 'Other' && p.cannabinoids !== '') && (
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cannabinoids per dose</th>
-                          )}
-                          {formData.products.some(p => p.ingredients && p.ingredients !== 'Other' && p.ingredients !== '') && (
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ingredients</th>
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {formData.products.map((product, idx) => (
-                          <tr key={idx} class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                              {product.product !== 'Unknown Product' ? product.product : `Product ${idx + 1}`}
-                            </td>
-                            {formData.products.some(p => p.quantity && p.quantity !== 'Other' && p.quantity !== '') && (
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                {(product.quantity && product.quantity !== 'Other' && product.quantity !== '') ? product.quantity : '-'}
-                              </td>
-                            )}
-                            {formData.products.some(p => p.cannabinoids && p.cannabinoids !== 'Other' && p.cannabinoids !== '') && (
-                              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                {(product.cannabinoids && product.cannabinoids !== 'Other' && product.cannabinoids !== '') ? product.cannabinoids : '-'}
-                              </td>
-                            )}
-                            {formData.products.some(p => p.ingredients && p.ingredients !== 'Other' && p.ingredients !== '') && (
-                              <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                {(product.ingredients && product.ingredients !== 'Other' && product.ingredients !== '') ? product.ingredients : '-'}
-                              </td>
-                            )}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+            {/* Products Table */}
+            <div class="overflow-x-auto mb-4">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr class="bg-black text-white">
+                    <th class="border border-black px-4 py-3 text-left font-bold">Product</th>
+                    <th class="border border-black px-4 py-3 text-left font-bold">Cannabinoids per Dose</th>
+                    <th class="border border-black px-4 py-3 text-left font-bold">Ingredients</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData.products.map((product, idx) => (
+                    <tr key={idx} class={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      <td class="border border-gray-300 px-4 py-3 align-top">
+                        <div class="font-medium">{product.product}</div>
+                        {product.quantity && <div class="text-sm text-gray-600">{product.quantity}</div>}
+                      </td>
+                      <td class="border border-gray-300 px-4 py-3 align-top whitespace-pre-line">
+                        {product.cannabinoids || 'Varies by Strain/Dose'}
+                      </td>
+                      <td class="border border-gray-300 px-4 py-3 align-top">
+                        {product.ingredients || '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          );
-        })}
 
-        {/* Additional Information */}
-        <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-emerald-900 dark:text-emerald-100 mb-4">Important Information</h3>
-          <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-            <li class="flex items-start">
-              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Always start with a low dose and gradually increase as needed
-            </li>
-            <li class="flex items-start">
-              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Consult with your healthcare provider for personalized dosing recommendations
-            </li>
-            <li class="flex items-start">
-              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Keep all cannabis products out of reach of children and pets
-            </li>
-            <li class="flex items-start">
-              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Store products in a cool, dry place away from direct sunlight
-            </li>
-            <li class="flex items-start">
-              <svg class="h-5 w-5 text-emerald-600 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Do not drive or operate machinery after using cannabis products
-            </li>
-          </ul>
-        </div>
+            {/* Brands */}
+            {formData.brands && (
+              <p class="text-sm italic mb-6">
+                <strong>Brands:</strong> {formData.brands}
+              </p>
+            )}
+          </div>
+        ))}
       </>
     ) : (
       <div class="text-center py-16">
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
-        <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">No Dosing Data Available</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <h3 class="mt-2 text-lg font-medium text-gray-900">No Dosing Data Available</h3>
+        <p class="mt-1 text-sm text-gray-500">
           {apiError ?
-            `Error loading data: ${apiError}. Please ensure the API server is running at ${API_BASE}` :
+            `Error loading data: ${apiError}. Please ensure the API server is running.` :
             `No dosing information is available. Please check that the API server is running and the content is published.`}
         </p>
-        <div class="mt-4 text-xs text-gray-400">
-          Endpoints checked:<br/>
-          - {API_BASE}/dosing-products<br/>
-          - {API_BASE}/dosage-forms<br/>
-          - {API_BASE}/dosing-ingredints
-        </div>
       </div>
     )}
-
-    {/* API Status Debug Info */}
-    <div class="mt-8 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4">
-      <h4 class="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-2">Data Status</h4>
-      <p class="text-xs text-emerald-700 dark:text-emerald-300">
-        Products Loaded: {dosingProducts.length}<br/>
-        Dosage Forms: {dosingForms.length}<br/>
-        Ingredients: {dosingIngredients.length}<br/>
-        Grouped Forms: {Object.keys(productsByForm).length}
-      </p>
-      {dosingProducts.length > 0 && (
-        <details class="mt-2">
-          <summary class="text-xs cursor-pointer text-emerald-600 dark:text-emerald-400">View Raw Data</summary>
-          <pre class="text-xs mt-2 p-2 bg-white dark:bg-gray-800 rounded overflow-auto max-h-32">
-            {JSON.stringify({ dosingProducts, dosingForms, dosingIngredients }, null, 2)}
-          </pre>
-        </details>
-      )}
-    </div>
   </div>
 </Layout>
+
+<style>
+  /* Print-friendly styling */
+  @media print {
+    .bg-black {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+
+  /* Ensure tables look good on all screen sizes */
+  table {
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 640px) {
+    table {
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 0.5rem !important;
+    }
+  }
+</style>
