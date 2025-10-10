@@ -87,7 +87,8 @@ if (dosingForms.length > 0) {
 
       formDetailsMap[formSlug] = {
         name: formName,
-        servingInfo: safeString(form.serving_info || form.ServingInfo || form.description || ''),
+        description: safeString(form.description || form.Description || ''),
+        servingInfo: safeString(form.serving_info || form.ServingInfo || ''),
         instructions: safeString(form.instructions || form.Instructions || ''),
         brands: safeString(form.brands || form.Brands || '')
       };
@@ -116,6 +117,7 @@ if (dosingProducts.length > 0) {
       if (!productsByForm[formName]) {
         const formDetails = formDetailsMap[formSlug] || {};
         productsByForm[formName] = {
+          description: formDetails.description || '',
           servingInfo: formDetails.servingInfo || '',
           instructions: formDetails.instructions || '',
           brands: formDetails.brands || '',
@@ -185,6 +187,11 @@ if (dosingProducts.length > 0) {
           {Object.entries(productsByForm).map(([formName, formData]) => (
             <div class="mb-10" key={formName}>
               <h2 class="text-xl font-bold mb-3 text-black">Dosage Form: {formName}</h2>
+
+              {/* Description */}
+              {formData.description && (
+                <p class="mb-4 text-base leading-relaxed text-black" set:html={formData.description}></p>
+              )}
 
               {/* Serving Info */}
               {formData.servingInfo && (
