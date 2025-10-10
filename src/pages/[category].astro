@@ -10,16 +10,32 @@ export async function getStaticPaths() {
     const response = await fetch(`${API_BASE}/categories?pagination[pageSize]=100`);
     const data = await response.json();
 
+    console.log('Categories data for static paths:', JSON.stringify(data, null, 2));
+
     if (data?.data && Array.isArray(data.data)) {
-      return data.data.map((category: any) => ({
-        params: { category: category.slug || category.Slug || category.documentId }
-      }));
+      const paths = data.data.map((category: any) => {
+        const catData = category.attributes || category;
+        const slug = catData.slug || catData.Slug || category.documentId;
+
+        console.log('Creating path for category:', {
+          name: catData.Name || catData.name,
+          slug
+        });
+
+        return {
+          params: { category: slug }
+        };
+      }).filter(p => p.params.category);
+
+      console.log('Total category paths created:', paths.length);
+      return paths;
     }
   } catch (error) {
     console.error('Error fetching categories:', error);
   }
 
   // Fallback to hardcoded categories if API fails
+  console.log('Using fallback categories');
   return [
     { params: { category: 'flower' } },
     { params: { category: 'edibles' } },
