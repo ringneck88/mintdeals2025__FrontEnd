@@ -89,7 +89,7 @@ if (dosingForms.length > 0) {
         servingInfo: safeString(form.serving_info || form.ServingInfo || ''),
         instructions: safeString(form.instructions || form.Instructions || ''),
         brands: safeString(form.brands || form.Brands || ''),
-        dosageBrand: safeString(form.dosage_brand || form.dosageBrand || form['dosage-brand'] || form.DosageBrand || ''),
+        dosingBrands: safeString(form.dosing_brands || form.dosingBrands || form.DosingBrands || ''),
         products: []
       };
     } catch (err) {
@@ -118,7 +118,7 @@ if (dosingProducts.length > 0) {
           servingInfo: '',
           instructions: '',
           brands: '',
-          dosageBrand: '',
+          dosingBrands: '',
           products: []
         };
       }
@@ -238,15 +238,15 @@ if (dosingProducts.length > 0) {
               </p>
             )}
 
-            {/* Dosage Brand */}
-            {formData.dosageBrand && (
+            {/* Dosing Brands */}
+            {formData.dosingBrands && (
               <p class="text-sm italic mb-6 text-black">
-                <strong>Dosage Brand:</strong> {formData.dosageBrand}
+                <strong>Dosing Brands:</strong> {formData.dosingBrands}
               </p>
             )}
 
-            {/* If neither brands nor dosageBrand exists, add bottom margin */}
-            {!formData.brands && !formData.dosageBrand && (
+            {/* If neither brands nor dosingBrands exists, add bottom margin */}
+            {!formData.brands && !formData.dosingBrands && (
               <div class="mb-6"></div>
             )}
           </div>
