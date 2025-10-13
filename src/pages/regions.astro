@@ -118,6 +118,16 @@ try {
       padding: 2rem 0;
     }
   }
+
+  /* Gradient heading class with better browser support */
+  .gradient-heading {
+    background: linear-gradient(to right, #fbbf24, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+    display: inline-block;
+  }
 </style>
 
 <Layout title="Regions - Mint Cannabis" description="Browse cannabis dispensaries by region and area">
@@ -146,10 +156,10 @@ try {
             <a href="/stores" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
               All Stores
             </a>
-            <a href="/categories" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105 border-2 border-white/20">
+            <a href="/categories" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
               Browse Categories
             </a>
-            <a href="/dosing-guide" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105 border-2 border-white/20">
+            <a href="/dosing-guide" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
               Dosing Guide
             </a>
           </div>
@@ -184,7 +194,7 @@ try {
           <div class="py-16 text-center">
             <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
               <div class="mb-4 text-6xl">🗺️</div>
-              <h3 class="mb-2 pb-1 text-lg font-medium text-yellow-400 leading-snug">No Regions Available</h3>
+              <h3 class="mb-2 pb-1 text-lg font-medium gradient-heading leading-snug">No Regions Available</h3>
               <p class="text-green-300">
                 {apiError ? `Error: ${apiError}` : 'No regions are available at this time.'}
               </p>
@@ -198,7 +208,7 @@ try {
                 {/* Region Header */}
                 <div class="flex flex-col items-start justify-between mb-6 md:flex-row md:items-center">
                   <div>
-                    <h2 class="mb-2 pb-1 text-3xl font-bold text-yellow-400 leading-snug">{region.name}</h2>
+                    <h2 class="mb-2 pb-1 text-3xl font-bold gradient-heading leading-snug">{region.name}</h2>
                     <div class="flex gap-4 text-sm text-green-300">
                       <span>{region.totalLocations} dispensar{region.totalLocations !== 1 ? 'ies' : 'y'}</span>
                       <span>•</span>

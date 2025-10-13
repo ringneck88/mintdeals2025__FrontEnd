@@ -298,6 +298,16 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
   .rich-text-content em {
     font-style: italic;
   }
+
+  /* Gradient heading class with better browser support */
+  .gradient-heading {
+    background: linear-gradient(to right, #fbbf24, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+    display: inline-block;
+  }
 </style>
 
 <Layout title="Product Categories - Mint Cannabis Deals" description="Explore our comprehensive range of cannabis product categories">
@@ -324,7 +334,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
             <a href="/stores" class="px-6 py-2.5 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
               Find Locations
             </a>
-            <a href="/dosing-guide" class="px-6 py-2.5 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105 border-2 border-white/20">
+            <a href="/dosing-guide" class="px-6 py-2.5 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
               Dosing Guide
             </a>
           </div>
@@ -360,7 +370,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
     <div class="py-12 bg-black">
       <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
         <div class="mb-8 text-center">
-          <h2 class="mb-3 text-2xl font-bold text-yellow-400 pb-1 leading-snug md:text-3xl">
+          <h2 class="mb-3 text-2xl font-bold gradient-heading pb-1 leading-snug md:text-3xl">
             Browse All Categories
           </h2>
           <p class="text-lg text-green-300">
@@ -372,7 +382,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
           <div class="py-12 text-center">
             <div class="max-w-md p-8 mx-auto bg-red-900 rounded-lg bg-opacity-80">
               <div class="mb-4 text-6xl text-red-400">⚠️</div>
-              <h3 class="mb-2 text-lg font-medium text-yellow-400 pb-1 leading-snug">API Error</h3>
+              <h3 class="mb-2 text-lg font-medium gradient-heading pb-1 leading-snug">API Error</h3>
               <p class="text-sm text-red-300">{apiError}</p>
             </div>
           </div>
@@ -400,7 +410,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
 
                 {/* Category Content */}
                 <div class="p-4">
-                  <h3 class="mb-1 text-lg font-bold text-yellow-400 pb-1 leading-snug">
+                  <h3 class="mb-1 text-lg font-bold gradient-heading pb-1 leading-snug">
                     {category.name}
                   </h3>
                   {category.description && (
@@ -424,7 +434,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
           <div class="py-12 text-center">
             <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
               <div class="mb-4 text-6xl">🌿</div>
-              <h3 class="mb-2 text-lg font-medium text-yellow-400 pb-1 leading-snug">Categories Coming Soon</h3>
+              <h3 class="mb-2 text-lg font-medium gradient-heading pb-1 leading-snug">Categories Coming Soon</h3>
               <p class="text-green-300">Product categories will be available here.</p>
             </div>
           </div>
@@ -437,7 +447,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
       <div class="py-12 bg-gradient-to-b from-black to-green-900/40">
         <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
           <div class="mb-8 text-center">
-            <h2 class="mb-3 text-2xl font-bold text-yellow-400 pb-1 leading-snug md:text-3xl">
+            <h2 class="mb-3 text-2xl font-bold gradient-heading pb-1 leading-snug md:text-3xl">
               Category Information
             </h2>
             <p class="text-lg text-green-300">
@@ -460,7 +470,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
                       <span class="text-3xl">{category.icon}</span>
                     </div>
                   )}
-                  <h3 class="text-2xl font-bold text-yellow-400 pb-1 leading-snug">{category.name}</h3>
+                  <h3 class="text-2xl font-bold gradient-heading pb-1 leading-snug">{category.name}</h3>
                 </div>
                 <div class="rich-text-content" set:html={category.richText}></div>
                 <div class="mt-6">
@@ -485,7 +495,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
     <div class="py-12 bg-gradient-to-b from-green-900/40 to-black/60">
       <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
         <div class="mb-8 text-center">
-          <h2 class="mb-3 text-2xl font-bold text-yellow-400 pb-1 leading-snug md:text-3xl">
+          <h2 class="mb-3 text-2xl font-bold gradient-heading pb-1 leading-snug md:text-3xl">
             Why Choose Mint Deals
           </h2>
           <p class="text-lg text-green-300">
@@ -502,7 +512,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
             </div>
-            <h3 class="mb-3 text-xl font-bold text-yellow-400 pb-1 leading-snug">Find Locations</h3>
+            <h3 class="mb-3 text-xl font-bold gradient-heading pb-1 leading-snug">Find Locations</h3>
             <p class="text-green-300">
               Discover trusted dispensaries near you with detailed information and directions.
             </p>
@@ -515,7 +525,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
               </svg>
             </div>
-            <h3 class="mb-3 text-xl font-bold text-yellow-400 pb-1 leading-snug">Browse Products</h3>
+            <h3 class="mb-3 text-xl font-bold gradient-heading pb-1 leading-snug">Browse Products</h3>
             <p class="text-green-300">
               Explore comprehensive product information and educational resources.
             </p>
@@ -528,7 +538,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
-            <h3 class="mb-3 text-xl font-bold text-yellow-400 pb-1 leading-snug">Trusted Information</h3>
+            <h3 class="mb-3 text-xl font-bold gradient-heading pb-1 leading-snug">Trusted Information</h3>
             <p class="text-green-300">
               Access reliable, up-to-date information from verified sources and experts.
             </p>

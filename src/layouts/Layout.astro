@@ -178,7 +178,7 @@ function getCategoryIcon(slug: string) {
               <div id="categoriesMenu" class="absolute left-0 mt-1 w-72 bg-black border-2 border-emerald-600 rounded-lg shadow-2xl hidden z-50">
                 <div class="py-2 max-h-96 overflow-y-auto">
                   <div class="px-4 py-3 border-b-2 border-emerald-800 bg-gradient-to-r from-emerald-900 to-emerald-800">
-                    <p class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold text-sm">Browse by Category</p>
+                    <p class="text-yellow-400 font-bold text-sm pb-1 leading-snug">Browse by Category</p>
                   </div>
                   {categories.map(category => (
                     <a
@@ -189,7 +189,7 @@ function getCategoryIcon(slug: string) {
                       <span class="font-medium">{category.name}</span>
                     </a>
                   ))}
-                  <a href="/categories" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-emerald-800 bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:from-yellow-500 hover:to-orange-600 transition-all">
+                  <a href="/categories" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-emerald-800 bg-gradient-to-r from-yellow-400 to-transparent text-white hover:from-yellow-500 hover:to-transparent transition-all">
                     📋 View All Categories →
                   </a>
                 </div>
@@ -209,7 +209,7 @@ function getCategoryIcon(slug: string) {
               <div id="regionsMenu" class="absolute left-0 mt-1 w-64 bg-black border-2 border-blue-600 rounded-lg shadow-2xl hidden z-50">
                 <div class="py-2 max-h-96 overflow-y-auto">
                   <div class="px-4 py-3 border-b-2 border-blue-800 bg-gradient-to-r from-blue-900 to-blue-800">
-                    <p class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold text-sm">Browse by Region</p>
+                    <p class="text-yellow-400 font-bold text-sm pb-1 leading-snug">Browse by Region</p>
                   </div>
                   {navRegions.map(region => (
                     <a
@@ -221,7 +221,7 @@ function getCategoryIcon(slug: string) {
                       {region.code && <span class="text-xs text-gray-400 ml-2">({region.code})</span>}
                     </a>
                   ))}
-                  <a href="/regions" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-blue-800 bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:from-yellow-500 hover:to-orange-600 transition-all">
+                  <a href="/regions" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-blue-800 bg-gradient-to-r from-yellow-400 to-transparent text-white hover:from-yellow-500 hover:to-transparent transition-all">
                     🗺️ View All Regions →
                   </a>
                 </div>
@@ -241,7 +241,7 @@ function getCategoryIcon(slug: string) {
               <div id="locationsMenu" class="absolute left-0 mt-1 w-80 bg-black border-2 border-green-600 rounded-lg shadow-2xl hidden z-50">
                 <div class="py-2 max-h-96 overflow-y-auto">
                   <div class="px-4 py-3 border-b-2 border-green-800 bg-gradient-to-r from-green-900 to-green-800">
-                    <p class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold text-sm">Browse by Location</p>
+                    <p class="text-yellow-400 font-bold text-sm pb-1 leading-snug">Browse by Location</p>
                   </div>
                   {Object.keys(storesByRegion).sort().map(regionName => (
                     <div class="border-b border-gray-800 last:border-b-0">
@@ -264,7 +264,7 @@ function getCategoryIcon(slug: string) {
                       </div>
                     </div>
                   ))}
-                  <a href="/stores" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-green-800 bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:from-yellow-500 hover:to-orange-600 transition-all">
+                  <a href="/stores" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-green-800 bg-gradient-to-r from-yellow-400 to-transparent text-white hover:from-yellow-500 hover:to-transparent transition-all">
                     🏬 View All Locations →
                   </a>
                 </div>
