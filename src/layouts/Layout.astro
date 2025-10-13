@@ -9,9 +9,10 @@ export interface Props {
 
 const { title, description = "Mint Cannabis Deals" } = Astro.props;
 
-// Fetch categories for navigation
+// Fetch categories and regions for navigation
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 let categories: any[] = [];
+let regions: any[] = [];
 
 try {
   const response = await fetch(`${API_BASE}/categories?pagination[pageSize]=100`);
@@ -40,6 +41,82 @@ try {
   }
 } catch (error) {
   console.error('Error fetching categories for nav:', error);
+}
+
+// Fetch regions for navigation
+let navRegions: any[] = [];
+try {
+  const response = await fetch(`${API_BASE}/regions?pagination[pageSize]=100`);
+  if (response.ok) {
+    const data = await response.json();
+    console.log('Regions API response for nav:', data);
+
+    navRegions = (data?.data || []).map((region: any) => {
+      const name = region.name || '';
+      const code = region.code || '';
+      const slug = name ? name.toLowerCase().replace(/\s+/g, '-') : '';
+
+      return {
+        id: region.id || region.documentId,
+        name,
+        code,
+        slug
+      };
+    }).filter((region: any) => region.name && region.slug)
+      .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+    console.log('Final regions for nav:', navRegions.length);
+  } else {
+    console.error('Regions API error:', response.status, response.statusText);
+  }
+} catch (error) {
+  console.error('Error fetching regions for nav:', error);
+}
+
+// Fetch stores/locations for navigation grouped by region
+let storesByRegion: any = {};
+try {
+  const response = await fetch(`${API_BASE}/stores?populate=region&pagination[pageSize]=500`);
+  if (response.ok) {
+    const data = await response.json();
+    console.log('Stores API response for nav:', data);
+
+    const stores = (data?.data || []).map((store: any) => {
+      const name = store.name || '';
+      const id = store.id || store.documentId;
+      const slug = store.slug || (name ? name.toLowerCase().replace(/\s+/g, '-') : id);
+      const regionData = store.region;
+      const regionName = regionData?.name || 'Other';
+      const regionId = regionData?.id || regionData?.documentId || 'other';
+
+      return {
+        id,
+        name,
+        slug,
+        regionName,
+        regionId
+      };
+    }).filter((store: any) => store.name);
+
+    // Group stores by region
+    stores.forEach((store: any) => {
+      if (!storesByRegion[store.regionName]) {
+        storesByRegion[store.regionName] = [];
+      }
+      storesByRegion[store.regionName].push(store);
+    });
+
+    // Sort stores within each region alphabetically
+    Object.keys(storesByRegion).forEach(regionName => {
+      storesByRegion[regionName].sort((a: any, b: any) => a.name.localeCompare(b.name));
+    });
+
+    console.log('Stores grouped by region for nav:', Object.keys(storesByRegion).length);
+  } else {
+    console.error('Stores API error:', response.status, response.statusText);
+  }
+} catch (error) {
+  console.error('Error fetching stores for nav:', error);
 }
 
 function getCategoryIcon(slug: string) {
@@ -100,8 +177,8 @@ function getCategoryIcon(slug: string) {
               <!-- Dropdown Menu -->
               <div id="categoriesMenu" class="absolute left-0 mt-1 w-72 bg-black border-2 border-emerald-600 rounded-lg shadow-2xl hidden z-50">
                 <div class="py-2 max-h-96 overflow-y-auto">
-                  <div class="px-4 py-3 border-b-2 border-emerald-800 bg-emerald-900">
-                    <p class="text-yellow-400 font-bold text-sm">Browse by Category</p>
+                  <div class="px-4 py-3 border-b-2 border-emerald-800 bg-gradient-to-r from-emerald-900 to-emerald-800">
+                    <p class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold text-sm">Browse by Category</p>
                   </div>
                   {categories.map(category => (
                     <a
@@ -112,16 +189,87 @@ function getCategoryIcon(slug: string) {
                       <span class="font-medium">{category.name}</span>
                     </a>
                   ))}
-                  <a href="/categories" class="block px-4 py-3 text-sm text-yellow-400 hover:bg-yellow-900 hover:text-yellow-300 font-bold text-center border-t-2 border-emerald-800">
+                  <a href="/categories" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-emerald-800 bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:from-yellow-500 hover:to-orange-600 transition-all">
                     📋 View All Categories →
                   </a>
                 </div>
               </div>
             </div>
 
-            <a href="/stores" class="text-gray-200 hover:text-green-600 px-3 py-2 rounded-md text-sm font-semibold">
-              Locations
-            </a>
+            <!-- Regions Dropdown -->
+            <div class="relative" id="regionsDropdown">
+              <a href="/regions" class="text-gray-200 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
+                Regions
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </a>
+
+              <!-- Dropdown Menu -->
+              <div id="regionsMenu" class="absolute left-0 mt-1 w-64 bg-black border-2 border-blue-600 rounded-lg shadow-2xl hidden z-50">
+                <div class="py-2 max-h-96 overflow-y-auto">
+                  <div class="px-4 py-3 border-b-2 border-blue-800 bg-gradient-to-r from-blue-900 to-blue-800">
+                    <p class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold text-sm">Browse by Region</p>
+                  </div>
+                  {navRegions.map(region => (
+                    <a
+                      href={`/region/${region.slug}`}
+                      class="block px-4 py-3 text-sm text-gray-200 hover:bg-blue-900 hover:text-blue-400 transition-colors border-b border-gray-800 last:border-b-0"
+                    >
+                      <span class="text-lg mr-2">📍</span>
+                      <span class="font-medium">{region.name}</span>
+                      {region.code && <span class="text-xs text-gray-400 ml-2">({region.code})</span>}
+                    </a>
+                  ))}
+                  <a href="/regions" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-blue-800 bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:from-yellow-500 hover:to-orange-600 transition-all">
+                    🗺️ View All Regions →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Locations Dropdown -->
+            <div class="relative" id="locationsDropdown">
+              <a href="/stores" class="text-gray-200 hover:text-green-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
+                Locations
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </a>
+
+              <!-- Dropdown Menu -->
+              <div id="locationsMenu" class="absolute left-0 mt-1 w-80 bg-black border-2 border-green-600 rounded-lg shadow-2xl hidden z-50">
+                <div class="py-2 max-h-96 overflow-y-auto">
+                  <div class="px-4 py-3 border-b-2 border-green-800 bg-gradient-to-r from-green-900 to-green-800">
+                    <p class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent font-bold text-sm">Browse by Location</p>
+                  </div>
+                  {Object.keys(storesByRegion).sort().map(regionName => (
+                    <div class="border-b border-gray-800 last:border-b-0">
+                      {/* Region Header */}
+                      <div class="px-4 py-2 bg-gray-900 text-green-400 font-semibold text-xs uppercase tracking-wide">
+                        {regionName}
+                      </div>
+
+                      {/* Stores in Region */}
+                      <div class="bg-gray-950">
+                        {storesByRegion[regionName].map((store: any) => (
+                          <a
+                            href={`/stores/${store.id}`}
+                            class="block px-4 py-2 pl-6 text-sm text-gray-300 hover:bg-green-900 hover:text-green-300 transition-colors"
+                          >
+                            <span class="text-base mr-2">🏪</span>
+                            <span>{store.name}</span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <a href="/stores" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-green-800 bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:from-yellow-500 hover:to-orange-600 transition-all">
+                    🏬 View All Locations →
+                  </a>
+                </div>
+              </div>
+            </div>
             <a href="/deals" class="text-gray-200 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-semibold">
               Deals
             </a>
@@ -227,6 +375,80 @@ function getCategoryIcon(slug: string) {
         categoriesMenu.addEventListener('mouseleave', () => {
           closeTimeout = setTimeout(() => {
             categoriesMenu.classList.add('hidden');
+            isOpen = false;
+          }, 200);
+        });
+      }
+
+      // Regions dropdown functionality
+      const regionsDropdown = document.getElementById('regionsDropdown');
+      const regionsMenu = document.getElementById('regionsMenu');
+
+      if (regionsDropdown && regionsMenu) {
+        let isOpen = false;
+        let closeTimeout: NodeJS.Timeout | null = null;
+
+        // Open dropdown on mouseenter
+        regionsDropdown.addEventListener('mouseenter', () => {
+          if (closeTimeout) clearTimeout(closeTimeout);
+          regionsMenu.classList.remove('hidden');
+          isOpen = true;
+        });
+
+        // Keep open when hovering over menu
+        regionsMenu.addEventListener('mouseenter', () => {
+          if (closeTimeout) clearTimeout(closeTimeout);
+          isOpen = true;
+        });
+
+        // Close dropdown with delay on mouseleave
+        regionsDropdown.addEventListener('mouseleave', () => {
+          closeTimeout = setTimeout(() => {
+            regionsMenu.classList.add('hidden');
+            isOpen = false;
+          }, 200);
+        });
+
+        regionsMenu.addEventListener('mouseleave', () => {
+          closeTimeout = setTimeout(() => {
+            regionsMenu.classList.add('hidden');
+            isOpen = false;
+          }, 200);
+        });
+      }
+
+      // Locations dropdown functionality
+      const locationsDropdown = document.getElementById('locationsDropdown');
+      const locationsMenu = document.getElementById('locationsMenu');
+
+      if (locationsDropdown && locationsMenu) {
+        let isOpen = false;
+        let closeTimeout: NodeJS.Timeout | null = null;
+
+        // Open dropdown on mouseenter
+        locationsDropdown.addEventListener('mouseenter', () => {
+          if (closeTimeout) clearTimeout(closeTimeout);
+          locationsMenu.classList.remove('hidden');
+          isOpen = true;
+        });
+
+        // Keep open when hovering over menu
+        locationsMenu.addEventListener('mouseenter', () => {
+          if (closeTimeout) clearTimeout(closeTimeout);
+          isOpen = true;
+        });
+
+        // Close dropdown with delay on mouseleave
+        locationsDropdown.addEventListener('mouseleave', () => {
+          closeTimeout = setTimeout(() => {
+            locationsMenu.classList.add('hidden');
+            isOpen = false;
+          }, 200);
+        });
+
+        locationsMenu.addEventListener('mouseleave', () => {
+          closeTimeout = setTimeout(() => {
+            locationsMenu.classList.add('hidden');
             isOpen = false;
           }, 200);
         });

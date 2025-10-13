@@ -101,152 +101,398 @@ const categoryIcons: Record<string, string> = {
   'edibles': '🍭',
   'topicals': '🧴',
   'cartridges': '🖊️',
-  'tinctures': '💧'
+  'tinctures': '💧',
+  'thc-edibles': '🍭',
+  'cannabis-capsules-and-tablets': '💊',
+  'thc-vapes-and-cartridges': '💨'
 };
 
 const categoryIcon = categoryIcons[category] || '🌱';
 ---
 
-<Layout title={`${categoryName} - Cannabis Products`} description={categoryDescription || `Browse ${categoryName} cannabis products`}>
-  <!-- Hero Section -->
-  <div class="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 text-white py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        {categoryImage ? (
-          <img
-            src={categoryImage}
-            alt={categoryName}
-            class="w-32 h-32 mx-auto mb-6 rounded-full object-cover border-4 border-white/30 shadow-xl"
-          />
-        ) : (
-          <div class="text-8xl mb-6">{categoryIcon}</div>
-        )}
-
-        <h1 class="text-4xl md:text-6xl font-bold mb-4">
-          {categoryName}
-        </h1>
-
-        {categoryDescription && (
-          <p class="text-xl md:text-2xl text-emerald-100 max-w-3xl mx-auto">
-            {categoryDescription}
-          </p>
-        )}
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-
-    <!-- Rich Text Content Section -->
-    {categoryRichText && (
-      <div class="mb-16">
-        <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-          <h2 class="text-3xl font-bold text-gray-900 mb-6">
-            About {categoryName}
-          </h2>
-          <div class="prose prose-lg max-w-none prose-headings:text-emerald-700 prose-a:text-emerald-600 prose-strong:text-gray-900" set:html={categoryRichText}>
-          </div>
-        </div>
-      </div>
-    )}
-
-    <!-- Products Section -->
-    {products.length > 0 ? (
-      <div>
-        <div class="mb-8">
-          <h2 class="text-3xl font-bold text-gray-900 mb-2">
-            Available Products
-          </h2>
-          <p class="text-gray-600">
-            {products.length} product{products.length !== 1 ? 's' : ''} available
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product: any) => {
-            const productName = product.name || product.Name || 'Product';
-            const productDescription = product.description || product.Description || '';
-            const productImage = product.image?.url || product.Image?.url;
-            const imageUrl = productImage ?
-              (productImage.startsWith('http') ? productImage : `${API_BASE}${productImage}`) :
-              null;
-
-            return (
-              <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={productName}
-                    class="w-full h-48 object-cover"
-                  />
-                ) : (
-                  <div class="w-full h-48 bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                    <span class="text-6xl">{categoryIcon}</span>
-                  </div>
-                )}
-
-                <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {productName}
-                  </h3>
-
-                  {productDescription && (
-                    <p class="text-gray-600 text-sm mb-4 line-clamp-3">
-                      {productDescription}
-                    </p>
-                  )}
-
-                  <div class="flex items-center justify-between">
-                    <span class="inline-block bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-medium">
-                      {categoryName}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    ) : (
-      <div class="text-center py-16">
-        <div class="text-6xl mb-4">{categoryIcon}</div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">
-          No Products Available
-        </h2>
-        <p class="text-gray-600">
-          Check back soon for {categoryName.toLowerCase()} products!
-        </p>
-      </div>
-    )}
-
-    <!-- Back to Categories -->
-    <div class="mt-16 text-center">
-      <a
-        href="/categories"
-        class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-colors"
-      >
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-        </svg>
-        Browse All Categories
-      </a>
-    </div>
-  </div>
-</Layout>
-
 <style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+  .video-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to top,  rgba(41, 163, 41, 0.35), rgba(51, 204, 51, 0.3), rgba(92, 214, 92, 0.25), rgba(133, 224, 133, 0.2), rgba(194, 240, 194, 0.15), rgba(235, 250, 235, 0.1), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    mix-blend-mode: color;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .video-background video {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+  }
+  .hero-section {
+    min-height: 15vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  @media (min-width: 768px) {
+    .hero-section {
+      min-height: 40vh;
+      padding: 2rem 0;
+    }
+  }
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
   .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  /* Rich text content styling - clean and readable */
+  .rich-text-content {
+    color: #d1fae5;
+    line-height: 1.8;
+  }
+
+  /* Hide editor metadata elements */
+  .rich-text-content source-footnote,
+  .rich-text-content sources-carousel-inline,
+  .rich-text-content source-inline-chips,
+  .rich-text-content source-inline-chip,
+  .rich-text-content .source-inline-chip-container,
+  .rich-text-content sup.superscript {
+    display: none !important;
+  }
+
+  /* Clean up citation spans */
+  .rich-text-content span[class*="citation"] {
+    background: none !important;
+    color: inherit !important;
+  }
+
+  /* Professional typesetting for headings */
+  .rich-text-content h1,
+  .rich-text-content h2,
+  .rich-text-content h3,
+  .rich-text-content h4,
+  .rich-text-content h5,
+  .rich-text-content h6 {
+    color: #fbbf24;
+    font-weight: 700;
+  }
+
+  .rich-text-content h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+
+  .rich-text-content h2 {
+    font-size: 1.75rem;
+    line-height: 1.25;
+    margin-top: 2em;
+    margin-bottom: 0.75em;
+  }
+
+  .rich-text-content h3 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    margin-top: 1.75em;
+    margin-bottom: 0.65em;
+  }
+
+  .rich-text-content h4 {
+    font-size: 1.25rem;
+    line-height: 1.35;
+    margin-top: 1.5em;
+    margin-bottom: 0.6em;
+  }
+
+  .rich-text-content h5 {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-top: 1.25em;
+    margin-bottom: 0.55em;
+  }
+
+  .rich-text-content h6 {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-top: 1.25em;
+    margin-bottom: 0.5em;
+  }
+
+  .rich-text-content p {
+    margin-bottom: 1.25em;
+    line-height: 1.8;
+  }
+
+  .rich-text-content ul,
+  .rich-text-content ol {
+    margin: 1em 0 1.25em 1.5em;
+    line-height: 1.8;
+  }
+
+  .rich-text-content li {
+    margin-bottom: 0.5em;
+  }
+
+  .rich-text-content hr {
+    border: none;
+    border-top: 1px solid #4ade80;
+    margin: 2em 0;
+  }
+
+  .rich-text-content a {
+    color: #fbbf24;
+    text-decoration: underline;
+  }
+
+  .rich-text-content a:hover {
+    color: #fcd34d;
+  }
+
+  .rich-text-content strong {
+    color: #86efac;
+    font-weight: bold;
+  }
+
+  .rich-text-content em {
+    font-style: italic;
+  }
 </style>
+
+<Layout title={`${categoryName} - Cannabis Products`} description={categoryDescription || `Browse ${categoryName} cannabis products`}>
+  <!-- Video Background -->
+  <div class="video-background">
+    <video autoplay loop muted playsinline>
+      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+    <!-- Hero Section -->
+    <div class="text-white hero-section">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+        <div class="text-center">
+          {categoryImage ? (
+            <img
+              src={categoryImage}
+              alt={categoryName}
+              class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 rounded-full object-cover border-4 border-yellow-400 shadow-2xl"
+            />
+          ) : (
+            <div class="text-6xl md:text-8xl mb-6">{categoryIcon}</div>
+          )}
+
+          <h1 class="mb-6 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
+            {categoryName}
+          </h1>
+
+          <div class="flex flex-wrap justify-center gap-4">
+            <a href="/categories" class="px-6 py-2.5 text-base font-semibold text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+              All Categories
+            </a>
+            <a href="/stores" class="px-6 py-2.5 text-base font-semibold text-yellow-400 transition-all transform border-2 border-yellow-400 rounded-lg shadow-lg hover:bg-yellow-400 hover:text-black hover:scale-105">
+              Find Locations
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rich Text Content Section -->
+    {categoryRichText && (
+      <div class="py-12 bg-gradient-to-b from-black/80 to-green-900/40">
+        <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+          <div class="p-6 bg-black border-2 border-green-500 rounded-lg md:p-8">
+            <div class="flex items-center mb-6 gap-4">
+              {categoryImage ? (
+                <img
+                  src={categoryImage}
+                  alt={categoryName}
+                  class="object-cover w-16 h-16 rounded-lg"
+                />
+              ) : (
+                <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                  <span class="text-3xl">{categoryIcon}</span>
+                </div>
+              )}
+              <h2 class="text-2xl font-bold text-yellow-400 md:text-3xl">About {categoryName}</h2>
+            </div>
+            <div class="rich-text-content" set:html={categoryRichText}></div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    <!-- Products Section -->
+    <div class="py-12 bg-black bg-opacity-90">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+        {products.length > 0 ? (
+          <div>
+            <div class="mb-8 text-center">
+              <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
+                Available Products
+              </h2>
+              <p class="text-lg text-green-300">
+                {products.length} product{products.length !== 1 ? 's' : ''} in {categoryName}
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {products.map((product: any) => {
+                const productName = product.name || product.Name || 'Product';
+                const productDescription = product.description || product.Description || '';
+                const productImage = product.image?.url || product.Image?.url;
+                const imageUrl = productImage ?
+                  (productImage.startsWith('http') ? productImage : `${API_BASE}${productImage}`) :
+                  null;
+
+                return (
+                  <div class="relative overflow-hidden transition-all transform bg-black border-2 border-green-500 group rounded-xl hover:border-yellow-400 hover:scale-105">
+                    {imageUrl ? (
+                      <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50">
+                        <img
+                          src={imageUrl}
+                          alt={productName}
+                          class="object-cover w-full h-full transition-opacity opacity-80 group-hover:opacity-100"
+                        />
+                      </div>
+                    ) : (
+                      <div class="h-40 bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                        <span class="text-5xl">{categoryIcon}</span>
+                      </div>
+                    )}
+
+                    <div class="p-4">
+                      <h3 class="mb-1 text-lg font-bold text-yellow-400 group-hover:text-yellow-300 line-clamp-2">
+                        {productName}
+                      </h3>
+
+                      {productDescription && (
+                        <p class="mb-2 text-xs text-green-300 line-clamp-2">
+                          {productDescription}
+                        </p>
+                      )}
+
+                      <div class="flex items-center justify-between">
+                        <span class="inline-block px-2 py-1 text-xs font-medium text-green-400 bg-green-900 rounded-full">
+                          {categoryName}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div class="py-12 text-center">
+            <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
+              <div class="mb-4 text-6xl">{categoryIcon}</div>
+              <h3 class="mb-2 text-lg font-medium text-yellow-400">No Products Available</h3>
+              <p class="text-green-300">Check back soon for {categoryName.toLowerCase()} products!</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="py-12 bg-gradient-to-b from-green-900/40 to-black/60">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+        <div class="mb-8 text-center">
+          <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
+            Why Choose Mint Deals
+          </h2>
+          <p class="text-lg text-green-300">
+            Your trusted partner in cannabis discovery
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <!-- Feature 1 -->
+          <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
+            <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">
+              <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <h3 class="mb-3 text-xl font-bold text-yellow-400">Find Locations</h3>
+            <p class="text-green-300">
+              Discover trusted dispensaries near you with detailed information and directions.
+            </p>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
+            <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">
+              <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+            </div>
+            <h3 class="mb-3 text-xl font-bold text-yellow-400">Browse Products</h3>
+            <p class="text-green-300">
+              Explore comprehensive product information and educational resources.
+            </p>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
+            <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">
+              <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h3 class="mb-3 text-xl font-bold text-yellow-400">Trusted Information</h3>
+            <p class="text-green-300">
+              Access reliable, up-to-date information from verified sources and experts.
+            </p>
+          </div>
+        </div>
+
+        <!-- Back to Categories -->
+        <div class="mt-12 text-center">
+          <a
+            href="/categories"
+            class="inline-flex items-center px-6 py-3 font-medium text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Browse All Categories
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

@@ -12,42 +12,21 @@ let apiError = null;
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 try {
-  console.log('🚀 Fetching stores, regions and categories from Railway API');
+  console.log('🚀 Fetching regions with stores from Railway API');
 
-  // Fetch stores, regions and categories in parallel
-  const [storesResponse, regionsResponse, categoriesResponse] = await Promise.allSettled([
-    fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=500`),
-    fetch(`${API_BASE}/regions?populate=*`),
-    fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=20`)
-  ]);
+  // Fetch regions with stores populated
+  const regionsResponse = await fetch(`${API_BASE}/regions?populate[stores][populate]=*&pagination[pageSize]=100`);
 
-  // Process regions
-  if (regionsResponse.status === 'fulfilled' && regionsResponse.value.ok) {
-    const data = await regionsResponse.value.json();
+  if (regionsResponse.ok) {
+    const data = await regionsResponse.json();
     const rawRegions = data?.data || [];
     console.log('✅ Regions loaded:', rawRegions.length);
 
-    // Process stores
-    if (storesResponse.status === 'fulfilled' && storesResponse.value.ok) {
-      const storesDataResponse = await storesResponse.value.json();
-      storesData = storesDataResponse?.data || [];
-      console.log('✅ Stores loaded:', storesData.length);
-    }
-
-    // Process categories
-    if (categoriesResponse.status === 'fulfilled' && categoriesResponse.value.ok) {
-      const data = await categoriesResponse.value.json();
-      categoriesData = data?.data || [];
-      console.log('✅ Categories loaded:', categoriesData.length);
-    }
-
-    // Build regions with stores grouped by city
+    // Build regions with stores grouped by city using the stores relationship
     regionsData = rawRegions.map(region => {
-      // Get stores for this region - match by region ID only
-      const regionStores = storesData.filter(store => {
-        const storeRegionId = typeof store.region === 'object' ? store.region?.id : store.region;
-        return storeRegionId === region.id;
-      });
+      // Get stores directly from the region's stores field
+      const regionStores = region.stores || [];
+      console.log(`📍 Region ${region.name}: ${regionStores.length} stores`);
 
       // Group stores by city
       const citiesMap = {};
@@ -64,8 +43,10 @@ try {
       });
 
       return {
+        id: region.id || region.documentId,
         name: region.name,
         code: region.code,
+        slug: region.name ? region.name.toLowerCase().replace(/\s+/g, '-') : (region.id || region.documentId),
         cities: Object.values(citiesMap).map(city => ({
           ...city,
           categories: Array.from(city.categories)
@@ -76,6 +57,9 @@ try {
     }).filter(region => region.totalLocations > 0);
 
     console.log('✅ Regions with stores:', regionsData.length);
+  } else {
+    console.error('❌ Regions API error:', regionsResponse.status, regionsResponse.statusText);
+    apiError = `Failed to fetch regions: ${regionsResponse.status}`;
   }
 
 } catch (error) {
@@ -85,13 +69,28 @@ try {
 ---
 
 <style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
   .video-background {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
     overflow: hidden;
+  }
+  .video-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to top,  rgba(41, 163, 41, 0.35), rgba(51, 204, 51, 0.3), rgba(92, 214, 92, 0.25), rgba(133, 224, 133, 0.2), rgba(194, 240, 194, 0.15), rgba(235, 250, 235, 0.1), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    mix-blend-mode: color;
     pointer-events: none;
     z-index: 1;
   }
@@ -103,14 +102,21 @@ try {
   .content-wrapper {
     position: relative;
     z-index: 1;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5));
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
   }
   .hero-section {
-    min-height: 40vh;
+    min-height: 15vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 0;
+    padding: 1rem 0;
+  }
+
+  @media (min-width: 768px) {
+    .hero-section {
+      min-height: 40vh;
+      padding: 2rem 0;
+    }
   }
 </style>
 
@@ -134,198 +140,115 @@ try {
           <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
             Discover premium cannabis dispensaries across multiple states
           </p>
+
+          <!-- Navigation Buttons -->
+          <div class="relative z-10 flex flex-wrap justify-center gap-4 mt-6">
+            <a href="/stores" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
+              All Stores
+            </a>
+            <a href="/categories" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105 border-2 border-white/20">
+              Browse Categories
+            </a>
+            <a href="/dosing-guide" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105 border-2 border-white/20">
+              Dosing Guide
+            </a>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Quick Stats Bar -->
-    <div class="bg-gradient-to-r from-green-800 via-green-900 to-green-800 py-3">
+    <div class="py-4 bg-black bg-opacity-90">
       <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
-        <div class="grid grid-cols-2 gap-6 text-center md:grid-cols-3">
-          <div class="text-white">
-            <div class="text-xl font-bold text-yellow-400">{regionsData.length}</div>
-            <div class="text-xs text-green-200">Regions</div>
+        <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-3">
+          <div>
+            <div class="mb-1 text-2xl font-bold text-green-500">{regionsData.length}</div>
+            <div class="text-sm text-yellow-400 font-semibold">Regions</div>
           </div>
-          <div class="text-white">
-            <div class="text-xl font-bold text-yellow-400">{regionsData.reduce((sum, r) => sum + r.totalLocations, 0)}</div>
-            <div class="text-xs text-green-200">Total Locations</div>
+          <div>
+            <div class="mb-1 text-2xl font-bold text-green-500">{regionsData.reduce((sum, r) => sum + r.totalLocations, 0)}</div>
+            <div class="text-sm text-yellow-400 font-semibold">Locations</div>
           </div>
-          <div class="text-white">
-            <div class="text-xl font-bold text-yellow-400">{regionsData.reduce((sum, r) => sum + r.cities.length, 0)}</div>
-            <div class="text-xs text-green-200">Cities</div>
+          <div>
+            <div class="mb-1 text-2xl font-bold text-green-500">{regionsData.reduce((sum, r) => sum + r.cities.length, 0)}</div>
+            <div class="text-sm text-yellow-400 font-semibold">Cities</div>
           </div>
         </div>
       </div>
     </div>
 
-  <!-- Main Content -->
-  <div class="bg-black py-12">
-    <div class="px-4 sm:px-6 lg:px-8 max-w-[2080px] mx-auto">
-    {regionsData.length === 0 ? (
-      <div class="text-center py-16">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-        </svg>
-        <h3 class="mt-2 text-lg font-medium text-white">No regions found</h3>
-        <p class="mt-1 text-sm text-gray-400">
-          {apiError ? `Error: ${apiError}` : 'No regions are available at this time.'}
-        </p>
-      </div>
-    ) : (
-      <div>
-        <!-- Region Overview Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 mb-16">
-          {regionsData.map(region => (
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transition-all border border-green-700 hover:border-yellow-500">
-              {/* State Header */}
-              <div class="bg-gradient-to-r from-green-900 via-green-800 to-yellow-700 text-white p-6">
-                <h2 class="text-2xl font-bold mb-2">{region.name}</h2>
-                <div class="flex items-center justify-between">
-                  <span class="text-green-200">
-                    {region.totalLocations} dispensar{region.totalLocations !== 1 ? 'ies' : 'y'}
-                  </span>
-                  <span class="text-green-200">
-                    {region.cities.length} cit{region.cities.length !== 1 ? 'ies' : 'y'}
-                  </span>
+    <!-- Main Content -->
+    <div class="py-12 bg-black">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+        {regionsData.length === 0 ? (
+          <div class="py-16 text-center">
+            <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
+              <div class="mb-4 text-6xl">🗺️</div>
+              <h3 class="mb-2 pb-1 text-lg font-medium text-yellow-400 leading-snug">No Regions Available</h3>
+              <p class="text-green-300">
+                {apiError ? `Error: ${apiError}` : 'No regions are available at this time.'}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div class="space-y-12">
+            <!-- Region Cards -->
+            {regionsData.map(region => (
+              <div class="p-6 bg-black border-2 border-green-500 rounded-lg md:p-8">
+                {/* Region Header */}
+                <div class="flex flex-col items-start justify-between mb-6 md:flex-row md:items-center">
+                  <div>
+                    <h2 class="mb-2 pb-1 text-3xl font-bold text-yellow-400 leading-snug">{region.name}</h2>
+                    <div class="flex gap-4 text-sm text-green-300">
+                      <span>{region.totalLocations} dispensar{region.totalLocations !== 1 ? 'ies' : 'y'}</span>
+                      <span>•</span>
+                      <span>{region.cities.length} cit{region.cities.length !== 1 ? 'ies' : 'y'}</span>
+                    </div>
+                  </div>
+                  <a
+                    href={`/region/${region.slug}`}
+                    class="inline-flex items-center px-6 py-3 mt-4 font-medium text-white transition-all transform rounded-lg shadow-lg md:mt-0 bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"
+                  >
+                    View All Locations
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
                 </div>
-              </div>
 
-              {/* Cities List */}
-              <div class="p-6">
-                <h3 class="text-lg font-semibold text-white mb-4">Cities & Areas</h3>
-                <div class="space-y-3">
+                {/* Cities Grid */}
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {region.cities.map(city => (
-                    <div class="border border-gray-700 rounded-lg p-4 hover:bg-gray-800 transition-colors">
+                    <div class="p-4 transition-all bg-gray-900 border-2 border-green-700 rounded-lg hover:shadow-lg hover:shadow-yellow-400/20" style="border-image: linear-gradient(to right, rgb(251, 191, 36), rgb(249, 115, 22)) 1;">
                       <div class="flex items-center justify-between mb-2">
-                        <h4 class="font-medium text-white">{city.name}</h4>
+                        <h3 class="text-lg font-semibold text-white">{city.name}</h3>
                         <span class="text-sm text-gray-400">
                           {city.locations.length} location{city.locations.length !== 1 ? 's' : ''}
                         </span>
                       </div>
 
-                      {/* Available Categories */}
                       {city.categories.length > 0 && (
-                        <div class="flex flex-wrap gap-1 mt-2">
+                        <div class="flex flex-wrap gap-1 mt-3">
                           {city.categories.slice(0, 3).map(category => (
-                            <span class="inline-block bg-green-900 text-green-200 px-2 py-1 rounded text-xs">
+                            <span class="inline-block px-2 py-1 text-xs text-green-200 bg-green-900 rounded">
                               {category}
                             </span>
                           ))}
                           {city.categories.length > 3 && (
-                            <span class="inline-block bg-gray-800 text-gray-400 px-2 py-1 rounded text-xs">
-                              +{city.categories.length - 3} more
+                            <span class="inline-block px-2 py-1 text-xs text-gray-400 bg-gray-800 rounded">
+                              +{city.categories.length - 3}
                             </span>
                           )}
-                        </div>
-                      )}
-
-                      {/* Quick Links */}
-                      {categoriesData.length > 0 && (
-                        <div class="flex space-x-2 mt-3">
-                          {categoriesData.slice(0, 2).map(category => category?.Slug && (
-                            <a
-                              href={`/stores`}
-                              class="text-xs bg-green-900 text-green-300 px-2 py-1 rounded hover:bg-green-800 transition-colors"
-                            >
-                              {category.Name || 'Browse'}
-                            </a>
-                          ))}
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
-
-                {/* View All Link */}
-                <div class="mt-6 pt-4 border-t border-gray-700">
-                  <a
-                    href={`/region/${region.name ? region.name.toLowerCase().replace(/\s+/g, '-') : region.id}`}
-                    class="block w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black px-4 py-2 rounded-lg text-center font-medium transition-colors shadow-lg"
-                  >
-                    View All {region.name} Locations
-                  </a>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <!-- Quick Category Navigation -->
-        {categoriesData.length > 0 && (
-          <div class="bg-gray-900 rounded-lg shadow-lg p-8 border border-green-700">
-            <h2 class="text-2xl font-bold text-white mb-6 text-center">
-              Browse by Category
-            </h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categoriesData.map(category => (
-                <div class="text-center">
-                  <a
-                    href={`/${category.Slug}`}
-                    class="block p-6 border-2 border-gray-700 rounded-lg hover:border-yellow-500 hover:bg-gray-800 transition-all group"
-                  >
-                    <div class="text-3xl mb-2">
-                      {category.Slug === 'flower' ? '🌿' :
-                       category.Slug === 'concentrates' ? '💎' :
-                       category.Slug === 'pre-rolls' ? '🚬' :
-                       category.Slug === 'vaporizers' ? '💨' : '🌱'}
-                    </div>
-                    <h3 class="font-semibold text-white group-hover:text-yellow-400">
-                      {category.Name}
-                    </h3>
-                    <p class="text-sm text-gray-400 mt-1">
-                      Available in {regionsData.length} region{regionsData.length !== 1 ? 's' : ''}
-                    </p>
-                  </a>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <!-- Popular Destinations -->
-        <div class="mt-16 bg-gradient-to-r from-green-900 via-green-800 to-yellow-700 rounded-lg p-8 shadow-lg">
-          <h2 class="text-2xl font-bold text-white mb-6 text-center">
-            Popular Destinations
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-            {regionsData.flatMap(region =>
-              region.cities.filter(city => city.locations.length > 0).slice(0, 3)
-            ).slice(0, 6).map(city => (
-              <div class="bg-gray-900 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow border border-green-700">
-                <h3 class="text-lg font-semibold text-white mb-2">{city.name}</h3>
-                <p class="text-gray-300 mb-4">
-                  {city.locations.length} dispensar{city.locations.length !== 1 ? 'ies' : 'y'} • {city.categories.length} categor{city.categories.length !== 1 ? 'ies' : 'y'}
-                </p>
-                <div class="grid grid-cols-2 gap-2">
-                  <a
-                    href="/stores"
-                    class="text-center bg-yellow-600 text-black px-3 py-2 rounded text-sm font-medium hover:bg-yellow-500 transition-colors"
-                  >
-                    View Stores
-                  </a>
-                  <a
-                    href="/all-store-specials"
-                    class="text-center bg-green-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-green-700 transition-colors"
-                  >
-                    View Specials
-                  </a>
-                </div>
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
-    )}
     </div>
   </div>
-  </div>
 </Layout>
-
-<style>
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-</style>
