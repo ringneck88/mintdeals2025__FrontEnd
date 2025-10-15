@@ -41,9 +41,9 @@ export async function getStaticPaths() {
 const { category, slug } = Astro.params;
 
 // Extract state from slug
-const statePart = slug.split('-in-')[1];
-const stateName = statePart.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-const categoryName = category.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+const statePart = slug?.split('-in-')[1] || '';
+const stateName = statePart ? statePart.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : '';
+const categoryName = category ? category.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : '';
 
 const pageTitle = `${categoryName} in ${stateName} | Cannabis Products`;
 const categoryIcon = getCategoryIcon(category);
@@ -74,38 +74,86 @@ try {
 }
 ---
 
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+  .video-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to top,  rgba(41, 163, 41, 0.35), rgba(51, 204, 51, 0.3), rgba(92, 214, 92, 0.25), rgba(133, 224, 133, 0.2), rgba(194, 240, 194, 0.15), rgba(235, 250, 235, 0.1), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    mix-blend-mode: color;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .video-background video {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+  }
+</style>
+
 <Layout title={pageTitle} description={description}>
+  <!-- Video Background -->
+  <div class="video-background">
+    <video autoplay loop muted playsinline>
+      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+
   <!-- Breadcrumb Navigation -->
-  <nav class="bg-slate-50 dark:bg-slate-900 py-4">
+  <nav class="bg-black bg-opacity-60 py-4">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center space-x-2 text-sm">
-        <a href="/" class="text-emerald-600 hover:text-emerald-800">Home</a>
-        <span class="text-slate-400">/</span>
-        <a href="/categories" class="text-emerald-600 hover:text-emerald-800">Categories</a>
-        <span class="text-slate-400">/</span>
-        <a href={`/${category}`} class="text-emerald-600 hover:text-emerald-800">{categoryName}</a>
-        <span class="text-slate-400">/</span>
-        <span class="text-slate-700 dark:text-slate-300">{stateName}</span>
+        <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
+        <span class="text-green-300">/</span>
+        <a href="/categories" class="text-yellow-400 hover:text-yellow-300">Categories</a>
+        <span class="text-green-300">/</span>
+        <a href={`/${category}`} class="text-yellow-400 hover:text-yellow-300">{categoryName}</a>
+        <span class="text-green-300">/</span>
+        <span class="text-white">{stateName}</span>
       </div>
     </div>
   </nav>
 
   <!-- Hero Section -->
-  <section class="relative bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 dark:from-emerald-800 dark:via-emerald-900 dark:to-teal-900">
-    <div class="absolute inset-0 bg-black opacity-20"></div>
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-      <div class="text-8xl mb-8">{categoryIcon}</div>
-      <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6">
-        {categoryName} in {stateName}
+  <section class="relative py-24 md:py-32 text-white bg-black bg-opacity-70">
+    <div class="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 text-center">
+      <div class="text-8xl md:text-9xl mb-10">{categoryIcon}</div>
+      <h1 class="mb-10 text-5xl font-bold md:text-8xl px-4">
+        <span class="inline-block pb-4 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 1rem; line-height: 1.6; letter-spacing: -0.02em;">
+          {categoryName} in {stateName}
+        </span>
       </h1>
-      <p class="text-xl md:text-2xl text-emerald-100 max-w-3xl mx-auto mb-8 leading-relaxed">
+      <p class="text-2xl md:text-3xl text-white max-w-4xl mx-auto mb-12 px-4 font-medium" style="line-height: 2; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
         {description}
       </p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="#stores" class="inline-flex items-center px-6 py-3 bg-white text-emerald-700 rounded-lg font-semibold shadow-lg hover:bg-emerald-50 transition-colors duration-200">
+      <div class="flex flex-col sm:flex-row gap-8 justify-center px-4">
+        <a href="#stores" class="inline-flex items-center justify-center px-10 py-5 text-xl font-bold text-white transition-all transform rounded-xl shadow-2xl bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 hover:scale-110">
           🏪 Find Dispensaries
         </a>
-        <a href="#products" class="inline-flex items-center px-6 py-3 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-emerald-700 transition-colors duration-200">
+        <a href="#products" class="inline-flex items-center justify-center px-10 py-5 text-xl font-bold text-white transition-all transform rounded-xl shadow-2xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 hover:scale-110">
           🌿 View Products
         </a>
       </div>
@@ -113,13 +161,15 @@ try {
   </section>
 
   <!-- Featured Products Section -->
-  <section id="products" class="bg-white dark:bg-gray-900 py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
-          {categoryName} Products
+  <section id="products" class="bg-black bg-opacity-95 py-24">
+    <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div class="text-center mb-20">
+        <h2 class="mb-8 text-5xl font-bold md:text-7xl px-4">
+          <span class="inline-block pb-4 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 1rem; line-height: 1.6; letter-spacing: -0.02em;">
+            {categoryName} Products
+          </span>
         </h2>
-        <p class="text-lg text-gray-600 dark:text-gray-300 mt-4">
+        <p class="text-2xl md:text-3xl text-white mt-8 max-w-3xl mx-auto px-4 font-medium" style="line-height: 2;">
           Browse popular {categoryName.toLowerCase()} products available in {stateName}
         </p>
       </div>
@@ -135,7 +185,7 @@ try {
               null;
 
             return (
-              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              <div class="bg-black border-2 border-green-500 rounded-lg overflow-hidden hover:shadow-lg hover:shadow-yellow-400/30 transition-all duration-300 hover:scale-105">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
@@ -143,23 +193,23 @@ try {
                     class="w-full h-48 object-cover"
                   />
                 ) : (
-                  <div class="w-full h-48 bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                  <div class="w-full h-48 bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center">
                     <span class="text-6xl">{categoryIcon}</span>
                   </div>
                 )}
 
-                <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                <div class="p-6">
+                  <h3 class="text-xl font-bold text-white mb-3 line-clamp-2" style="line-height: 1.4;">
                     {productName}
                   </h3>
 
                   {productDescription && (
-                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                    <p class="text-base text-green-300 mb-4 line-clamp-3" style="line-height: 1.6;">
                       {productDescription}
                     </p>
                   )}
 
-                  <span class="inline-block bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-1 rounded-full text-xs font-medium">
+                  <span class="inline-block bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold">
                     {categoryName}
                   </span>
                 </div>
@@ -169,22 +219,26 @@ try {
         </div>
       ) : (
         <div class="text-center py-12">
-          <div class="text-6xl mb-4">{categoryIcon}</div>
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white">No Products Available</h3>
-          <p class="text-gray-600 dark:text-gray-300">Check back soon for {categoryName.toLowerCase()} products!</p>
+          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
+            <div class="text-6xl mb-4">{categoryIcon}</div>
+            <h3 class="mb-2 text-lg font-medium text-yellow-400">No Products Available</h3>
+            <p class="text-green-300">Check back soon for {categoryName.toLowerCase()} products!</p>
+          </div>
         </div>
       )}
     </div>
   </section>
 
   <!-- Dispensaries Section -->
-  <section id="stores" class="bg-gray-50 dark:bg-gray-800 py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
-          Dispensaries in {stateName}
+  <section id="stores" class="bg-gradient-to-b from-green-900/40 to-black/60 py-24">
+    <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div class="text-center mb-20">
+        <h2 class="mb-8 text-5xl font-bold md:text-7xl px-4">
+          <span class="inline-block pb-4 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 1rem; line-height: 1.6; letter-spacing: -0.02em;">
+            Dispensaries in {stateName}
+          </span>
         </h2>
-        <p class="text-lg text-gray-600 dark:text-gray-300 mt-4">
+        <p class="text-2xl md:text-3xl text-white mt-8 max-w-3xl mx-auto px-4 font-medium" style="line-height: 2;">
           Licensed dispensaries carrying {categoryName.toLowerCase()} products
         </p>
       </div>
@@ -192,31 +246,31 @@ try {
       {stores.length > 0 ? (
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {stores.map((store: any) => (
-            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-              <div class="flex items-center mb-4">
-                <div class="bg-emerald-500 text-white rounded-lg w-12 h-12 flex items-center justify-center mr-4 text-xl">
+            <div class="bg-black border-2 border-green-500 rounded-lg p-8 hover:shadow-lg hover:shadow-yellow-400/20 transition-all hover:scale-105">
+              <div class="flex items-center mb-6">
+                <div class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg w-16 h-16 flex items-center justify-center mr-5 text-3xl flex-shrink-0">
                   🏪
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{store.name}</h3>
+                <h3 class="text-2xl font-bold text-white" style="line-height: 1.3;">{store.name}</h3>
               </div>
 
-              <div class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+              <div class="space-y-3 text-lg text-white mb-6">
                 <div class="flex items-center">
-                  <span class="text-gray-400 mr-2 w-4 h-4">📍</span>
+                  <span class="text-yellow-400 mr-3 text-2xl">📍</span>
                   <span>{store.city}, {store.state}</span>
                 </div>
                 {store.phone && (
                   <div class="flex items-center">
-                    <span class="text-gray-400 mr-2 w-4 h-4">📞</span>
+                    <span class="text-yellow-400 mr-3 text-2xl">📞</span>
                     <span>{store.phone}</span>
                   </div>
                 )}
               </div>
 
-              <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+              <div class="mt-6 pt-6 border-t-2 border-green-500">
                 <a
                   href={`/location/${store.slug}`}
-                  class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                  class="inline-block font-bold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 px-6 py-3 text-lg hover:scale-105"
                 >
                   View Store Details
                 </a>
@@ -226,38 +280,42 @@ try {
         </div>
       ) : (
         <div class="text-center py-12">
-          <div class="text-6xl mb-4">🏪</div>
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Finding Dispensaries</h3>
-          <p class="text-gray-600 dark:text-gray-300">We're updating our dispensary database for {stateName}. Check back soon!</p>
+          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
+            <div class="text-6xl mb-4">🏪</div>
+            <h3 class="mb-2 text-lg font-medium text-yellow-400">Finding Dispensaries</h3>
+            <p class="text-green-300">We're updating our dispensary database for {stateName}. Check back soon!</p>
+          </div>
         </div>
       )}
     </div>
   </section>
 
   <!-- Related States -->
-  <section class="bg-emerald-50 dark:bg-emerald-900/20 py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-          {categoryName} in Other States
+  <section class="bg-black bg-opacity-90 py-24">
+    <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div class="text-center mb-20">
+        <h2 class="mb-8 text-5xl font-bold md:text-7xl px-4">
+          <span class="inline-block pb-4 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 1rem; line-height: 1.6; letter-spacing: -0.02em;">
+            {categoryName} in Other States
+          </span>
         </h2>
-        <p class="text-lg text-gray-600 dark:text-gray-300 mt-4">
+        <p class="text-2xl md:text-3xl text-white mt-8 max-w-3xl mx-auto px-4 font-medium" style="line-height: 2;">
           Explore {categoryName.toLowerCase()} products in other locations
         </p>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-6">
         {['florida', 'california', 'colorado', 'nevada', 'arizona', 'massachusetts', 'michigan', 'illinois']
           .filter(state => state !== statePart)
           .slice(0, 7)
           .map(relatedState => {
             const relatedStateName = relatedState.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
             return (
-              <a href={`/${category}/${category}-in-${relatedState}`} class="bg-white dark:bg-slate-800 p-4 rounded-xl text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group">
-                <div class="text-3xl mb-2 group-hover:scale-110 transition-transform duration-200">
+              <a href={`/${category}/${category}-in-${relatedState}`} class="bg-black border-2 border-green-500 p-6 rounded-xl text-center hover:shadow-lg hover:shadow-yellow-400/30 hover:scale-105 hover:-translate-y-1 transition-all duration-200 group">
+                <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-200">
                   📍
                 </div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+                <h3 class="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors" style="line-height: 1.3;">
                   {relatedStateName}
                 </h3>
               </a>
@@ -267,6 +325,8 @@ try {
       </div>
     </div>
   </section>
+
+  </div> <!-- Close content-wrapper -->
 </Layout>
 
 <style>

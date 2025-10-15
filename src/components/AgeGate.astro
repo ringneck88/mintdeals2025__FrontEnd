@@ -105,6 +105,12 @@
         // Pull lever animation
         vaultLever.style.transform = 'rotate(90deg)';
 
+        // Quick success vibration
+        if ('vibrate' in navigator) {
+          // Single short vibration for success feedback
+          navigator.vibrate(100);
+        }
+
         // Stop the outer ring from spinning
         if (outerRingContainer) {
           outerRingContainer.style.animation = 'stopAtTop 1.5s ease-out forwards';
@@ -141,8 +147,13 @@
     const vaultLeverNo = document.getElementById('vaultLeverNo');
     if (vaultLeverNo) {
       vaultLeverNo.addEventListener('click', () => {
-        // Pull lever animation
-        vaultLeverNo.style.transform = 'translateY(-50%) rotate(-90deg)';
+        // Small pull lever animation
+        vaultLeverNo.style.transform = 'translateY(-50%) rotate(-15deg)';
+
+        // Return to original position after brief moment
+        setTimeout(() => {
+          vaultLeverNo.style.transform = 'translateY(-50%) rotate(0deg)';
+        }, 200);
 
         // Add red flashing alarm to vault
         const ageGateContent = document.querySelector('.age-gate-content');
@@ -153,6 +164,13 @@
         // Show error message
         if (errorMessage) {
           errorMessage.classList.remove('hidden');
+        }
+
+        // Trigger vibration if available (mobile devices)
+        if ('vibrate' in navigator) {
+          // Vibrate pattern: [vibrate, pause, vibrate, pause, ...]
+          // Pattern: 200ms on, 100ms off, 200ms on, 100ms off, 200ms on
+          navigator.vibrate([200, 100, 200, 100, 200]);
         }
       });
     }
@@ -377,12 +395,12 @@
 
   .vault-lever-right {
     right: -205px;
-    transform-origin: 30px center;
+    transform-origin: 20px center;
   }
 
   .vault-lever-left {
     left: -165px;
-    transform-origin: 150px center;
+    transform-origin: 160px center;
   }
 
   .lever-base {

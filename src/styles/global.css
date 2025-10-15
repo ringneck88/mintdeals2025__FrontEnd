@@ -199,12 +199,7 @@ p {
   max-width: 66ch;
 }
 
-/* Content containers - 66 CPL limit */
-main, article, section {
-  max-width: 66ch;
-  margin-left: auto;
-  margin-right: auto;
-}
+/* Content containers - removed global constraint to allow page-level control */
 
 /* Navigation and UI text */
 nav a, button, .btn {

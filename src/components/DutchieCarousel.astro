@@ -1,0 +1,25 @@
+---
+interface Props {
+  retailerId: string;
+  carouselId: string;
+  routeRoot: string;
+}
+
+const { retailerId, carouselId, routeRoot } = Astro.props;
+---
+
+<div id="dutchie-carousel-container">
+  <div id="dutchie-carousel-embed"></div>
+</div>
+
+<script define:vars={{ retailerId, carouselId, routeRoot }}>
+  // Load Dutchie carousel script - append to the container div
+  const container = document.getElementById('dutchie-carousel-embed');
+  if (container) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.id = `dutchie--carousel-embed-${carouselId}__script`;
+    script.src = `https://dutchie.com/api/v3/embedded-menu/${retailerId}/carousels/${carouselId}.js?routeRoot=${encodeURIComponent(routeRoot)}&hideTitle=true`;
+    container.appendChild(script);
+  }
+</script>

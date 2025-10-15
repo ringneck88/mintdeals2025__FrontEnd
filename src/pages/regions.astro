@@ -30,8 +30,16 @@ try {
 
       // Group stores by city
       const citiesMap = {};
+
+      // Helper function to safely extract string values
+      const getStringValue = (value, fallback = '') => {
+        return typeof value === 'string' ? value : fallback;
+      };
+
       regionStores.forEach(store => {
-        const city = store.address?.city || store.city || 'Unknown City';
+        // Handle various address structures with type checking
+        let city = getStringValue(store.address?.city) || getStringValue(store.city) || 'Unknown City';
+
         if (!citiesMap[city]) {
           citiesMap[city] = {
             name: city,
@@ -105,17 +113,17 @@ try {
     background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
   }
   .hero-section {
-    min-height: 15vh;
+    min-height: 7.5vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
 
   @media (min-width: 768px) {
     .hero-section {
-      min-height: 40vh;
-      padding: 2rem 0;
+      min-height: 30vh;
+      padding: 1rem 0;
     }
   }
 
@@ -142,10 +150,12 @@ try {
   <div class="content-wrapper">
     <!-- Hero Section -->
     <div class="text-white hero-section">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
-            Explore Our Regions
+          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
+            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+              Explore Our Regions
+            </span>
           </h1>
           <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
             Discover premium cannabis dispensaries across multiple states
@@ -159,9 +169,6 @@ try {
             <a href="/categories" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
               Browse Categories
             </a>
-            <a href="/dosing-guide" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-              Dosing Guide
-            </a>
           </div>
         </div>
       </div>
@@ -169,7 +176,7 @@ try {
 
     <!-- Quick Stats Bar -->
     <div class="py-4 bg-black bg-opacity-90">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-3">
           <div>
             <div class="mb-1 text-2xl font-bold text-green-500">{regionsData.length}</div>
@@ -189,7 +196,7 @@ try {
 
     <!-- Main Content -->
     <div class="py-12 bg-black">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         {regionsData.length === 0 ? (
           <div class="py-16 text-center">
             <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
@@ -208,7 +215,11 @@ try {
                 {/* Region Header */}
                 <div class="flex flex-col items-start justify-between mb-6 md:flex-row md:items-center">
                   <div>
-                    <h2 class="mb-2 pb-1 text-3xl font-bold gradient-heading leading-snug">{region.name}</h2>
+                    <h2 class="mb-2 text-3xl font-bold">
+                      <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.35rem;">
+                        {region.name}
+                      </span>
+                    </h2>
                     <div class="flex gap-4 text-sm text-green-300">
                       <span>{region.totalLocations} dispensar{region.totalLocations !== 1 ? 'ies' : 'y'}</span>
                       <span>•</span>

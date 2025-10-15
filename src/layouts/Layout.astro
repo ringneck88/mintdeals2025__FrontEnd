@@ -18,7 +18,6 @@ try {
   const response = await fetch(`${API_BASE}/categories?pagination[pageSize]=100`);
   if (response.ok) {
     const data = await response.json();
-    console.log('Categories API response:', data);
 
     categories = (data?.data || []).map((cat: any) => {
       // Handle both direct and nested attribute structures
@@ -26,21 +25,15 @@ try {
       const name = catData.Name || catData.name || '';
       const slug = catData.slug || catData.Slug || cat.documentId || '';
 
-      console.log('Processing category:', { name, slug });
-
       return {
         name,
         slug,
         icon: getCategoryIcon(slug)
       };
     }).filter((cat: any) => cat.name && cat.slug);
-
-    console.log('Final categories for nav:', categories.length);
-  } else {
-    console.error('Categories API error:', response.status, response.statusText);
   }
 } catch (error) {
-  console.error('Error fetching categories for nav:', error);
+  // Silently handle error - categories will remain empty array
 }
 
 // Fetch regions for navigation
@@ -49,7 +42,6 @@ try {
   const response = await fetch(`${API_BASE}/regions?pagination[pageSize]=100`);
   if (response.ok) {
     const data = await response.json();
-    console.log('Regions API response for nav:', data);
 
     navRegions = (data?.data || []).map((region: any) => {
       const name = region.name || '';
@@ -64,13 +56,9 @@ try {
       };
     }).filter((region: any) => region.name && region.slug)
       .sort((a: any, b: any) => a.name.localeCompare(b.name));
-
-    console.log('Final regions for nav:', navRegions.length);
-  } else {
-    console.error('Regions API error:', response.status, response.statusText);
   }
 } catch (error) {
-  console.error('Error fetching regions for nav:', error);
+  // Silently handle error - regions will remain empty array
 }
 
 // Fetch stores/locations for navigation grouped by region
@@ -79,14 +67,23 @@ try {
   const response = await fetch(`${API_BASE}/stores?populate=region&pagination[pageSize]=500`);
   if (response.ok) {
     const data = await response.json();
-    console.log('Stores API response for nav:', data);
 
     const stores = (data?.data || []).map((store: any) => {
       const name = store.name || '';
       const id = store.id || store.documentId;
       const slug = store.slug || (name ? name.toLowerCase().replace(/\s+/g, '-') : id);
       const regionData = store.region;
-      const regionName = regionData?.name || 'Other';
+
+      // Safely extract region name - handle both nested and direct structures
+      let regionName = 'Other';
+      if (regionData) {
+        if (typeof regionData === 'string') {
+          regionName = regionData;
+        } else if (typeof regionData === 'object') {
+          regionName = regionData.name || regionData.Name || 'Other';
+        }
+      }
+
       const regionId = regionData?.id || regionData?.documentId || 'other';
 
       return {
@@ -110,13 +107,9 @@ try {
     Object.keys(storesByRegion).forEach(regionName => {
       storesByRegion[regionName].sort((a: any, b: any) => a.name.localeCompare(b.name));
     });
-
-    console.log('Stores grouped by region for nav:', Object.keys(storesByRegion).length);
-  } else {
-    console.error('Stores API error:', response.status, response.statusText);
   }
 } catch (error) {
-  console.error('Error fetching stores for nav:', error);
+  // Silently handle error - storesByRegion will remain empty object
 }
 
 function getCategoryIcon(slug: string) {
@@ -148,7 +141,7 @@ function getCategoryIcon(slug: string) {
     <AgeGate />
 
     <header class="bg-black shadow-lg">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-[95%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20">
         <div class="flex justify-between items-center py-6">
           <div class="flex items-center">
             <a href="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
@@ -254,7 +247,7 @@ function getCategoryIcon(slug: string) {
                       <div class="bg-gray-950">
                         {storesByRegion[regionName].map((store: any) => (
                           <a
-                            href={`/stores/${store.id}`}
+                            href={`/location/${store.slug}`}
                             class="block px-4 py-2 pl-6 text-sm text-gray-300 hover:bg-green-900 hover:text-green-300 transition-colors"
                           >
                             <span class="text-base mr-2">🏪</span>
@@ -283,7 +276,7 @@ function getCategoryIcon(slug: string) {
     </main>
 
     <footer class="bg-gray-800 text-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="max-w-[95%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <!-- About Section -->
           <div>

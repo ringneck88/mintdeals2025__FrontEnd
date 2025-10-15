@@ -6,6 +6,7 @@ import Layout from '../layouts/Layout.astro';
 // Initialize data arrays
 let stores = [];
 let categories = [];
+let regions = [];
 let apiError = null;
 
 // Category icon mapping
@@ -41,12 +42,12 @@ function getCategoryColor(index) {
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 try {
-  console.log('🚀 Fetching stores and categories from API');
 
-  // Fetch stores and categories in parallel
-  const [storesResponse, categoriesResponse] = await Promise.allSettled([
+  // Fetch stores, categories, and regions in parallel
+  const [storesResponse, categoriesResponse, regionsResponse] = await Promise.allSettled([
     fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=50`),
-    fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=25`)
+    fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=25`),
+    fetch(`${API_BASE}/regions?populate=*&pagination[pageSize]=50`)
   ]);
 
   // Process stores
@@ -65,8 +66,6 @@ try {
       image: store.image?.url ? `https://mintdealsbackend-production.up.railway.app${store.image.url}` : null,
       isActive: store.is_active !== false
     })).filter(store => store.isActive);
-
-    console.log('✅ Stores loaded:', stores.length);
   }
 
   // Process categories
@@ -121,8 +120,6 @@ try {
         || getImageUrl(category.Image)
         || null;
 
-      console.log(`Category: ${data.Name || data.name}, Image URL: ${imageUrl}, Raw image field:`, JSON.stringify(data.image));
-
       return {
         id: category.id,
         documentId: category.documentId,
@@ -141,13 +138,67 @@ try {
     categories = categories
       .filter(category => category.title && category.isActive)
       .sort((a, b) => a.title.localeCompare(b.title));
+  }
 
-    console.log('✅ Categories loaded:', categories.length);
+  // Process regions
+  if (regionsResponse.status === 'fulfilled' && regionsResponse.value.ok) {
+    const data = await regionsResponse.value.json();
+    const regionsData = data?.data || [];
+
+    regions = regionsData.map((region) => {
+      const isV4 = !!region.attributes;
+      const data = isV4 ? region.attributes : region;
+
+      // Helper function to get image URL
+      function getImageUrl(imageData) {
+        if (!imageData || imageData === null) return null;
+
+        if (imageData?.data?.attributes?.url) {
+          const url = imageData.data.attributes.url;
+          return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+        }
+
+        if (typeof imageData === 'object' && imageData.formats) {
+          if (imageData.formats.large?.url) return imageData.formats.large.url;
+          if (imageData.formats.medium?.url) return imageData.formats.medium.url;
+          if (imageData.formats.small?.url) return imageData.formats.small.url;
+          if (imageData.formats.thumbnail?.url) return imageData.formats.thumbnail.url;
+        }
+
+        if (typeof imageData === 'object' && imageData.url) {
+          const url = imageData.url;
+          return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+        }
+
+        if (typeof imageData === 'string') {
+          return imageData.startsWith('http') ? imageData : `https://mintdealsbackend-production.up.railway.app${imageData}`;
+        }
+
+        return null;
+      }
+
+      const imageUrl = getImageUrl(data.image)
+        || getImageUrl(data.Image)
+        || getImageUrl(data.IMAGE)
+        || getImageUrl(region.image)
+        || getImageUrl(region.Image)
+        || null;
+
+      return {
+        id: region.id,
+        documentId: region.documentId,
+        name: data.name || data.Name || '',
+        slug: data.slug || data.Slug || region.documentId || region.id,
+        description: data.description || data.Description || '',
+        image: imageUrl
+      };
+    });
+
+    regions = regions.filter(region => region.name);
   }
 
 } catch (error) {
-  console.error('❌ Error fetching data:', error);
-  apiError = error.message;
+  apiError = error instanceof Error ? error.message : 'Unknown error';
 }
 ---
 ---
@@ -189,17 +240,17 @@ try {
     background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
   }
   .hero-section {
-    min-height: 15vh; /* 25% of desktop (60vh) */
+    min-height: 7.5vh; /* Half of original 15vh */
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
 
   @media (min-width: 768px) {
     .hero-section {
-      min-height: 60vh;
-      padding: 2rem 0;
+      min-height: 30vh; /* Half of original 60vh */
+      padding: 1rem 0;
     }
   }
   .line-clamp-2 {
@@ -222,7 +273,7 @@ try {
   <div class="content-wrapper">
     <!-- Hero Section -->
     <div class="text-white hero-section">
-    <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
       <div class="text-center">
         <h1 class="mb-4 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
           Mint Cannabis Deals
@@ -243,9 +294,9 @@ try {
     </div>
 
     <!-- Quick Stats Section -->
-  <div class="py-2 bg-black bg-opacity-90">
-    <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
-      <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
+  <div class="py-4 bg-black bg-opacity-90">
+    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+      <div class="grid grid-cols-2 gap-12 text-center md:grid-cols-3">
         <div>
           <div class="mb-1 text-2xl font-bold text-green-500">{stores.length}+</div>
           <div class="text-sm text-yellow-400">Locations</div>
@@ -253,10 +304,6 @@ try {
         <div>
           <div class="mb-1 text-2xl font-bold text-green-500">{categories.length}+</div>
           <div class="text-sm text-yellow-400">Categories</div>
-        </div>
-        <div>
-          <div class="mb-1 text-2xl font-bold text-green-500">100%</div>
-          <div class="text-sm text-yellow-400">Legal</div>
         </div>
         <div>
           <div class="mb-1 text-2xl font-bold text-green-500">24/7</div>
@@ -267,15 +314,14 @@ try {
   </div>
 
   <!-- Product Categories Section -->
-  <div class="py-12 bg-black">
-    <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+  <div class="py-16 bg-black">
+    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
       <div class="mb-8 text-center">
-        <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
-          Product Categories
+        <h2 class="mb-3 text-2xl font-bold md:text-3xl">
+          <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+            Product Categories
+          </span>
         </h2>
-        <p class="text-lg text-green-300">
-          Explore our comprehensive range of cannabis products
-        </p>
       </div>
 
       {apiError ? (
@@ -287,7 +333,7 @@ try {
           </div>
         </div>
       ) : categories.length > 0 ? (
-        <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div class="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:gap-8">
           {categories.slice(0, 8).map((category, index) => (
             <a
               href={`/${category.slug}`}
@@ -310,8 +356,10 @@ try {
 
               {/* Category Content */}
               <div class="p-4">
-                <h3 class="mb-1 text-lg font-bold text-yellow-400 group-hover:text-yellow-300">
-                  {category.title}
+                <h3 class="mb-1 text-lg font-bold">
+                  <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent group-hover:from-yellow-300 group-hover:to-orange-400" style="padding-bottom: 0.25rem;">
+                    {category.title}
+                  </span>
                 </h3>
                 {category.description && (
                   <p class="mb-2 text-xs text-green-300 line-clamp-2">
@@ -351,12 +399,95 @@ try {
     </div>
   </div>
 
-  <!-- Featured Locations Section -->
-  <div class="py-12 bg-gradient-to-b from-green-900/40 to-black/60">
-    <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+  <!-- Regions Section -->
+  <div class="py-16 bg-gradient-to-b from-black to-green-900/40">
+    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
       <div class="mb-8 text-center">
-        <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
-          Featured Locations
+        <h2 class="mb-3 text-2xl font-bold md:text-3xl">
+          <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+            Shop by Region
+          </span>
+        </h2>
+        <p class="text-lg text-green-300">
+          Explore cannabis products available in your area
+        </p>
+      </div>
+
+      {regions.length > 0 ? (
+        <div class="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:gap-8">
+          {regions.slice(0, 8).map((region) => (
+            <a
+              href={`/region/${region.slug}`}
+              class="relative overflow-hidden transition-all transform bg-black border-2 border-green-500 group rounded-xl hover:border-yellow-400 hover:scale-105 hover:-translate-y-1"
+            >
+              {/* Region Image */}
+              {region.image ? (
+                <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50">
+                  <img
+                    src={region.image}
+                    alt={region.name}
+                    class="object-cover w-full h-full transition-opacity opacity-80 group-hover:opacity-100"
+                  />
+                </div>
+              ) : (
+                <div class="h-40 bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center">
+                  <span class="text-5xl">📍</span>
+                </div>
+              )}
+
+              {/* Region Content */}
+              <div class="p-4">
+                <h3 class="mb-1 text-lg font-bold">
+                  <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent group-hover:from-yellow-300 group-hover:to-orange-400" style="padding-bottom: 0.25rem;">
+                    {region.name}
+                  </span>
+                </h3>
+                {region.description && (
+                  <p class="mb-2 text-xs text-green-300 line-clamp-2">
+                    {region.description}
+                  </p>
+                )}
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-green-400">
+                    View stores
+                  </span>
+                  <span class="text-yellow-400 transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="py-12 text-center">
+          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
+            <div class="mb-4 text-6xl">📍</div>
+            <h3 class="mb-2 text-lg font-medium text-yellow-400">Regions Coming Soon</h3>
+            <p class="text-green-300">Regional information will be available here.</p>
+          </div>
+        </div>
+      )}
+
+      <div class="mt-12 text-center">
+        <a href="/regions" class="inline-flex items-center px-6 py-3 font-medium text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
+          View All Regions
+          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured Locations Section -->
+  <div class="py-16 bg-gradient-to-b from-green-900/40 to-black/60">
+    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+      <div class="mb-8 text-center">
+        <h2 class="mb-3 text-2xl font-bold md:text-3xl">
+          <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+            Featured Locations
+          </span>
         </h2>
         <p class="text-lg text-green-300">
           Visit our trusted dispensary partners
@@ -387,7 +518,7 @@ try {
             </div>
           </div>
 
-          <div id="stores-grid" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div id="stores-grid" class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:gap-8">
             {stores.slice(0, 6).map(store => (
               <div
                 class="overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg store-card hover:shadow-2xl hover:border-yellow-400 hover:scale-105"
@@ -405,7 +536,11 @@ try {
                 )}
                 <div class="p-6">
                   <div class="flex items-start justify-between mb-2">
-                    <h3 class="text-xl font-bold text-yellow-400">{store.name}</h3>
+                    <h3 class="text-xl font-bold">
+                      <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.25rem;">
+                        {store.name}
+                      </span>
+                    </h3>
                     <span class="hidden px-2 py-1 text-xs text-green-400 rounded store-distance bg-green-900/50"></span>
                   </div>
                   {store.address && (
@@ -457,18 +592,20 @@ try {
   </div>
 
   <!-- About Section -->
-  <div class="py-12 bg-gradient-to-b from-black/60 to-green-900/40">
-    <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+  <div class="py-16 bg-gradient-to-b from-black/60 to-green-900/40">
+    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
       <div class="mb-8 text-center">
-        <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
-          Why Choose Mint Deals
+        <h2 class="mb-3 text-2xl font-bold md:text-3xl">
+          <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+            Why Choose Mint Deals
+          </span>
         </h2>
         <p class="text-lg text-green-300">
           Your trusted partner in cannabis discovery
         </p>
       </div>
 
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-3 xl:gap-12">
         <!-- Feature 1 -->
         <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
           <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">

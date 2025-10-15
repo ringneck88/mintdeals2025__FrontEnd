@@ -1,0 +1,23 @@
+---
+interface Props {
+  storeId: string;
+}
+
+const { storeId } = Astro.props;
+---
+
+<div id="dutchie-embed-container">
+  <div id="dutchie-menu-embed"></div>
+</div>
+
+<script define:vars={{ storeId }}>
+  // Load Dutchie embed script - append to the container div
+  const container = document.getElementById('dutchie-menu-embed');
+  if (container) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.id = 'dutchie--embed__script';
+    script.src = `https://dutchie.com/api/v2/embedded-menu/${storeId}.js`;
+    container.appendChild(script);
+  }
+</script>

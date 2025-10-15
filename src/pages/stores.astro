@@ -75,38 +75,45 @@ try {
     const storesData = await storesResponse.json();
     const storesList = storesData?.data || [];
 
-    stores = storesList.map(store => ({
-      id: store.id,
-      documentId: store.documentId,
-      Name: store.name || 'Unnamed Store',
-      slug: store.slug || store.documentId,
-      Description: store.description,
-      Address: store.address?.street || store.address,
-      City: store.address?.city || store.city || 'Unknown City',
-      State: store.address?.state || store.state || 'Unknown State',
-      ZipCode: store.address?.zipCode || store.zip_code,
-      Phone: store.phone,
-      Email: store.email,
-      Website: store.website,
-      Latitude: store.latitude,
-      Longitude: store.longitude,
-      Hours: store.hours,
-      StoreImage: store.store_image || store.hero_image ? {
-        url: (store.store_image?.url || store.hero_image?.url) ?
-          ((store.store_image?.url || store.hero_image?.url).startsWith('http') ?
-            (store.store_image?.url || store.hero_image?.url) :
-            `https://mintdealsbackend-production.up.railway.app${store.store_image?.url || store.hero_image?.url}`) : null
-      } : null,
-      GalleryImages: store.gallery_images || [],
-      IsFeatured: store.is_featured || false,
-      IsActive: store.is_active !== false,
-      StoreManager: store.store_manager,
-      region: store.region ? {
-        id: typeof store.region === 'object' ? store.region.id : store.region,
-        Name: regions.find(r => r.id === (typeof store.region === 'object' ? store.region.id : store.region))?.Name || 'Unknown Region'
-      } : null,
-      dosage_products: store.products || []
-    })).filter(store => store.IsActive);
+    stores = storesList.map(store => {
+      // Extract address fields with type checking
+      const getStringValue = (value, fallback = '') => {
+        return typeof value === 'string' ? value : fallback;
+      };
+
+      return {
+        id: store.id,
+        documentId: store.documentId,
+        Name: store.name || 'Unnamed Store',
+        slug: store.slug || store.documentId,
+        Description: store.description,
+        Address: getStringValue(store.address?.street) || getStringValue(store.street) || 'Address not available',
+        City: getStringValue(store.address?.city) || getStringValue(store.city) || 'Unknown City',
+        State: getStringValue(store.address?.state) || getStringValue(store.state) || 'Unknown State',
+        ZipCode: getStringValue(store.address?.zipCode) || getStringValue(store.zip_code),
+        Phone: store.phone,
+        Email: store.email,
+        Website: store.website,
+        Latitude: store.latitude,
+        Longitude: store.longitude,
+        Hours: store.hours,
+        StoreImage: store.store_image || store.hero_image ? {
+          url: (store.store_image?.url || store.hero_image?.url) ?
+            ((store.store_image?.url || store.hero_image?.url).startsWith('http') ?
+              (store.store_image?.url || store.hero_image?.url) :
+              `https://mintdealsbackend-production.up.railway.app${store.store_image?.url || store.hero_image?.url}`) : null
+        } : null,
+        GalleryImages: store.gallery_images || [],
+        IsFeatured: store.is_featured || false,
+        IsActive: store.is_active !== false,
+        StoreManager: store.store_manager,
+        region: store.region ? {
+          id: typeof store.region === 'object' ? store.region.id : store.region,
+          Name: regions.find(r => r.id === (typeof store.region === 'object' ? store.region.id : store.region))?.Name || 'Unknown Region'
+        } : null,
+        dosage_products: store.products || []
+      };
+    }).filter(store => store.IsActive);
 
     console.log('✅ Stores loaded:', stores.length);
     console.log('📊 Store regions:', stores.map(s => ({ name: s.Name, regionId: s.region?.id, regionName: s.region?.Name })));
@@ -159,17 +166,17 @@ try {
     background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
   }
   .hero-section {
-    min-height: 15vh;
+    min-height: 7.5vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
 
   @media (min-width: 768px) {
     .hero-section {
-      min-height: 40vh;
-      padding: 2rem 0;
+      min-height: 30vh;
+      padding: 1rem 0;
     }
   }
 </style>
@@ -186,10 +193,12 @@ try {
   <div class="content-wrapper">
     <!-- Hero Section -->
     <div class="text-white hero-section">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
-            🏪 Mint Cannabis Locations
+          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
+            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+              🏪 Mint Cannabis Locations
+            </span>
           </h1>
           <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
             Premium cannabis dispensaries across multiple states
@@ -203,9 +212,6 @@ try {
             <a href="/regions" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
               Browse Regions
             </a>
-            <a href="/dosing-guide" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-              Dosing Guide
-            </a>
           </div>
         </div>
       </div>
@@ -213,7 +219,7 @@ try {
 
     <!-- Quick Stats Bar -->
     <div class="py-4 bg-black bg-opacity-90">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-3">
           <div>
             <div class="mb-1 text-2xl font-bold text-green-500">{stores.length}</div>
@@ -233,7 +239,7 @@ try {
 
     <!-- Main Content -->
     <div class="bg-black py-12">
-      <div class="max-w-[2080px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-[90%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20">
     {error && (
       <div class="bg-yellow-900/20 border border-yellow-700 text-yellow-200 px-6 py-4 rounded-xl mb-8 shadow-sm">
         <div class="flex items-center">
@@ -317,7 +323,11 @@ try {
     <!-- Stores Grid -->
     <div class="mb-16">
       <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold text-white mb-4">Our Store Locations</h2>
+        <h2 class="text-4xl font-bold mb-4">
+          <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+            Our Store Locations
+          </span>
+        </h2>
         <p class="text-xl text-gray-300 max-w-3xl mx-auto">
           Visit any of our premium dispensary locations for expert guidance and the finest cannabis products
         </p>

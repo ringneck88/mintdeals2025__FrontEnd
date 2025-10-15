@@ -165,17 +165,17 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
     background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
   }
   .hero-section {
-    min-height: 15vh;
+    min-height: 7.5vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
 
   @media (min-width: 768px) {
     .hero-section {
-      min-height: 60vh;
-      padding: 2rem 0;
+      min-height: 30vh;
+      padding: 1rem 0;
     }
   }
   .line-clamp-2 {
@@ -322,10 +322,12 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
   <div class="content-wrapper">
     <!-- Hero Section -->
     <div class="text-white hero-section">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
-            Product Categories
+          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
+            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+              Product Categories
+            </span>
           </h1>
           <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 pb-1 leading-snug md:text-xl drop-shadow-lg">
             Explore our comprehensive range of premium cannabis products
@@ -334,18 +336,15 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
             <a href="/stores" class="px-6 py-2.5 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
               Find Locations
             </a>
-            <a href="/dosing-guide" class="px-6 py-2.5 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-              Dosing Guide
-            </a>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Quick Stats Section -->
-    <div class="py-2 bg-black bg-opacity-90">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
-        <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
+    <div class="py-4 bg-black bg-opacity-90">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+        <div class="grid grid-cols-2 gap-12 text-center md:grid-cols-4">
           <div>
             <div class="mb-1 text-2xl font-bold text-green-500">{totalCategories}+</div>
             <div class="text-sm text-yellow-400 font-semibold">Categories</div>
@@ -367,11 +366,13 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
     </div>
 
     <!-- Product Categories Section -->
-    <div class="py-12 bg-black">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
-        <div class="mb-8 text-center">
-          <h2 class="mb-3 text-2xl font-bold gradient-heading pb-1 leading-snug md:text-3xl">
-            Browse All Categories
+    <div class="py-16 bg-black">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+        <div class="mb-12 text-center">
+          <h2 class="mb-3 text-2xl font-bold md:text-3xl">
+            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+              Browse All Categories
+            </span>
           </h2>
           <p class="text-lg text-green-300">
             Click on any category to explore products
@@ -387,7 +388,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
             </div>
           </div>
         ) : categories.length > 0 ? (
-          <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <div class="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:gap-8">
             {categories.map((category, index) => (
               <a
                 href={`/${category.slug}`}
@@ -442,68 +443,21 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
       </div>
     </div>
 
-    <!-- Rich Text Content Section -->
-    {categories.some(cat => cat.richText) && (
-      <div class="py-12 bg-gradient-to-b from-black to-green-900/40">
-        <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
-          <div class="mb-8 text-center">
-            <h2 class="mb-3 text-2xl font-bold gradient-heading pb-1 leading-snug md:text-3xl">
-              Category Information
-            </h2>
-            <p class="text-lg text-green-300">
-              Learn more about our product categories
-            </p>
-          </div>
-
-          <div class="space-y-8">
-            {categories.filter(cat => cat.richText).map((category) => (
-              <div class="p-6 bg-black border-2 border-green-500 rounded-lg md:p-8">
-                <div class="flex items-center mb-4 gap-4">
-                  {category.image ? (
-                    <img
-                      src={category.image}
-                      alt={category.name}
-                      class="object-cover w-16 h-16 rounded-lg"
-                    />
-                  ) : (
-                    <div class={`w-16 h-16 rounded-lg bg-gradient-to-br ${category.colorGradient} flex items-center justify-center`}>
-                      <span class="text-3xl">{category.icon}</span>
-                    </div>
-                  )}
-                  <h3 class="text-2xl font-bold gradient-heading pb-1 leading-snug">{category.name}</h3>
-                </div>
-                <div class="rich-text-content" set:html={category.richText}></div>
-                <div class="mt-6">
-                  <a
-                    href={`/${category.slug}`}
-                    class="inline-flex items-center px-6 py-3 font-medium text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"
-                  >
-                    Browse {category.name}
-                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )}
-
     <!-- About Section -->
-    <div class="py-12 bg-gradient-to-b from-green-900/40 to-black/60">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
-        <div class="mb-8 text-center">
-          <h2 class="mb-3 text-2xl font-bold gradient-heading pb-1 leading-snug md:text-3xl">
-            Why Choose Mint Deals
+    <div class="py-16 bg-gradient-to-b from-green-900/40 to-black/60">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+        <div class="mb-12 text-center">
+          <h2 class="mb-3 text-2xl font-bold md:text-3xl">
+            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+              Why Choose Mint Deals
+            </span>
           </h2>
           <p class="text-lg text-green-300">
             Your trusted partner in cannabis discovery
           </p>
         </div>
 
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-3 xl:gap-12">
           <!-- Feature 1 -->
           <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-yellow-400/20">
             <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500">

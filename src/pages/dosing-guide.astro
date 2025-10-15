@@ -74,6 +74,24 @@ const safeString = (value) => {
   return String(value);
 };
 
+// Helper function to extract brand names from brands array
+const extractBrandNames = (brandsValue) => {
+  if (!brandsValue) return '';
+
+  // If it's already a string, return it
+  if (typeof brandsValue === 'string') return brandsValue;
+
+  // If it's an array, extract brand names
+  if (Array.isArray(brandsValue)) {
+    return brandsValue
+      .map(brand => brand?.brand_name || brand?.name || brand?.Name || '')
+      .filter(name => name)
+      .join(', ');
+  }
+
+  return '';
+};
+
 // Group products by dosage form using API data
 const productsByForm = {};
 
@@ -88,8 +106,8 @@ if (dosingForms.length > 0) {
         description: safeString(form.Discription || form.discription || form.Description || form.description || ''),
         servingInfo: safeString(form.serving_info || form.ServingInfo || ''),
         instructions: safeString(form.instructions || form.Instructions || ''),
-        brands: safeString(form.brands || form.Brands || ''),
-        dosingBrands: safeString(form.dosing_brands || form.dosingBrands || form.DosingBrands || ''),
+        brands: extractBrandNames(form.brands || form.Brands),
+        dosingBrands: extractBrandNames(form.dosing_brands || form.dosingBrands || form.DosingBrands),
         products: []
       };
     } catch (err) {
@@ -241,7 +259,7 @@ if (dosingProducts.length > 0) {
             {/* Dosing Brands */}
             {formData.dosingBrands && (
               <p class="text-sm italic mb-6 text-black">
-                <strong>Dosing Brands:</strong> {formData.dosingBrands}
+                <strong>Brands:</strong> {formData.dosingBrands}
               </p>
             )}
 

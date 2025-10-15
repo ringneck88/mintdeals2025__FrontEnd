@@ -2,14 +2,15 @@
  * For more details on how to configure Wrangler, refer to:
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
-{
-	"$schema": "node_modules/wrangler/config-schema.json",
+
+	{
 	"name": "mintdeals2025",
-	"compatibility_date": "2025-09-18",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
-	"pages_build_output_dir": "./dist",
+ 	"compatibility_date": "2025-09-15",
+  	"compatibility_flags": [
+    "nodejs_compat",
+    "disable_nodejs_process_v2"
+  ],
+  "pages_build_output_dir": "./dist",
 	"observability": {
 		"enabled": true
 	}
