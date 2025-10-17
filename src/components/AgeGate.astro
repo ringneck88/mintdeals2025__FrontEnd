@@ -40,7 +40,7 @@
 
       <!-- Center Logo (spins with outer ring) -->
       <div class="center-logo-container">
-        <img src="/favicon.png" alt="Mint Logo" class="center-logo" />
+        <img src="/favicon.png" alt="Mint Coin Logo" class="center-logo" />
       </div>
     </div>
 
@@ -66,6 +66,16 @@
     <h1 class="age-gate-title">Age Verification</h1>
     <p class="age-gate-message">You must be 21 years or older to enter this site.</p>
     <p class="age-gate-question">Are you 21 years of age or older?</p>
+
+    <!-- Mobile Buttons (visible only on mobile) -->
+    <div class="mobile-buttons">
+      <button id="mobileYesButton" class="mobile-button mobile-button-yes">
+        Yes, I'm 21+
+      </button>
+      <button id="mobileNoButton" class="mobile-button mobile-button-no">
+        No, I'm Under 21
+      </button>
+    </div>
 
     <div id="errorMessage" class="error-message hidden">
       Must be over 21
@@ -171,6 +181,28 @@
           // Vibrate pattern: [vibrate, pause, vibrate, pause, ...]
           // Pattern: 200ms on, 100ms off, 200ms on, 100ms off, 200ms on
           navigator.vibrate([200, 100, 200, 100, 200]);
+        }
+      });
+    }
+
+    // Mobile Yes Button
+    const mobileYesButton = document.getElementById('mobileYesButton');
+    if (mobileYesButton) {
+      mobileYesButton.addEventListener('click', () => {
+        // Trigger same animation as lever
+        if (vaultLever) {
+          vaultLever.click();
+        }
+      });
+    }
+
+    // Mobile No Button
+    const mobileNoButton = document.getElementById('mobileNoButton');
+    if (mobileNoButton) {
+      mobileNoButton.addEventListener('click', () => {
+        // Trigger same animation as no lever
+        if (vaultLeverNo) {
+          vaultLeverNo.click();
         }
       });
     }
@@ -791,31 +823,237 @@
     line-height: 1.5;
   }
 
+  /* Mobile Buttons - hidden by default, shown on mobile */
+  .mobile-buttons {
+    display: none;
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    gap: 1rem;
+    width: 90%;
+    max-width: 350px;
+  }
+
+  .mobile-button {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .mobile-button-yes {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border-color: #10b981;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .mobile-button-yes:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.6);
+  }
+
+  .mobile-button-no {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    border-color: #ef4444;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .mobile-button-no:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.6);
+  }
+
   /* Mobile responsive */
   @media (max-width: 640px) {
+    /* Hide levers on mobile */
+    .vault-lever {
+      display: none !important;
+    }
+
+    /* Show mobile buttons */
+    .mobile-buttons {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .age-gate-overlay {
+      padding: 10px;
+    }
+
     .age-gate-content {
-      width: 90vw;
-      height: 90vw;
-      max-width: 450px;
-      max-height: 450px;
-      padding: 2rem 1.5rem;
+      width: 85vw;
+      height: 85vw;
+      max-width: 380px;
+      max-height: 380px;
+      padding: 1.5rem 1rem;
     }
 
     .age-gate-title {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
+      top: -50px;
     }
 
     .age-gate-message {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
+      bottom: 120px;
     }
 
     .age-gate-question {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
+      bottom: 95px;
     }
 
     .logo-image {
       width: 60px;
       height: 60px;
+    }
+
+    /* Make outer ring smaller on mobile */
+    .outer-ring-container {
+      width: 350px;
+      height: 350px;
+    }
+
+    .outer-ring-container::before {
+      width: 280px;
+      height: 280px;
+    }
+
+    .outer-ring-numbers .ring-number {
+      font-size: 1.1rem;
+      transform:
+        translate(-50%, -50%)
+        rotate(calc(var(--index) * 30deg))
+        translateY(-150px);
+    }
+
+    .stationary-pointer .pointer-triangle {
+      top: -193px;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 20px solid #fbbf24;
+    }
+
+    .center-logo-container {
+      width: 140px;
+      height: 140px;
+    }
+
+    .center-logo {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+    }
+
+    /* Position levers closer and more visible on mobile */
+    .vault-lever {
+      width: 140px;
+      height: 120px;
+    }
+
+    .vault-lever-right {
+      right: -150px;
+    }
+
+    .vault-lever-left {
+      left: -130px;
+    }
+
+    .lever-handle {
+      width: 110px;
+      height: 35px;
+      left: 0px;
+      top: 20px;
+    }
+
+    .lever-text {
+      font-size: 0.95rem;
+      padding-left: 8px;
+    }
+
+    .vault-lever-left .lever-text {
+      padding-left: 0;
+      padding-right: 20px;
+    }
+
+    .lever-base {
+      width: 120px;
+      height: 50px;
+    }
+
+    .error-message {
+      font-size: 1.2rem;
+      padding: 1rem 1.5rem;
+    }
+  }
+
+  /* Very small mobile screens */
+  @media (max-width: 400px) {
+    .age-gate-content {
+      width: 90vw;
+      height: 90vw;
+      max-width: 320px;
+      max-height: 320px;
+    }
+
+    .outer-ring-container {
+      width: 300px;
+      height: 300px;
+    }
+
+    .outer-ring-container::before {
+      width: 240px;
+      height: 240px;
+    }
+
+    .outer-ring-numbers .ring-number {
+      font-size: 1rem;
+      transform:
+        translate(-50%, -50%)
+        rotate(calc(var(--index) * 30deg))
+        translateY(-130px);
+    }
+
+    .stationary-pointer .pointer-triangle {
+      top: -168px;
+    }
+
+    .center-logo-container {
+      width: 110px;
+      height: 110px;
+    }
+
+    .center-logo {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+    }
+
+    .vault-lever-right {
+      right: -125px;
+    }
+
+    .vault-lever-left {
+      left: -110px;
+    }
+
+    .lever-handle {
+      width: 95px;
+      height: 32px;
+    }
+
+    .lever-text {
+      font-size: 0.85rem;
     }
   }
 

@@ -81,6 +81,30 @@ try {
         return typeof value === 'string' ? value : fallback;
       };
 
+      // Extract coordinates from geo field (JSON object with lat/lng)
+      let latitude = null;
+      let longitude = null;
+
+      if (store.geo) {
+        if (typeof store.geo === 'object') {
+          latitude = store.geo.lat || store.geo.latitude || null;
+          longitude = store.geo.lng || store.geo.lon || store.geo.longitude || null;
+        } else if (typeof store.geo === 'string') {
+          try {
+            const geoObj = JSON.parse(store.geo);
+            latitude = geoObj.lat || geoObj.latitude || null;
+            longitude = geoObj.lng || geoObj.lon || geoObj.longitude || null;
+          } catch (e) {
+            console.error('Failed to parse geo string for store:', store.name);
+          }
+        }
+      }
+
+      // Check if store is 24 hours by examining hours array
+      const is24Hour = store.hours && Array.isArray(store.hours)
+        ? store.hours.some(day => day.is24hours === true)
+        : false;
+
       return {
         id: store.id,
         documentId: store.documentId,
@@ -94,9 +118,11 @@ try {
         Phone: store.phone,
         Email: store.email,
         Website: store.website,
-        Latitude: store.latitude,
-        Longitude: store.longitude,
+        Latitude: latitude,
+        Longitude: longitude,
         Hours: store.hours,
+        Is24Hour: is24Hour,
+        HasCafe: store.hasCafe || false,
         StoreImage: store.store_image || store.hero_image ? {
           url: (store.store_image?.url || store.hero_image?.url) ?
             ((store.store_image?.url || store.hero_image?.url).startsWith('http') ?
@@ -194,10 +220,19 @@ try {
     <!-- Hero Section -->
     <div class="text-white hero-section">
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+        <!-- Breadcrumb -->
+        <nav class="mb-6 text-sm">
+          <div class="flex items-center space-x-2">
+            <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
+            <span class="text-green-300">/</span>
+            <span class="text-white">Stores</span>
+          </div>
+        </nav>
+
         <div class="text-center">
           <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
             <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-              🏪 Mint Cannabis Locations
+              Mint Cannabis Locations
             </span>
           </h1>
           <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
@@ -220,7 +255,7 @@ try {
     <!-- Quick Stats Bar -->
     <div class="py-4 bg-black bg-opacity-90">
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-        <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-3">
+        <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
           <div>
             <div class="mb-1 text-2xl font-bold text-green-500">{stores.length}</div>
             <div class="text-sm text-yellow-400 font-semibold">Locations</div>
@@ -230,8 +265,12 @@ try {
             <div class="text-sm text-yellow-400 font-semibold">Regions</div>
           </div>
           <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{stores.filter(s => s.IsFeatured).length}</div>
-            <div class="text-sm text-yellow-400 font-semibold">Featured</div>
+            <div class="mb-1 text-2xl font-bold text-green-500">100%</div>
+            <div class="text-sm text-yellow-400 font-semibold">Fresh</div>
+          </div>
+          <div>
+            <div class="mb-1 text-2xl font-bold text-green-500">{Math.floor(Math.random() * (498 - 350 + 1)) + 350}</div>
+            <div class="text-sm text-yellow-400 font-semibold">Discounted Items</div>
           </div>
         </div>
       </div>
@@ -333,153 +372,100 @@ try {
         </p>
       </div>
       
-      <div id="stores-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+      <div id="stores-grid" class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:gap-8">
         {stores.map((store, index) => (
-          <div class="store-card group relative bg-gray-900 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-green-700 hover:border-yellow-500 overflow-hidden" data-region-id={store.region?.id || ''}>
+          <div
+            class="store-card relative overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 hover:scale-105"
+            data-region-id={store.region?.id || ''}
+            data-lat={store.Latitude || ''}
+            data-lng={store.Longitude || ''}
+          >
+            {/* Store Name Header */}
+            <div class="bg-gradient-to-r from-green-900 to-black p-4 border-b-2 border-green-500">
+              <h3 class="text-xl font-bold text-center">
+                <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.25rem;">
+                  {store.Name}
+                </span>
+              </h3>
+            </div>
 
-            {/* Hover overlay */}
-            <div class="absolute inset-0 bg-gradient-to-r from-green-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
-            
-            <div class="relative z-20">
-              {/* Store Image or Gradient */}
+            <div class="relative">
               {store.StoreImage ? (
-                <img 
-                  src={store.StoreImage.url} 
+                <img
+                  src={store.StoreImage.url}
                   alt={store.Name}
-                  class="w-full h-64 object-cover"
+                  class="object-cover w-full h-48"
                 />
               ) : (
-                <div class={`w-full h-64 bg-gradient-to-br ${index % 3 === 0 ? 'from-green-400 to-green-600' : index % 3 === 1 ? 'from-yellow-400 to-yellow-600' : 'from-green-500 to-yellow-500'} flex items-center justify-center relative overflow-hidden`}>
-                  <div class="absolute inset-0 bg-black/20"></div>
-                  <div class="relative text-white text-center">
-                    <div class="text-3xl font-bold mb-2">{store.Name.split(' ').slice(-1)[0]}</div>
-                    <div class="text-sm opacity-80">{store.City}, {store.State}</div>
-                  </div>
+                <div class="w-full h-48 bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center relative">
+                  <span class="text-6xl" title={store.Is24Hour ? '24 Hour' : ''}>
+                    {store.Is24Hour ? '🏪' : '🏣'}
+                  </span>
+                  {/* Mint coin logo overlay on building emoji */}
+                  {!store.Is24Hour && (
+                    <img
+                      src="/favicon.png"
+                      alt="Mint"
+                      class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 object-contain opacity-90"
+                      style="margin-top: -8px;"
+                    />
+                  )}
                 </div>
               )}
-              
-              {/* Featured Badge */}
-              {store.IsFeatured && (
-                <div class="absolute top-4 right-4 z-30">
-                  <div class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                    ⭐ FEATURED
-                  </div>
-                </div>
-              )}
-              
-              {/* Store Content */}
-              <div class="p-8">
-                <div class="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 class="text-2xl font-bold text-white group-hover:text-yellow-400 transition-colors duration-300">
-                      {store.Name}
-                    </h3>
-                    {store.region && (
-                      <div class="flex items-center mt-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        <span class="text-sm font-medium text-green-400">{store.region.Name}</span>
-                      </div>
-                    )}
-                  </div>
-                  {store.StoreManager && (
-                    <div class="text-right">
-                      <div class="text-xs text-gray-400">Manager</div>
-                      <div class="text-sm font-medium text-gray-300">{store.StoreManager}</div>
-                    </div>
-                  )}
-                </div>
 
-                {store.Description && (
-                  <p class="text-gray-300 mb-6 leading-relaxed line-clamp-2">{store.Description}</p>
-                )}
-                
-                {/* Store Details Grid */}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                  {/* Address */}
-                  <div class="space-y-3">
-                    <div class="flex items-center text-gray-700 dark:text-gray-300">
-                      <svg class="w-5 h-5 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                      </svg>
-                      <div class="text-sm">
-                        <div class="font-medium">{store.Address}</div>
-                        <div class="text-gray-400">{store.City}, {store.State} {store.ZipCode}</div>
-                      </div>
-                    </div>
-
-                    {store.Phone && (
-                      <div class="flex items-center text-gray-300">
-                        <svg class="w-5 h-5 mr-3 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                        </svg>
-                        <a href={`tel:${store.Phone}`} class="text-sm hover:text-yellow-400 transition-colors">
-                          {store.Phone}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Additional Info */}
-                  <div class="space-y-3">
-                    {store.Email && (
-                      <div class="flex items-center text-gray-300">
-                        <svg class="w-5 h-5 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                        </svg>
-                        <a href={`mailto:${store.Email}`} class="text-sm hover:text-green-600 dark:hover:text-green-400 transition-colors">
-                          {store.Email}
-                        </a>
-                      </div>
-                    )}
-                    
-                    <div class="flex items-center text-gray-700 dark:text-gray-300">
-                      <svg class="w-5 h-5 mr-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM6 9.5a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7a.5.5 0 01-.5-.5zm.5 2.5a.5.5 0 000 1h7a.5.5 0 000-1h-7z" clip-rule="evenodd"></path>
-                      </svg>
-                      <span class="text-sm">{store.dosage_products?.length || 0} products available</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div class="flex space-x-3">
-                  <a
-                    href={`/location/${store.slug || store.documentId}`}
-                    class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-center"
-                  >
-                    <span class="flex items-center justify-center">
-                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                      Store Details
-                    </span>
-                  </a>
-                  
-                  {store.Latitude && store.Longitude && (
-                    <button
-                      class="px-6 py-3 border-2 border-green-600 text-green-400 hover:bg-green-600 hover:text-white rounded-xl transition-all duration-300 font-semibold"
-                      onclick={`window.open('https://maps.google.com/?q=${store.Latitude},${store.Longitude}', '_blank')`}
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      </svg>
-                    </button>
-                  )}
-                  
-                  {store.Website && (
-                    <button
-                      class="px-6 py-3 border-2 border-gray-600 text-gray-400 hover:bg-gray-600 hover:text-white rounded-xl transition-all duration-300 font-semibold"
-                      onclick={`window.open('${store.Website}', '_blank')`}
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                      </svg>
-                    </button>
-                  )}
+              {/* Distance Badge */}
+              <div class="absolute top-2 left-2">
+                <div class="store-distance-badge hidden bg-green-900/90 border border-green-500 text-green-300 px-2 py-1 rounded text-xs font-bold shadow-lg">
+                  Calculating...
                 </div>
               </div>
+
+              {/* Cafe Badge */}
+              {store.HasCafe && (
+                <div class="absolute bottom-2 right-2">
+                  <div class="bg-orange-900/90 border border-orange-500 text-orange-300 px-2 py-1 rounded text-2xl shadow-lg" title="Cafe on Site">
+                    🍔
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div class="p-6">
+              {store.Address && (
+                <div class="mb-2">
+                  <p class="flex items-start text-green-300">
+                    <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>{store.City}, {store.State}</span>
+                  </p>
+                  {(store.Latitude && store.Longitude) && (
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${store.Latitude},${store.Longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-yellow-400 hover:text-yellow-300 text-sm ml-7 inline-block mt-1"
+                    >
+                      Get Driving Directions →
+                    </a>
+                  )}
+                </div>
+              )}
+              {store.Phone && (
+                <p class="flex items-center mb-4 text-green-300">
+                  <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                  </svg>
+                  {store.Phone}
+                </p>
+              )}
+              <a href={`/location/${store.slug || store.documentId}`} class="inline-flex items-center font-medium text-yellow-400 hover:text-yellow-300">
+                View Details
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </a>
             </div>
           </div>
         ))}
@@ -520,6 +506,86 @@ try {
       const clearFiltersBtn = document.getElementById('clear-filters');
       const showMapBtn = document.getElementById('show-map');
       const activeFiltersDiv = document.getElementById('active-filters');
+
+      // Get user location and sort stores by distance
+      let userLat = null;
+      let userLon = null;
+
+      function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 3959; // Earth's radius in miles
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+      }
+
+      function formatDistance(distance) {
+        if (distance < 0.1) {
+          return `${(distance * 5280).toFixed(0)} ft`;
+        } else if (distance < 1) {
+          return `${distance.toFixed(2)} mi`;
+        } else {
+          return `${distance.toFixed(1)} mi`;
+        }
+      }
+
+      function sortStoresByDistance() {
+        if (!userLat || !userLon) return;
+
+        const cardsArray = Array.from(storeCards);
+        const cardsWithDistance = cardsArray.map(card => {
+          // Extract lat/lon from data attributes
+          const storeLat = parseFloat(card.dataset.lat);
+          const storeLng = parseFloat(card.dataset.lng);
+
+          let distance = Infinity;
+          if (storeLat && storeLng && !isNaN(storeLat) && !isNaN(storeLng)) {
+            distance = calculateDistance(userLat, userLon, storeLat, storeLng);
+
+            // Show and update distance badge
+            const distanceBadge = card.querySelector('.store-distance-badge');
+            if (distanceBadge) {
+              distanceBadge.textContent = `📍 ${formatDistance(distance)}`;
+              distanceBadge.classList.remove('hidden');
+            }
+          }
+
+          return { card, distance };
+        });
+
+        // Sort by distance (closest first)
+        cardsWithDistance.sort((a, b) => a.distance - b.distance);
+
+        // Reorder DOM elements
+        cardsWithDistance.forEach(({ card }) => {
+          storesGrid.appendChild(card);
+        });
+
+        console.log('✅ Stores sorted by distance from user location:',
+          cardsWithDistance.filter(s => s.distance !== Infinity).slice(0, 5).map(s => ({
+            name: s.card.querySelector('h3').textContent.trim(),
+            distance: formatDistance(s.distance)
+          }))
+        );
+      }
+
+      // Get user's geolocation
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            userLat = position.coords.latitude;
+            userLon = position.coords.longitude;
+            console.log(`📍 User location: ${userLat}, ${userLon}`);
+            sortStoresByDistance();
+          },
+          (error) => {
+            console.warn('⚠️ Could not get user location:', error.message);
+          }
+        );
+      }
 
       // Enhanced filtering with animation
       function filterStores() {

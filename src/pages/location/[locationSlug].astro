@@ -196,7 +196,7 @@ try {
             )}
             {(store?.latitude && store?.longitude) && (
               <a
-                href={`https://maps.google.com/?q=${store.latitude},${store.longitude}`}
+                href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="inline-flex items-center px-6 py-3 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"
@@ -204,7 +204,7 @@ try {
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                 </svg>
-                Get Directions
+                Get Driving Directions
               </a>
             )}
             {storePhone && (
@@ -293,6 +293,16 @@ try {
                   <div>
                     <p class="text-green-200">{storeAddress}</p>
                     <p class="text-green-200">{storeCity}, {storeState} {storeZip}</p>
+                    {(store?.latitude && store?.longitude) && (
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-yellow-400 hover:text-yellow-300 text-sm mt-1 inline-block"
+                      >
+                        Get Driving Directions →
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
@@ -333,10 +343,8 @@ try {
                 </h3>
                 <div id="countdown-timer" class="text-sm text-green-300 mt-2 ml-8"></div>
               </div>
-              <div class="space-y-2">
+              <div class="space-y-2" id="store-hours-list">
                 {store.hours.map((hour: any) => {
-                  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-                  const isToday = hour.dayOfWeek?.toLowerCase() === today.toLowerCase();
                   const dayName = hour.dayOfWeek ? hour.dayOfWeek.charAt(0).toUpperCase() + hour.dayOfWeek.slice(1).toLowerCase() : 'Daily';
 
                   // Format time to 12-hour format with single letter (09:00:00 -> 9:00A, 21:00:00 -> 9:00P)
@@ -367,12 +375,15 @@ try {
                   const closeTime = formatTime(hour.closeTime || '');
 
                   return (
-                    <div class={`flex justify-between text-sm p-2 rounded transition-colors ${isToday ? 'bg-yellow-400/20 border-l-4 border-yellow-400' : ''}`}>
-                      <span class={`font-medium ${isToday ? 'text-yellow-400 font-bold' : 'text-green-300'}`}>
+                    <div
+                      class="hour-row flex justify-between text-sm p-2 rounded transition-colors"
+                      data-day={hour.dayOfWeek?.toLowerCase()}
+                    >
+                      <span class="day-name font-medium text-green-300">
                         {dayName}
-                        {isToday && <span class="ml-2 text-xs">(Today)</span>}
+                        <span class="today-label ml-2 text-xs hidden"></span>
                       </span>
-                      <span class={isToday ? 'text-yellow-300' : 'text-green-200'}>
+                      <span class="time-display text-green-200">
                         {hour.is_24hour ? '24 Hours' : hour.isClosed ? 'Closed' : `${openTime} - ${closeTime}`}
                       </span>
                     </div>
@@ -401,6 +412,45 @@ try {
   </div>
 
   <script is:inline define:vars={{ storeHours: store?.hours || [] }}>
+    // Highlight today's hours
+    function highlightTodaysHours() {
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const now = new Date();
+      const today = dayNames[now.getDay()];
+
+      // Find all hour rows
+      const hourRows = document.querySelectorAll('.hour-row');
+
+      hourRows.forEach(row => {
+        const dayAttr = row.getAttribute('data-day');
+        if (dayAttr && dayAttr.toLowerCase() === today) {
+          // Highlight today's row
+          row.classList.add('bg-yellow-400/20', 'border-l-4', 'border-yellow-400');
+
+          // Update day name styling
+          const dayNameEl = row.querySelector('.day-name');
+          if (dayNameEl) {
+            dayNameEl.classList.remove('text-green-300');
+            dayNameEl.classList.add('text-yellow-400', 'font-bold');
+
+            // Show "Today" label
+            const todayLabel = dayNameEl.querySelector('.today-label');
+            if (todayLabel) {
+              todayLabel.textContent = '(Today)';
+              todayLabel.classList.remove('hidden');
+            }
+          }
+
+          // Update time display styling
+          const timeDisplayEl = row.querySelector('.time-display');
+          if (timeDisplayEl) {
+            timeDisplayEl.classList.remove('text-green-200');
+            timeDisplayEl.classList.add('text-yellow-300');
+          }
+        }
+      });
+    }
+
     function updateCountdown() {
       const countdownEl = document.getElementById('countdown-timer');
       if (!countdownEl || !storeHours || storeHours.length === 0) return;
@@ -477,9 +527,22 @@ try {
       }
     }
 
-    // Update immediately and then every second
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      highlightTodaysHours();
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    });
+
+    // Also run immediately in case DOMContentLoaded already fired
+    if (document.readyState === 'loading') {
+      // DOMContentLoaded has not fired yet
+    } else {
+      // DOMContentLoaded has already fired
+      highlightTodaysHours();
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    }
   </script>
 
   </div> <!-- Close content-wrapper -->

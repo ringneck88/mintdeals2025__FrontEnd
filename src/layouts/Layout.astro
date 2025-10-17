@@ -64,7 +64,7 @@ try {
 // Fetch stores/locations for navigation grouped by region
 let storesByRegion: any = {};
 try {
-  const response = await fetch(`${API_BASE}/stores?populate=region&pagination[pageSize]=500`);
+  const response = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=500`);
   if (response.ok) {
     const data = await response.json();
 
@@ -86,12 +86,18 @@ try {
 
       const regionId = regionData?.id || regionData?.documentId || 'other';
 
+      // Check if store is 24 hours by examining hours array
+      const is24Hour = store.hours && Array.isArray(store.hours)
+        ? store.hours.some((day: any) => day.is24hours === true || day.is_24hour === true)
+        : false;
+
       return {
         id,
         name,
         slug,
         regionName,
-        regionId
+        regionId,
+        is24Hour
       };
     }).filter((store: any) => store.name);
 
@@ -250,7 +256,7 @@ function getCategoryIcon(slug: string) {
                             href={`/location/${store.slug}`}
                             class="block px-4 py-2 pl-6 text-sm text-gray-300 hover:bg-green-900 hover:text-green-300 transition-colors"
                           >
-                            <span class="text-base mr-2">🏪</span>
+                            <span class="text-base mr-2">{store.is24Hour ? '🏪' : '🏣'}</span>
                             <span>{store.name}</span>
                           </a>
                         ))}
@@ -331,9 +337,40 @@ function getCategoryIcon(slug: string) {
           <p class="text-gray-400 text-sm">
             © 2025 Mint Cannabis. All rights reserved.
           </p>
+          <!-- Debug: User Location Display -->
+          <p id="userLocationDebug" class="text-yellow-400 text-xs mt-2 font-mono">
+            Location: Loading...
+          </p>
         </div>
       </div>
     </footer>
+
+    <script>
+      // Display user's current location for debugging
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude.toFixed(6);
+            const lon = position.coords.longitude.toFixed(6);
+            const debugEl = document.getElementById('userLocationDebug');
+            if (debugEl) {
+              debugEl.textContent = `Your Location: Lat ${lat}, Lon ${lon}`;
+            }
+          },
+          (error) => {
+            const debugEl = document.getElementById('userLocationDebug');
+            if (debugEl) {
+              debugEl.textContent = `Location Error: ${error.message}`;
+            }
+          }
+        );
+      } else {
+        const debugEl = document.getElementById('userLocationDebug');
+        if (debugEl) {
+          debugEl.textContent = 'Geolocation not supported';
+        }
+      }
+    </script>
 
     <script>
       // Categories dropdown functionality

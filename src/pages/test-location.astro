@@ -1,0 +1,409 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+
+// Fetch stores from API
+let stores = [];
+let apiError = null;
+
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
+try {
+  console.log('🔍 Fetching stores for location test...');
+  const response = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
+
+  if (response.ok) {
+    const data = await response.json();
+    stores = (data?.data || []).map(store => {
+      // Extract coordinates from geo field (JSON object with lat/lng)
+      let latitude = null;
+      let longitude = null;
+
+      if (store.geo) {
+        if (typeof store.geo === 'object') {
+          latitude = store.geo.lat || store.geo.latitude || null;
+          longitude = store.geo.lng || store.geo.lon || store.geo.longitude || null;
+        } else if (typeof store.geo === 'string') {
+          try {
+            const geoObj = JSON.parse(store.geo);
+            latitude = geoObj.lat || geoObj.latitude || null;
+            longitude = geoObj.lng || geoObj.lon || geoObj.longitude || null;
+          } catch (e) {
+            console.error('Failed to parse geo string for store:', store.name);
+          }
+        }
+      }
+
+      return {
+        id: store.id,
+        documentId: store.documentId,
+        name: store.name || 'Unnamed Store',
+        slug: store.slug || store.documentId,
+        address: store.address,
+        city: store.address?.city || 'Unknown',
+        state: store.address?.state || 'Unknown',
+        latitude: latitude,
+        longitude: longitude,
+        phone: store.phone,
+        isActive: store.is_active !== false
+      };
+    }).filter(store => store.isActive);
+
+    console.log(`✅ Loaded ${stores.length} stores`);
+    console.log(`📍 Stores with coordinates: ${stores.filter(s => s.latitude && s.longitude).length}`);
+  } else {
+    apiError = `API returned ${response.status}`;
+    console.error('❌ API Error:', apiError);
+  }
+} catch (error) {
+  apiError = error.message;
+  console.error('❌ Fetch Error:', error);
+}
+---
+
+<Layout title="Location Test - Mint Deals" description="Testing geolocation and distance sorting">
+  <div class="min-h-screen bg-gradient-to-b from-black to-green-900/40 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Header -->
+      <div class="mb-8 text-center">
+        <h1 class="text-4xl font-bold mb-4">
+          <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            Location & Distance Test
+          </span>
+        </h1>
+        <p class="text-green-300 text-lg">
+          Debugging geolocation and store distance calculations
+        </p>
+      </div>
+
+      <!-- User Location Status -->
+      <div class="bg-black border-2 border-green-500 rounded-lg p-6 mb-6">
+        <h2 class="text-2xl font-bold text-yellow-400 mb-4">📍 Your Location</h2>
+
+        <div id="location-status" class="space-y-3">
+          <div id="status-checking" class="flex items-center gap-3 text-yellow-400">
+            <div class="w-5 h-5 border-b-2 border-yellow-400 rounded-full animate-spin"></div>
+            <span>Checking geolocation support...</span>
+          </div>
+
+          <div id="status-requesting" class="hidden flex items-center gap-3 text-blue-400">
+            <div class="w-5 h-5 border-b-2 border-blue-400 rounded-full animate-spin"></div>
+            <span>Requesting your location...</span>
+          </div>
+
+          <div id="status-success" class="hidden">
+            <div class="text-green-400 font-bold mb-2">✅ Location Obtained!</div>
+            <div class="bg-green-900/30 p-4 rounded border border-green-500">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-green-300">
+                <div>
+                  <span class="text-yellow-400 font-semibold">Latitude:</span>
+                  <span id="user-lat" class="ml-2 font-mono">-</span>
+                </div>
+                <div>
+                  <span class="text-yellow-400 font-semibold">Longitude:</span>
+                  <span id="user-lon" class="ml-2 font-mono">-</span>
+                </div>
+                <div>
+                  <span class="text-yellow-400 font-semibold">Accuracy:</span>
+                  <span id="user-accuracy" class="ml-2 font-mono">-</span>
+                </div>
+                <div>
+                  <span class="text-yellow-400 font-semibold">Timestamp:</span>
+                  <span id="user-timestamp" class="ml-2 font-mono text-sm">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="status-error" class="hidden">
+            <div class="text-red-400 font-bold mb-2">❌ Location Error</div>
+            <div class="bg-red-900/30 p-4 rounded border border-red-500 text-red-300">
+              <div class="font-semibold mb-1">Error Details:</div>
+              <div id="error-message" class="font-mono text-sm">-</div>
+              <div class="mt-3 text-sm">
+                <strong>Common Issues:</strong>
+                <ul class="list-disc list-inside mt-1 space-y-1">
+                  <li>Location permission denied</li>
+                  <li>Location services disabled on device</li>
+                  <li>Using HTTP instead of HTTPS (localhost is OK)</li>
+                  <li>Browser doesn't support geolocation</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div id="status-unsupported" class="hidden text-red-400">
+            ❌ Geolocation is not supported by your browser
+          </div>
+        </div>
+      </div>
+
+      <!-- API Status -->
+      <div class="bg-black border-2 border-green-500 rounded-lg p-6 mb-6">
+        <h2 class="text-2xl font-bold text-yellow-400 mb-4">🗄️ API Status</h2>
+        {apiError ? (
+          <div class="bg-red-900/30 p-4 rounded border border-red-500 text-red-300">
+            <div class="font-bold mb-1">❌ API Error:</div>
+            <div class="font-mono text-sm">{apiError}</div>
+          </div>
+        ) : (
+          <div class="bg-green-900/30 p-4 rounded border border-green-500">
+            <div class="text-green-400 font-bold mb-2">✅ API Connected</div>
+            <div class="text-green-300">
+              <div><span class="text-yellow-400 font-semibold">Total Stores:</span> {stores.length}</div>
+              <div><span class="text-yellow-400 font-semibold">Stores with Coordinates:</span> {stores.filter(s => s.latitude && s.longitude).length}</div>
+              <div><span class="text-yellow-400 font-semibold">Stores missing Coordinates:</span> {stores.filter(s => !s.latitude || !s.longitude).length}</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <!-- Stores List (sorted by distance) -->
+      <div class="bg-black border-2 border-green-500 rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-yellow-400 mb-4">🏪 Stores by Distance</h2>
+
+        <div id="stores-info" class="mb-4 text-yellow-400 italic">
+          Waiting for location data to calculate distances...
+        </div>
+
+        <div id="stores-list" class="space-y-4">
+          {stores.length > 0 ? (
+            stores.map((store) => (
+              <div
+                class="store-item bg-green-900/20 border border-green-500 rounded-lg p-4 transition-all"
+                data-store-id={store.id}
+                data-lat={store.latitude || ''}
+                data-lon={store.longitude || ''}
+              >
+                <div class="flex justify-between items-start mb-2">
+                  <h3 class="text-xl font-bold text-yellow-400">{store.name}</h3>
+                  <span class="store-distance hidden px-3 py-1 bg-green-900 border border-green-500 rounded text-green-300 font-mono text-sm">
+                    Calculating...
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-green-300 text-sm">
+                  <div>
+                    <span class="text-yellow-400">Location:</span> {store.city}, {store.state}
+                  </div>
+                  <div>
+                    <span class="text-yellow-400">Phone:</span> {store.phone || 'N/A'}
+                  </div>
+                  <div>
+                    <span class="text-yellow-400">Latitude:</span>
+                    <span class="font-mono">{store.latitude ? store.latitude.toFixed(6) : 'Missing'}</span>
+                  </div>
+                  <div>
+                    <span class="text-yellow-400">Longitude:</span>
+                    <span class="font-mono">{store.longitude ? store.longitude.toFixed(6) : 'Missing'}</span>
+                  </div>
+                </div>
+
+                {(!store.latitude || !store.longitude) && (
+                  <div class="mt-2 text-red-400 text-sm">
+                    ⚠️ Missing coordinates - cannot calculate distance
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div class="text-center text-green-300 py-8">
+              No stores available
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Debug Console -->
+      <div class="bg-black border-2 border-green-500 rounded-lg p-6 mt-6">
+        <h2 class="text-2xl font-bold text-yellow-400 mb-4">🐛 Debug Console</h2>
+        <div id="debug-console" class="bg-gray-900 p-4 rounded font-mono text-xs text-green-400 space-y-1 max-h-96 overflow-y-auto">
+          <div class="text-yellow-400">Debug log will appear here...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Debug logger
+    function debugLog(message, type = 'info') {
+      const console_el = document.getElementById('debug-console');
+      const timestamp = new Date().toLocaleTimeString();
+      const colors = {
+        info: 'text-green-400',
+        success: 'text-green-300',
+        error: 'text-red-400',
+        warning: 'text-yellow-400'
+      };
+      const color = colors[type] || colors.info;
+
+      const logEntry = document.createElement('div');
+      logEntry.className = color;
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      console_el.appendChild(logEntry);
+      console_el.scrollTop = console_el.scrollHeight;
+
+      // Also log to browser console
+      console.log(`[Location Test] ${message}`);
+    }
+
+    // Haversine distance calculation
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 3958.756; // Earth's radius in miles
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    // Format distance
+    function formatDistance(distance) {
+      if (distance < 0.1) {
+        return `${(distance * 5280).toFixed(0)} ft`;
+      } else if (distance < 1) {
+        return `${distance.toFixed(2)} mi`;
+      } else {
+        return `${distance.toFixed(1)} mi`;
+      }
+    }
+
+    // Sort stores by distance
+    function sortAndDisplayStores(userLat, userLon) {
+      debugLog(`Calculating distances from user location (${userLat.toFixed(6)}, ${userLon.toFixed(6)})`, 'info');
+
+      const storeItems = Array.from(document.querySelectorAll('.store-item'));
+      const storesList = document.getElementById('stores-list');
+
+      const storesWithDistance = storeItems.map(item => {
+        const lat = parseFloat(item.dataset.lat);
+        const lon = parseFloat(item.dataset.lon);
+
+        let distance = Infinity;
+        let hasCoords = false;
+
+        if (lat && lon && !isNaN(lat) && !isNaN(lon)) {
+          distance = calculateDistance(userLat, userLon, lat, lon);
+          hasCoords = true;
+        }
+
+        return { element: item, distance, hasCoords };
+      });
+
+      // Sort by distance
+      storesWithDistance.sort((a, b) => a.distance - b.distance);
+
+      debugLog(`Sorted ${storesWithDistance.length} stores by distance`, 'success');
+
+      // Update display
+      let validCount = 0;
+      storesWithDistance.forEach((store, index) => {
+        const distanceEl = store.element.querySelector('.store-distance');
+
+        if (store.hasCoords && store.distance !== Infinity) {
+          distanceEl.textContent = formatDistance(store.distance);
+          distanceEl.classList.remove('hidden');
+          store.element.classList.add('border-yellow-400');
+          validCount++;
+          debugLog(`  ${index + 1}. Distance: ${formatDistance(store.distance)} - ${store.element.querySelector('h3').textContent}`, 'info');
+        } else {
+          distanceEl.textContent = 'No coordinates';
+          distanceEl.classList.remove('hidden');
+          distanceEl.classList.add('bg-red-900', 'border-red-500', 'text-red-300');
+        }
+
+        storesList.appendChild(store.element);
+      });
+
+      document.getElementById('stores-info').textContent =
+        `Showing ${validCount} stores sorted by distance (${storesWithDistance.length - validCount} missing coordinates)`;
+
+      debugLog(`✅ Display updated - ${validCount} stores with valid distances`, 'success');
+    }
+
+    // Initialize geolocation
+    function initGeolocation() {
+      debugLog('Initializing geolocation test...', 'info');
+
+      const statusChecking = document.getElementById('status-checking');
+      const statusRequesting = document.getElementById('status-requesting');
+      const statusSuccess = document.getElementById('status-success');
+      const statusError = document.getElementById('status-error');
+      const statusUnsupported = document.getElementById('status-unsupported');
+
+      // Check if geolocation is supported
+      if (!navigator.geolocation) {
+        debugLog('❌ Geolocation API not supported', 'error');
+        statusChecking.classList.add('hidden');
+        statusUnsupported.classList.remove('hidden');
+        return;
+      }
+
+      debugLog('✅ Geolocation API is supported', 'success');
+      statusChecking.classList.add('hidden');
+      statusRequesting.classList.remove('hidden');
+
+      // Request user location
+      debugLog('Requesting user location permission...', 'info');
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          const accuracy = position.coords.accuracy;
+          const timestamp = new Date(position.timestamp).toLocaleString();
+
+          debugLog(`✅ Location obtained successfully!`, 'success');
+          debugLog(`  Latitude: ${lat}`, 'info');
+          debugLog(`  Longitude: ${lon}`, 'info');
+          debugLog(`  Accuracy: ${accuracy.toFixed(0)} meters`, 'info');
+
+          // Update UI
+          statusRequesting.classList.add('hidden');
+          statusSuccess.classList.remove('hidden');
+          document.getElementById('user-lat').textContent = lat.toFixed(6);
+          document.getElementById('user-lon').textContent = lon.toFixed(6);
+          document.getElementById('user-accuracy').textContent = `${accuracy.toFixed(0)} meters`;
+          document.getElementById('user-timestamp').textContent = timestamp;
+
+          // Calculate and sort distances
+          sortAndDisplayStores(lat, lon);
+        },
+        (error) => {
+          const errorMessages = {
+            1: 'Permission denied - User denied location access',
+            2: 'Position unavailable - Location information unavailable',
+            3: 'Timeout - Request timed out'
+          };
+
+          const errorMsg = errorMessages[error.code] || error.message;
+          debugLog(`❌ Geolocation error: ${errorMsg}`, 'error');
+          debugLog(`  Error code: ${error.code}`, 'error');
+          debugLog(`  Error message: ${error.message}`, 'error');
+
+          statusRequesting.classList.add('hidden');
+          statusError.classList.remove('hidden');
+          document.getElementById('error-message').textContent = errorMsg;
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    // Start when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      debugLog('Page loaded - starting geolocation test', 'info');
+      initGeolocation();
+    });
+  </script>
+</Layout>
