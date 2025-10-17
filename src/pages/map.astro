@@ -1,0 +1,484 @@
+---
+export const prerender = true;
+
+import Layout from '../layouts/Layout.astro';
+
+// Calculate map center (approximate center of USA)
+const mapCenter = {
+  lat: 39.8283,
+  lng: -98.5795
+};
+
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+---
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+  .video-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to top,  rgba(41, 163, 41, 0.35), rgba(51, 204, 51, 0.3), rgba(92, 214, 92, 0.25), rgba(133, 224, 133, 0.2), rgba(194, 240, 194, 0.15), rgba(235, 250, 235, 0.1), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    mix-blend-mode: color;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .video-background video {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+    min-height: 100vh;
+  }
+  .hero-section {
+    min-height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+
+  #map {
+    width: 100%;
+    height: 70vh;
+    border-radius: 0.5rem;
+    border: 2px solid rgb(34, 197, 94);
+    z-index: 1;
+  }
+
+  .map-container {
+    position: relative;
+  }
+
+  .map-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid rgb(34, 197, 94);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgb(34, 197, 94);
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: rgb(251, 191, 36);
+    font-weight: 600;
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 0.5rem;
+  }
+
+  .loading-spinner {
+    border: 4px solid rgba(251, 191, 36, 0.3);
+    border-top: 4px solid rgb(251, 191, 36);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Custom marker styles */
+  .custom-marker {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    cursor: pointer;
+  }
+
+  .marker-24hour {
+    background: rgb(34, 197, 94);
+  }
+
+  .marker-regular {
+    background: rgb(251, 191, 36);
+  }
+
+  /* Leaflet popup customization */
+  .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    padding: 0;
+  }
+
+  .leaflet-popup-content {
+    margin: 0;
+    min-width: 280px;
+  }
+
+  .store-popup {
+    padding: 12px;
+  }
+
+  .store-popup h3 {
+    margin: 0 0 8px 0;
+    color: rgb(34, 197, 94);
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .store-popup .badge-24hour {
+    display: inline-block;
+    background: rgb(34, 197, 94);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+
+  .store-popup .address {
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+  }
+
+  .store-popup .buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .store-popup .btn {
+    flex: 1;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    color: white;
+  }
+
+  .store-popup .btn-view {
+    background: linear-gradient(to right, rgb(251, 191, 36), rgb(249, 115, 22));
+  }
+
+  .store-popup .btn-directions {
+    background: rgb(34, 197, 94);
+  }
+</style>
+
+<Layout title="Store Locations Map - Mint Cannabis" description="Interactive map showing all Mint Cannabis dispensary locations across the USA">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- Video Background -->
+  <div class="video-background">
+    <video autoplay loop muted playsinline>
+      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+    <!-- Hero Section -->
+    <div class="text-white hero-section">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+        <!-- Breadcrumb -->
+        <nav class="mb-6 text-sm">
+          <div class="flex items-center justify-center space-x-2">
+            <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
+            <span class="text-green-300">/</span>
+            <span class="text-white">Store Map</span>
+          </div>
+        </nav>
+
+        <div class="text-center">
+          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
+            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+              Find Your Nearest Location
+            </span>
+          </h1>
+          <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg" id="storeCount">
+            Loading store locations...
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="py-8 bg-black bg-opacity-90">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[95%]">
+        <!-- Stats Cards -->
+        <div class="map-stats" id="statsContainer" style="display: none;">
+          <div class="stat-card">
+            <div class="stat-value" id="totalLocations">0</div>
+            <div class="stat-label">Total Locations</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalStates">0</div>
+            <div class="stat-label">States</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="total24Hour">0</div>
+            <div class="stat-label">24-Hour Stores</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalRegions">0</div>
+            <div class="stat-label">Regions</div>
+          </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+          <div id="map"></div>
+          <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex flex-wrap justify-center gap-4 mt-8">
+          <a href="/stores" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
+            View Store List
+          </a>
+          <a href="/regions" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
+            Browse by Region
+          </a>
+          <a href="/categories" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
+            Shop by Category
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Map initialization script -->
+  <script is:inline define:vars={{ center: mapCenter, apiBase: API_BASE }}>
+    // Wait for Leaflet to load
+    window.addEventListener('load', function() {
+      let map;
+      let stores = [];
+
+      async function fetchStores() {
+        try {
+          console.log('🗺️ Fetching stores from API...');
+          const response = await fetch(`${apiBase}/stores?populate=*&pagination[pageSize]=500`);
+
+        if (!response.ok) {
+          throw new Error(`API returned ${response.status}`);
+        }
+
+        const data = await response.json();
+        const rawStores = data?.data || [];
+        console.log(`✅ Fetched ${rawStores.length} stores`);
+
+        stores = rawStores.map(store => {
+          const locationSlug = store.location_slug ||
+                              (store.name ? store.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : '');
+
+          const address = store.address || {};
+          const street = address.street || store.street || '';
+          const city = address.city || store.city || '';
+          const state = address.state || store.state || '';
+          const zip = address.zip || store.zip || '';
+
+          let latitude = null;
+          let longitude = null;
+
+          if (store.geo) {
+            if (typeof store.geo === 'object') {
+              latitude = store.geo.lat || store.geo.latitude || null;
+              longitude = store.geo.lng || store.geo.lon || store.geo.longitude || null;
+            } else if (typeof store.geo === 'string') {
+              try {
+                const geoObj = JSON.parse(store.geo);
+                latitude = geoObj.lat || geoObj.latitude || null;
+                longitude = geoObj.lng || geoObj.lon || geoObj.longitude || null;
+              } catch (e) {
+                console.error('Failed to parse geo string for store:', store.name);
+              }
+            }
+          }
+
+          const is24Hour = store.hours && Array.isArray(store.hours)
+            ? store.hours.some(day => day.is24hours === true || day.is_24hour === true)
+            : false;
+
+          return {
+            id: store.id || store.documentId,
+            name: store.name || 'Mint Cannabis',
+            slug: locationSlug,
+            street,
+            city,
+            state,
+            zip,
+            latitude,
+            longitude,
+            is24Hour,
+            phone: store.phone || '',
+            region: store.region?.name || ''
+          };
+        }).filter(store => store.latitude && store.longitude);
+
+        console.log(`✅ ${stores.length} stores have coordinates`);
+
+        // Update stats
+        document.getElementById('storeCount').textContent = `Explore all ${stores.length} Mint Cannabis dispensaries across the USA`;
+        document.getElementById('totalLocations').textContent = stores.length;
+        document.getElementById('totalStates').textContent = [...new Set(stores.map(s => s.state))].length;
+        document.getElementById('total24Hour').textContent = stores.filter(s => s.is24Hour).length;
+        document.getElementById('totalRegions').textContent = [...new Set(stores.map(s => s.region))].filter(r => r).length;
+        document.getElementById('statsContainer').style.display = 'grid';
+
+        // Initialize map with stores
+        initMap();
+      } catch (error) {
+        console.error('❌ Error fetching stores:', error);
+        document.getElementById('loadingOverlay').innerHTML = `
+          <div style="text-align: center; color: white;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+            <div style="font-size: 1.2rem; font-weight: bold;">Error Loading Stores</div>
+            <div style="margin-top: 0.5rem;">${error.message}</div>
+          </div>
+        `;
+      }
+    }
+
+    function initMap() {
+      // Create map centered on USA
+      map = L.map('map').setView([center.lat, center.lng], 4);
+
+      // Add OpenStreetMap tiles with dark theme
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(map);
+
+      // Create custom icon function
+      function createCustomIcon(is24Hour) {
+        const iconHtml = is24Hour
+          ? '<div class="custom-marker marker-24hour">🏪</div>'
+          : '<div class="custom-marker marker-regular">🏣</div>';
+
+        return L.divIcon({
+          html: iconHtml,
+          className: '',
+          iconSize: [40, 40],
+          iconAnchor: [20, 20],
+          popupAnchor: [0, -20]
+        });
+      }
+
+      // Add markers for each store
+      const markers = [];
+      stores.forEach(store => {
+        const marker = L.marker([store.latitude, store.longitude], {
+          icon: createCustomIcon(store.is24Hour)
+        });
+
+        // Create popup content
+        const popupContent = `
+          <div class="store-popup">
+            <h3>${store.name}</h3>
+            ${store.is24Hour ? '<div class="badge-24hour">OPEN 24 HOURS</div>' : ''}
+            <div class="address">
+              <div>${store.street}</div>
+              <div>${store.city}, ${store.state} ${store.zip}</div>
+              ${store.phone ? `<div style="margin-top: 4px;">📞 ${store.phone}</div>` : ''}
+            </div>
+            <div class="buttons">
+              <a href="/location/${store.slug}" class="btn btn-view">
+                View Store
+              </a>
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="btn btn-directions">
+                Directions
+              </a>
+            </div>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent, {
+          maxWidth: 300,
+          className: 'custom-popup'
+        });
+
+        marker.addTo(map);
+        markers.push(marker);
+      });
+
+      // Fit map to show all markers if there are stores
+      if (stores.length > 0) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+
+        // Ensure zoom level doesn't get too close
+        if (map.getZoom() > 15) {
+          map.setZoom(15);
+        }
+      }
+
+      // Hide loading overlay
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fetchStores);
+      } else {
+        fetchStores();
+      }
+    }); // End of window load event listener
+  </script>
+</Layout>

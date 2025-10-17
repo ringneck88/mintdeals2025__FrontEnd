@@ -177,6 +177,17 @@ const categoryIcon = categoryIcons[category] || '🌱';
   .rich-text-content {
     color: #d1fae5;
     line-height: 1.8;
+    font-size: 1.125rem;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  .rich-text-content > * {
+    max-width: 100%;
   }
 
   /* Hide editor metadata elements */
@@ -202,65 +213,80 @@ const categoryIcon = categoryIcons[category] || '🌱';
   .rich-text-content h4,
   .rich-text-content h5,
   .rich-text-content h6 {
-    color: #fbbf24;
-    font-weight: 700;
+    color: #fbbf24 !important;
+    font-weight: 700 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    padding: 1rem 0 !important;
+    border-top: 2px solid rgba(74, 222, 128, 0.3) !important;
+    border-bottom: 2px solid rgba(74, 222, 128, 0.3) !important;
+    margin: 1.5rem 0 !important;
+    letter-spacing: normal !important;
   }
 
   .rich-text-content h1 {
-    font-size: 2rem;
-    line-height: 1.2;
-    margin-top: 0;
-    margin-bottom: 1em;
+    font-size: 2rem !important;
+    line-height: 3.7em !important;
+    width: 100% !important;
+    clear: both !important;
   }
 
   .rich-text-content h2 {
-    font-size: 1.75rem;
-    line-height: 1.25;
-    margin-top: 2em;
-    margin-bottom: 0.75em;
+    font-size: 1.75rem !important;
+    line-height: 3.7em !important;
+    text-align: center !important;
+    width: 100% !important;
+    clear: both !important;
   }
 
   .rich-text-content h3 {
-    font-size: 1.5rem;
-    line-height: 1.3;
-    margin-top: 1.75em;
-    margin-bottom: 0.65em;
+    font-size: 1.5rem !important;
+    line-height: 3.7em !important;
+    text-align: center !important;
+    width: 100% !important;
+    clear: both !important;
   }
 
   .rich-text-content h4 {
-    font-size: 1.25rem;
-    line-height: 1.35;
-    margin-top: 1.5em;
-    margin-bottom: 0.6em;
+    font-size: 1.25rem !important;
+    line-height: 3.7em !important;
+    width: 100% !important;
+    clear: both !important;
   }
 
   .rich-text-content h5 {
-    font-size: 1.1rem;
-    line-height: 1.4;
-    margin-top: 1.25em;
-    margin-bottom: 0.55em;
+    font-size: 1.1rem !important;
+    line-height: 3.7em !important;
+    width: 100% !important;
+    clear: both !important;
   }
 
   .rich-text-content h6 {
-    font-size: 1rem;
-    line-height: 1.4;
-    margin-top: 1.25em;
-    margin-bottom: 0.5em;
+    font-size: 1rem !important;
+    line-height: 3.7em !important;
+    width: 100% !important;
+    clear: both !important;
   }
 
   .rich-text-content p {
     margin-bottom: 1.25em;
     line-height: 1.8;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .rich-text-content ul,
   .rich-text-content ol {
     margin: 1em 0 1.25em 1.5em;
     line-height: 1.8;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .rich-text-content li {
     margin-bottom: 0.5em;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .rich-text-content hr {
@@ -281,10 +307,172 @@ const categoryIcon = categoryIcons[category] || '🌱';
   .rich-text-content strong {
     color: #86efac;
     font-weight: bold;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    display: inline;
   }
 
   .rich-text-content em {
     font-style: italic;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    display: inline;
+  }
+
+  /* Table styling */
+  .rich-text-content figure.table {
+    margin: 2em 0;
+    overflow-x: auto;
+  }
+
+  .rich-text-content table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #4ade80 !important;
+    border-radius: 8px;
+    table-layout: auto !important;
+  }
+
+  .rich-text-content table *,
+  .rich-text-content table * * {
+    box-sizing: border-box !important;
+    position: static !important;
+    float: none !important;
+    white-space: normal !important;
+  }
+
+  .rich-text-content thead {
+    background: linear-gradient(to right, #4ade80, #22c55e);
+  }
+
+  .rich-text-content thead th {
+    color: #000 !important;
+    font-weight: 700;
+    text-align: left;
+    padding: 1rem !important;
+    border: 1px solid #22c55e !important;
+    border-top: none !important;
+  }
+
+  .rich-text-content thead th:first-child {
+    border-left: none !important;
+  }
+
+  .rich-text-content thead th:last-child {
+    border-right: none !important;
+  }
+
+  .rich-text-content tbody tr {
+    border-bottom: 1px solid #4ade80;
+  }
+
+  .rich-text-content tbody tr:hover {
+    background: rgba(74, 222, 128, 0.15);
+  }
+
+  .rich-text-content td,
+  .rich-text-content th {
+    padding: 0.875rem 1rem !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    vertical-align: top !important;
+  }
+
+  .rich-text-content tbody td {
+    color: #d1fae5 !important;
+    border: 1px solid #4ade80 !important;
+    padding: 0.875rem 1rem !important;
+    overflow: visible !important;
+    vertical-align: top !important;
+  }
+
+  /* Override inline styles from CMS */
+  .rich-text-content table td div,
+  .rich-text-content table th div {
+    position: static !important;
+    white-space: normal !important;
+    width: auto !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    float: none !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  /* Strip all inline styles from table elements */
+  .rich-text-content table[style],
+  .rich-text-content table tr[style],
+  .rich-text-content table td[style],
+  .rich-text-content table th[style],
+  .rich-text-content table div[style] {
+    border-right: 0 !important;
+  }
+
+  .rich-text-content table td[style*="width"],
+  .rich-text-content table div[style*="width"] {
+    width: auto !important;
+  }
+
+  /* Nuclear option: completely remove divs from table cells and use their text */
+  .rich-text-content table td > div,
+  .rich-text-content table th > div {
+    all: revert !important;
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .rich-text-content table td > div > div,
+  .rich-text-content table th > div > div {
+    all: revert !important;
+    display: inline !important;
+    position: static !important;
+    width: auto !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .rich-text-content tbody td:first-child {
+    border-left: none !important;
+  }
+
+  .rich-text-content tbody td:last-child {
+    border-right: none !important;
+  }
+
+  .rich-text-content tbody tr:first-child td {
+    border-top: none !important;
+  }
+
+  .rich-text-content tbody tr:last-child td {
+    border-bottom: none !important;
+  }
+
+  /* Mobile table responsiveness */
+  @media (max-width: 768px) {
+    .rich-text-content table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
   }
 </style>
 
@@ -300,7 +488,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
   <div class="content-wrapper">
     <!-- Hero Section -->
     <div class="text-white hero-section">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-5xl">
         <div class="text-center">
           {categoryImage ? (
             <img
@@ -331,18 +519,18 @@ const categoryIcon = categoryIcons[category] || '🌱';
     <!-- Rich Text Content Section -->
     {categoryRichText && (
       <div class="py-12 bg-gradient-to-b from-black/80 to-green-900/40">
-        <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
-          <div class="p-6 bg-black border-2 border-green-500 rounded-lg md:p-8">
-            <div class="flex items-center mb-6 gap-4">
+        <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-4xl">
+          <div class="p-6 bg-black border-2 border-green-500 rounded-lg md:p-8 overflow-hidden">
+            <div class="flex flex-col items-center mb-8 text-center gap-4">
               {categoryImage ? (
                 <img
                   src={categoryImage}
                   alt={categoryName}
-                  class="object-cover w-16 h-16 rounded-lg"
+                  class="object-cover w-20 h-20 rounded-lg"
                 />
               ) : (
-                <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                  <span class="text-3xl">{categoryIcon}</span>
+                <div class="w-20 h-20 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                  <span class="text-4xl">{categoryIcon}</span>
                 </div>
               )}
               <h2 class="text-2xl font-bold text-yellow-400 md:text-3xl">About {categoryName}</h2>
@@ -355,7 +543,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
 
     <!-- Products Section -->
     <div class="py-12 bg-black bg-opacity-90">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
         {products.length > 0 ? (
           <div>
             <div class="mb-8 text-center">
@@ -392,19 +580,19 @@ const categoryIcon = categoryIcons[category] || '🌱';
                       </div>
                     )}
 
-                    <div class="p-4">
-                      <h3 class="mb-1 text-lg font-bold text-yellow-400 group-hover:text-yellow-300 line-clamp-2">
+                    <div class="p-4 text-center">
+                      <h3 class="mb-2 text-base font-bold text-yellow-400 group-hover:text-yellow-300 line-clamp-2" style="line-height: 1.4;">
                         {productName}
                       </h3>
 
                       {productDescription && (
-                        <p class="mb-2 text-xs text-green-300 line-clamp-2">
+                        <p class="mb-3 text-xs text-green-300 line-clamp-2" style="line-height: 1.5;">
                           {productDescription}
                         </p>
                       )}
 
-                      <div class="flex items-center justify-between">
-                        <span class="inline-block px-2 py-1 text-xs font-medium text-green-400 bg-green-900 rounded-full">
+                      <div class="flex items-center justify-center">
+                        <span class="inline-block px-3 py-1 text-xs font-medium text-green-400 bg-green-900 rounded-full">
                           {categoryName}
                         </span>
                       </div>
@@ -417,9 +605,9 @@ const categoryIcon = categoryIcons[category] || '🌱';
         ) : (
           <div class="py-12 text-center">
             <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
-              <div class="mb-4 text-6xl">{categoryIcon}</div>
-              <h3 class="mb-2 text-lg font-medium text-yellow-400">No Products Available</h3>
-              <p class="text-green-300">Check back soon for {categoryName.toLowerCase()} products!</p>
+              <div class="mb-6 text-6xl">{categoryIcon}</div>
+              <h3 class="mb-3 text-xl font-bold text-yellow-400" style="line-height: 1.4;">No Products Available</h3>
+              <p class="text-base text-green-300" style="line-height: 1.6;">Check back soon for {categoryName.toLowerCase()} products!</p>
             </div>
           </div>
         )}
@@ -428,7 +616,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
 
     <!-- About Section -->
     <div class="py-12 bg-gradient-to-b from-green-900/40 to-black/60">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-[2080px]">
+      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
         <div class="mb-8 text-center">
           <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
             Why Choose Mint Deals

@@ -35,6 +35,17 @@ const storeAddress = getStringValue(store?.address?.street) || getStringValue(st
 const storeZip = getStringValue(store?.address?.zipCode) || getStringValue(store?.zip_code) || '';
 const storePhone = getStringValue(store?.phone) || '';
 const storeEmail = getStringValue(store?.email) || '';
+
+// Build Google Maps URL - prefer coordinates from geo field, fallback to address
+let mapsUrl = '';
+if (store?.geo?.lat && store?.geo?.lng) {
+  mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${store.geo.lat},${store.geo.lng}`;
+} else if (storeAddress || storeCity || storeState) {
+  // Use address as fallback
+  const addressParts = [storeAddress, storeCity, storeState, storeZip].filter(part => part).join(', ');
+  const encodedAddress = encodeURIComponent(addressParts);
+  mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+}
 const storeShortDescription = getStringValue(store?.short_description) || 'Premium cannabis products and expert guidance for your wellness journey.';
 const storeLongDescription = getStringValue(store?.description) || getStringValue(store?.long_description) || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
 const storeImage = store?.image?.url ? `https://mintdealsbackend-production.up.railway.app${store.image.url}` : null;
@@ -194,9 +205,9 @@ try {
                 View Full Menu
               </a>
             )}
-            {(store?.latitude && store?.longitude) && (
+            {mapsUrl && (
               <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
+                href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="inline-flex items-center px-6 py-3 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"
@@ -293,9 +304,9 @@ try {
                   <div>
                     <p class="text-green-200">{storeAddress}</p>
                     <p class="text-green-200">{storeCity}, {storeState} {storeZip}</p>
-                    {(store?.latitude && store?.longitude) && (
+                    {mapsUrl && (
                       <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}
+                        href={mapsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         class="text-yellow-400 hover:text-yellow-300 text-sm mt-1 inline-block"

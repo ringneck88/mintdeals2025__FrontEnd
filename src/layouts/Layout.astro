@@ -269,6 +269,9 @@ function getCategoryIcon(slug: string) {
                 </div>
               </div>
             </div>
+            <a href="/map" class="text-gray-200 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-semibold">
+              Map
+            </a>
             <a href="/deals" class="text-gray-200 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-semibold">
               Deals
             </a>
@@ -284,9 +287,15 @@ function getCategoryIcon(slug: string) {
     <footer class="bg-gray-800 text-white">
       <div class="max-w-[95%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <!-- About Section -->
+          <!-- About Section with Logo -->
           <div>
-            <h3 class="text-lg font-semibold text-white mb-4">Mint Cannabis</h3>
+            <a href="/" class="inline-block mb-4 hover:opacity-80 transition-opacity">
+              <img
+                src="/assets/Mint_Full_Logo.png"
+                alt="Mint Cannabis"
+                class="h-16 w-auto object-contain"
+              />
+            </a>
             <p class="text-gray-400 text-sm">
               Your trusted source for premium cannabis products and deals.
             </p>
@@ -304,6 +313,9 @@ function getCategoryIcon(slug: string) {
               </li>
               <li>
                 <a href="/stores" class="text-gray-400 hover:text-green-400 text-sm transition-colors">Locations</a>
+              </li>
+              <li>
+                <a href="/map" class="text-gray-400 hover:text-purple-400 text-sm transition-colors">Map</a>
               </li>
               <li>
                 <a href="/deals" class="text-gray-400 hover:text-orange-400 text-sm transition-colors">Deals</a>

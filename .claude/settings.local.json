@@ -16,7 +16,8 @@
       "WebFetch(domain:mintdeals2025.pages.dev)",
       "Bash(node:*)",
       "Bash(npx wrangler pages deployment:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "WebFetch(domain:2b364d54.mintdeals2025.pages.dev)"
     ],
     "deny": [],
     "ask": []
