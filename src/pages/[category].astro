@@ -51,6 +51,8 @@ let categoryName = category.replace('-', ' ').replace(/\b\w/g, (l: string) => l.
 let categoryDescription = '';
 let categoryImage = null;
 let categoryRichText = '';
+let seoTitle = '';
+let seoDescription = '';
 
 try {
   const response = await fetch(`${API_BASE}/categories?filters[slug][$eq]=${category}&populate=*`);
@@ -64,7 +66,12 @@ try {
       categoryDescription = catData.Description || catData.description || catData.Discription || '';
       categoryRichText = catData.RichText || catData.richText || catData.rich_text || '';
 
-      console.log('Category details:', { categoryName, hasRichText: !!categoryRichText });
+      // Get SEO fields
+      const seoData = catData.seo || catData.SEO || catData.Seo;
+      seoTitle = seoData?.metaTitle || seoData?.title || seoData?.MetaTitle || '';
+      seoDescription = seoData?.metaDescription || seoData?.description || seoData?.MetaDescription || '';
+
+      console.log('Category details:', { categoryName, hasRichText: !!categoryRichText, seoTitle, seoDescription });
 
       // Try to get image
       const imageData = catData.Image || catData.image;
@@ -319,6 +326,13 @@ const categoryIcon = categoryIcons[category] || '🌱';
     display: inline;
   }
 
+  /* Image styling */
+  .rich-text-content img {
+    border: 1px solid #000 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 4px;
+  }
+
   /* Table styling */
   .rich-text-content figure.table {
     margin: 2em 0;
@@ -476,7 +490,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
   }
 </style>
 
-<Layout title={`${categoryName} - Cannabis Products`} description={categoryDescription || `Browse ${categoryName} cannabis products`}>
+<Layout title={seoTitle || `${categoryName} - Cannabis Products`} description={seoDescription || categoryDescription || `Browse ${categoryName} cannabis products`}>
   <!-- Video Background -->
   <div class="video-background">
     <video autoplay loop muted playsinline>
@@ -501,7 +515,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
           )}
 
           <h1 class="mb-6 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
-            {categoryName}
+            {seoTitle || categoryName}
           </h1>
 
           <div class="flex flex-wrap justify-center gap-4">
