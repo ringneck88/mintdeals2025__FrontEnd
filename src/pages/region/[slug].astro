@@ -1,11 +1,14 @@
 ---
+export const prerender = true;
+
 import Layout from '../../layouts/Layout.astro';
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 export async function getStaticPaths() {
   try {
-    const response = await fetch(`${API_BASE}/regions?populate=*`);
+    // Fetch regions with stores populated
+    const response = await fetch(`${API_BASE}/regions?populate[stores][populate]=*&pagination[pageSize]=100`);
     const data = await response.json();
 
     if (data?.data && Array.isArray(data.data)) {
@@ -13,7 +16,10 @@ export async function getStaticPaths() {
         params: {
           slug: region.slug || (region.name ? region.name.toLowerCase().replace(/\s+/g, '-') : region.documentId)
         },
-        props: { region }
+        props: {
+          region,
+          regionStores: region.stores || []
+        }
       }));
     }
   } catch (error) {
@@ -24,7 +30,7 @@ export async function getStaticPaths() {
   return [{ params: { slug: 'test-region' } }];
 }
 
-const { region } = Astro.props;
+const { region, regionStores } = Astro.props;
 const { slug } = Astro.params;
 
 // Helper function to safely extract string values
@@ -32,28 +38,8 @@ const getStringValue = (value, fallback = '') => {
   return typeof value === 'string' ? value : fallback;
 };
 
-// Fetch stores for this region if region prop is available
-let stores: any[] = [];
-if (region) {
-  try {
-    // First try to get stores from the region's relations
-    if (region.stores && Array.isArray(region.stores)) {
-      stores = region.stores;
-    } else if (region.stores?.data && Array.isArray(region.stores.data)) {
-      // Strapi v4 format with nested data array
-      stores = region.stores.data;
-    } else {
-      // Fallback: fetch stores by querying with region filter
-      const response = await fetch(`${API_BASE}/stores?filters[region][documentId][$eq]=${region.documentId}&populate=*&pagination[pageSize]=100`);
-      if (response.ok) {
-        const data = await response.json();
-        stores = data?.data || [];
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching stores:', error);
-  }
-}
+// Use stores from props (already fetched in getStaticPaths)
+let stores: any[] = regionStores || [];
 
 const regionName = region?.name || region?.Name || slug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
 const regionDescription = region?.description || region?.Description || 'Discover premium cannabis dispensaries and products in the ' + regionName + ' area. Our trusted retail partners offer a carefully curated selection of high-quality cannabis products, expert guidance, and exceptional customer service. Whether you\'re a seasoned enthusiast or new to cannabis, you\'ll find knowledgeable staff ready to help you find the perfect products for your needs. Explore our locations to experience the best cannabis retail has to offer in ' + regionName + '.';
