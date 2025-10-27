@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import Layout from '../../layouts/Layout.astro';
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
@@ -15,13 +17,13 @@ let stores: any[] = [];
 
 try {
   // First, try to find region by slug with population
-  const regionResponse = await fetch(`${API_BASE}/regions?filters[slug][$eq]=${slug}&populate=*&pagination[pageSize]=100`);
+  const regionResponse = await fetch(`${API_BASE}/regions?filters[slug][$eq]=${slug}&populate[stores][populate][0]=address&populate[image]=*&pagination[pageSize]=100`);
   let regionData = await regionResponse.json();
 
   // If no region found by slug, try by name
   if (!regionData?.data || regionData.data.length === 0) {
     const nameToSearch = slug.replace(/-/g, ' ');
-    const regionByNameResponse = await fetch(`${API_BASE}/regions?filters[name][$eqi]=${encodeURIComponent(nameToSearch)}&populate=*&pagination[pageSize]=100`);
+    const regionByNameResponse = await fetch(`${API_BASE}/regions?filters[name][$eqi]=${encodeURIComponent(nameToSearch)}&populate[stores][populate][0]=address&populate[image]=*&pagination[pageSize]=100`);
     regionData = await regionByNameResponse.json();
   }
 
@@ -79,6 +81,9 @@ const regionImageUrl = getImageUrl(region?.image)
 ---
 
 <style>
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     margin: 0;
     padding: 0;
@@ -186,12 +191,15 @@ const regionImageUrl = getImageUrl(region?.image)
             )}
 
             <div class="flex flex-wrap gap-4">
-              <div class="inline-flex items-center px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-green-600 to-green-700 rounded-lg shadow-lg">
+              <a href="#stores-section" class="inline-flex items-center px-6 py-3 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
-                {stores.length} Location{stores.length !== 1 ? 's' : ''}
-              </div>
+                View {stores.length} Location{stores.length !== 1 ? 's' : ''}
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </a>
             </div>
           </div>
         </div>
@@ -219,7 +227,7 @@ const regionImageUrl = getImageUrl(region?.image)
 
         <!-- Stores Section -->
         {stores.length > 0 ? (
-          <div>
+          <div id="stores-section">
             <div class="mb-8">
               <h2 class="text-3xl font-bold flex items-center">
                 <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,7 +243,7 @@ const regionImageUrl = getImageUrl(region?.image)
               {stores.map((store: any) => {
                 const storeImage = getImageUrl(store.image) || getImageUrl(store.Image);
                 return (
-                  <div class="overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 hover:scale-105">
+                  <a href={`/location/${store.slug}`} class="block overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 hover:scale-105 hover:-translate-y-1 cursor-pointer">
                     {storeImage && (
                       <img
                         src={storeImage}
@@ -266,14 +274,14 @@ const regionImageUrl = getImageUrl(region?.image)
                           {store.phone}
                         </p>
                       )}
-                      <a href={`/location/${store.slug}`} class="inline-flex items-center font-medium text-yellow-400 hover:text-yellow-300">
+                      <span class="inline-flex items-center font-medium text-yellow-400">
                         View Details
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                         </svg>
-                      </a>
+                      </span>
                     </div>
-                  </div>
+                  </a>
                 );
               })}
             </div>

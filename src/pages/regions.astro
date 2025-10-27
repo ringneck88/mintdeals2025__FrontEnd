@@ -11,21 +11,86 @@ let apiError = null;
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
+// Helper function to get image URL (same as used on region page)
+function getImageUrl(imageData: any) {
+  if (!imageData || imageData === null) return null;
+
+  // Case 1: Strapi v4 nested structure: image.data.attributes.url
+  if (imageData?.data?.attributes?.url) {
+    const url = imageData.data.attributes.url;
+    return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+  }
+
+  // Case 2: Direct image object with formats (Cloudinary or Strapi uploaded images)
+  if (typeof imageData === 'object' && imageData.formats) {
+    // Prefer larger formats for better quality
+    if (imageData.formats.large?.url) return imageData.formats.large.url;
+    if (imageData.formats.medium?.url) return imageData.formats.medium.url;
+    if (imageData.formats.small?.url) return imageData.formats.small.url;
+    if (imageData.formats.thumbnail?.url) return imageData.formats.thumbnail.url;
+  }
+
+  // Case 3: Direct image object with url: image.url
+  if (typeof imageData === 'object' && imageData.url) {
+    const url = imageData.url;
+    return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+  }
+
+  // Case 4: String URL directly
+  if (typeof imageData === 'string') {
+    return imageData.startsWith('http') ? imageData : `https://mintdealsbackend-production.up.railway.app${imageData}`;
+  }
+
+  return null;
+}
+
 try {
   console.log('🚀 Fetching regions with stores from Railway API');
 
-  // Fetch regions with stores populated
-  const regionsResponse = await fetch(`${API_BASE}/regions?populate[stores][populate]=*&pagination[pageSize]=100`);
+  // Fetch regions with stores populated (only populate=* works on this API)
+  const regionsResponse = await fetch(`${API_BASE}/regions?populate=*&pagination[pageSize]=100`);
 
   if (regionsResponse.ok) {
     const data = await regionsResponse.json();
     const rawRegions = data?.data || [];
     console.log('✅ Regions loaded:', rawRegions.length);
 
+    // Fetch all stores with addresses in one query
+    console.log('📦 Fetching stores for address data...');
+    const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=200`);
+    const storesData = await storesResponse.json();
+    const storesMap = {};
+
+    (storesData?.data || []).forEach(store => {
+      storesMap[store.documentId || store.id] = store;
+    });
+
+    // Fetch each region individually to get images (list queries don't populate Image field)
+    console.log('🖼️ Fetching region images...');
+    const regionsWithImages = await Promise.all(
+      rawRegions.map(async (region) => {
+        try {
+          const regionDetailResponse = await fetch(`${API_BASE}/regions/${region.documentId || region.id}?populate=*`);
+          if (regionDetailResponse.ok) {
+            const regionDetail = await regionDetailResponse.json();
+            return regionDetail.data;
+          }
+        } catch (e) {
+          console.error('Error fetching region image:', region.name, e);
+        }
+        return region;
+      })
+    );
+
     // Build regions with stores grouped by city using the stores relationship
-    regionsData = rawRegions.map(region => {
+    regionsData = regionsWithImages.map(region => {
       // Get stores directly from the region's stores field
-      const regionStores = region.stores || [];
+      const regionStores = (region.stores || []).map(store => {
+        const fullStore = storesMap[store.documentId || store.id];
+        // Merge basic store data with full address data
+        return fullStore || store;
+      });
+
       console.log(`📍 Region ${region.name}: ${regionStores.length} stores`);
 
       // Group stores by city
@@ -50,11 +115,15 @@ try {
         citiesMap[city].locations.push(store);
       });
 
+      // Get region image URL
+      const imageUrl = getImageUrl(region.image) || getImageUrl(region.Image) || getImageUrl(region.IMAGE);
+
       return {
         id: region.id || region.documentId,
         name: region.name,
         code: region.code,
         slug: region.name ? region.name.toLowerCase().replace(/\s+/g, '-') : (region.id || region.documentId),
+        imageUrl: imageUrl,
         cities: Object.values(citiesMap).map(city => ({
           ...city,
           categories: Array.from(city.categories)
@@ -223,16 +292,31 @@ try {
               <div class="p-6 bg-black border-2 border-green-500 rounded-lg md:p-8">
                 {/* Region Header */}
                 <div class="flex flex-col items-start justify-between mb-6 md:flex-row md:items-center">
-                  <div>
-                    <h2 class="mb-2 text-3xl font-bold">
-                      <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.35rem;">
-                        {region.name}
-                      </span>
-                    </h2>
-                    <div class="flex gap-4 text-sm text-green-300">
-                      <span>{region.totalLocations} dispensar{region.totalLocations !== 1 ? 'ies' : 'y'}</span>
-                      <span>•</span>
-                      <span>{region.cities.length} cit{region.cities.length !== 1 ? 'ies' : 'y'}</span>
+                  <div class="flex items-center gap-4">
+                    {/* Region Image Icon */}
+                    {region.imageUrl ? (
+                      <img
+                        src={region.imageUrl}
+                        alt={region.name}
+                        class="w-16 h-16 object-cover rounded-lg border-2 border-yellow-400 flex-shrink-0"
+                      />
+                    ) : (
+                      <div class="w-16 h-16 bg-gradient-to-br from-green-900 to-green-800 rounded-lg border-2 border-yellow-400 flex items-center justify-center flex-shrink-0">
+                        <span class="text-2xl">📍</span>
+                      </div>
+                    )}
+
+                    <div>
+                      <h2 class="mb-2 text-3xl font-bold">
+                        <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.35rem;">
+                          {region.name}
+                        </span>
+                      </h2>
+                      <div class="flex gap-4 text-sm text-green-300">
+                        <span>{region.totalLocations} dispensar{region.totalLocations !== 1 ? 'ies' : 'y'}</span>
+                        <span>•</span>
+                        <span>{region.cities.length} cit{region.cities.length !== 1 ? 'ies' : 'y'}</span>
+                      </div>
                     </div>
                   </div>
                   <a
