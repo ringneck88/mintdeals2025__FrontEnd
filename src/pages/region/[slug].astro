@@ -37,27 +37,32 @@ try {
 const regionName = region?.name || region?.Name || slug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
 const regionDescription = region?.description || region?.Description || 'Discover premium cannabis dispensaries and products in the ' + regionName + ' area. Our trusted retail partners offer a carefully curated selection of high-quality cannabis products, expert guidance, and exceptional customer service. Whether you\'re a seasoned enthusiast or new to cannabis, you\'ll find knowledgeable staff ready to help you find the perfect products for your needs. Explore our locations to experience the best cannabis retail has to offer in ' + regionName + '.';
 
-// Helper function to get image URL
+// Helper function to get image URL (same as used on home page)
 function getImageUrl(imageData: any) {
   if (!imageData || imageData === null) return null;
 
+  // Case 1: Strapi v4 nested structure: image.data.attributes.url
   if (imageData?.data?.attributes?.url) {
     const url = imageData.data.attributes.url;
     return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
   }
 
+  // Case 2: Direct image object with formats (Cloudinary or Strapi uploaded images)
   if (typeof imageData === 'object' && imageData.formats) {
+    // Prefer larger formats for better quality
     if (imageData.formats.large?.url) return imageData.formats.large.url;
     if (imageData.formats.medium?.url) return imageData.formats.medium.url;
     if (imageData.formats.small?.url) return imageData.formats.small.url;
     if (imageData.formats.thumbnail?.url) return imageData.formats.thumbnail.url;
   }
 
+  // Case 3: Direct image object with url: image.url
   if (typeof imageData === 'object' && imageData.url) {
     const url = imageData.url;
     return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
   }
 
+  // Case 4: String URL directly
   if (typeof imageData === 'string') {
     return imageData.startsWith('http') ? imageData : `https://mintdealsbackend-production.up.railway.app${imageData}`;
   }
@@ -65,7 +70,11 @@ function getImageUrl(imageData: any) {
   return null;
 }
 
-const regionImageUrl = getImageUrl(region?.image) || getImageUrl(region?.Image);
+// Try multiple possible image field names (matching home page logic)
+const regionImageUrl = getImageUrl(region?.image)
+  || getImageUrl(region?.Image)
+  || getImageUrl(region?.IMAGE)
+  || null;
 ---
 
 <style>
