@@ -130,7 +130,19 @@ const categoryIcon = categoryIcons[category] || '🌱';
     height: 100%;
     z-index: -1;
     overflow: hidden;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
   }
+
+  .video-background video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
   .video-background::before {
     content: '';
     position: absolute;
@@ -143,10 +155,350 @@ const categoryIcon = categoryIcons[category] || '🌱';
     pointer-events: none;
     z-index: 1;
   }
-  .video-background video {
-    object-fit: cover;
-    height: 100%;
+
+  /* Falling pills animation - continuous */
+  @keyframes fall-continuous {
+    0% {
+      transform: translateY(-150px) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(calc(100vh + 100px)) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  /* Capsule shapes - two-tone pills */
+  .pill-image {
+    position: fixed;
+    animation: fall-continuous linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pill-image::before {
+    content: '';
+    display: block;
+    border-radius: 25px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
+
+  /* Different colored two-tone capsules */
+  .pill-image:nth-child(1)::before {
+    width: 70px;
+    height: 30px;
+    background: linear-gradient(90deg, #ef4444 0%, #ef4444 50%, #fbbf24 50%, #fbbf24 100%);
+  }
+
+  .pill-image:nth-child(2)::before {
+    width: 85px;
+    height: 35px;
+    background: linear-gradient(90deg, #3b82f6 0%, #3b82f6 50%, #ffffff 50%, #ffffff 100%);
+  }
+
+  .pill-image:nth-child(3)::before {
+    width: 75px;
+    height: 32px;
+    background: linear-gradient(90deg, #10b981 0%, #10b981 50%, #ffffff 50%, #ffffff 100%);
+  }
+
+  .pill-image:nth-child(4)::before {
+    width: 90px;
+    height: 38px;
+    background: linear-gradient(90deg, #ec4899 0%, #ec4899 50%, #ec4899 50%, #ec4899 100%);
+  }
+
+  .pill-image:nth-child(5)::before {
+    width: 80px;
+    height: 34px;
+    background: linear-gradient(90deg, #f59e0b 0%, #f59e0b 50%, #dc2626 50%, #dc2626 100%);
+  }
+
+  .pill-image:nth-child(6)::before {
+    width: 68px;
+    height: 29px;
+    background: linear-gradient(90deg, #8b5cf6 0%, #8b5cf6 50%, #fbbf24 50%, #fbbf24 100%);
+  }
+
+  .pill-image:nth-child(7)::before {
+    width: 92px;
+    height: 40px;
+    background: linear-gradient(90deg, #14b8a6 0%, #14b8a6 50%, #14b8a6 50%, #14b8a6 100%);
+  }
+
+  .pill-image:nth-child(8)::before {
+    width: 76px;
+    height: 31px;
+    background: linear-gradient(90deg, #6366f1 0%, #6366f1 50%, #ffffff 50%, #ffffff 100%);
+  }
+
+  .pill-image:nth-child(9)::before {
+    width: 88px;
+    height: 36px;
+    background: linear-gradient(90deg, #dc2626 0%, #dc2626 50%, #fbbf24 50%, #fbbf24 100%);
+  }
+
+  .pill-image:nth-child(10)::before {
+    width: 82px;
+    height: 33px;
+    background: linear-gradient(90deg, #10b981 0%, #10b981 50%, #f59e0b 50%, #f59e0b 100%);
+  }
+
+  /* Tablet shapes - various styles */
+  .tablet-image {
+    position: fixed;
+    animation: fall-continuous linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .tablet-image::before {
+    content: '';
+    display: block;
     width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
+
+  /* Round tablets - different sizes */
+  .tablet-image:nth-child(11)::before {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffffff 0%, #e5e7eb 100%);
+  }
+
+  /* Oval tablets */
+  .tablet-image:nth-child(12)::before {
+    width: 80px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+  }
+
+  /* Long thin tablets */
+  .tablet-image:nth-child(13)::before {
+    width: 50px;
+    height: 100px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  }
+
+  /* Square tablets with rounded corners */
+  .tablet-image:nth-child(14)::before {
+    width: 75px;
+    height: 75px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  }
+
+  /* Short wide tablets */
+  .tablet-image:nth-child(15)::before {
+    width: 90px;
+    height: 45px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  }
+
+  /* Medium round tablet */
+  .tablet-image:nth-child(16)::before {
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  }
+
+  /* Long rounded tablet */
+  .tablet-image:nth-child(17)::before {
+    width: 60px;
+    height: 95px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  }
+
+  /* Small round tablet */
+  .tablet-image:nth-child(18)::before {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  }
+
+  /* Topicals page - massage/wellness theme */
+  @keyframes pulse-wave {
+    0%, 100% {
+      transform: scale(1) translateY(0);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.5) translateY(-20px);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes float-wellness {
+    0% {
+      transform: translateY(100vh) translateX(0) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.7;
+    }
+    90% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(-100px) translateX(50px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  .wellness-icon {
+    position: fixed;
+    font-size: 60px;
+    animation: float-wellness linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    filter: drop-shadow(0 4px 8px rgba(16, 185, 129, 0.3));
+  }
+
+  .wellness-icon:nth-child(1) { left: 10%; animation-duration: 15s; animation-delay: 0s; }
+  .wellness-icon:nth-child(2) { left: 25%; animation-duration: 18s; animation-delay: 2s; }
+  .wellness-icon:nth-child(3) { left: 40%; animation-duration: 16s; animation-delay: 4s; }
+  .wellness-icon:nth-child(4) { left: 55%; animation-duration: 17s; animation-delay: 1s; }
+  .wellness-icon:nth-child(5) { left: 70%; animation-duration: 19s; animation-delay: 3s; }
+  .wellness-icon:nth-child(6) { left: 85%; animation-duration: 14s; animation-delay: 5s; }
+
+  .wellness-icon:nth-child(odd)::before { content: '💪'; }
+  .wellness-icon:nth-child(even)::before { content: '🌿'; }
+  .wellness-icon:nth-child(3n)::before { content: '✨'; }
+
+  .pulse-circle {
+    position: fixed;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0) 70%);
+    animation: pulse-wave 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .pulse-circle:nth-child(7) { left: 20%; top: 30%; animation-delay: 0s; }
+  .pulse-circle:nth-child(8) { left: 60%; top: 50%; animation-delay: 1.5s; }
+  .pulse-circle:nth-child(9) { left: 80%; top: 20%; animation-delay: 3s; }
+
+  /* Stagger positions and timing for continuous falling effect */
+  .pill-image:nth-child(1) {
+    left: 8%;
+    animation-duration: 12s;
+    animation-delay: 0s;
+    font-size: 70px;
+  }
+  .pill-image:nth-child(2) {
+    left: 18%;
+    animation-duration: 15s;
+    animation-delay: 2s;
+    font-size: 90px;
+  }
+  .pill-image:nth-child(3) {
+    left: 28%;
+    animation-duration: 13s;
+    animation-delay: 4s;
+    font-size: 75px;
+  }
+  .pill-image:nth-child(4) {
+    left: 38%;
+    animation-duration: 16s;
+    animation-delay: 1s;
+    font-size: 85px;
+  }
+  .pill-image:nth-child(5) {
+    left: 48%;
+    animation-duration: 14s;
+    animation-delay: 3s;
+    font-size: 80px;
+  }
+  .pill-image:nth-child(6) {
+    left: 58%;
+    animation-duration: 17s;
+    animation-delay: 5s;
+    font-size: 70px;
+  }
+  .pill-image:nth-child(7) {
+    left: 68%;
+    animation-duration: 11s;
+    animation-delay: 2s;
+    font-size: 90px;
+  }
+  .pill-image:nth-child(8) {
+    left: 78%;
+    animation-duration: 18s;
+    animation-delay: 4.5s;
+    font-size: 75px;
+  }
+  .pill-image:nth-child(9) {
+    left: 88%;
+    animation-duration: 15s;
+    animation-delay: 1.5s;
+    font-size: 85px;
+  }
+  .pill-image:nth-child(10) {
+    left: 93%;
+    animation-duration: 13s;
+    animation-delay: 3.5s;
+    font-size: 80px;
+  }
+
+  /* Tablet positioning - offset from pills */
+  .tablet-image:nth-child(11) {
+    left: 12%;
+    animation-duration: 14s;
+    animation-delay: 1s;
+  }
+  .tablet-image:nth-child(12) {
+    left: 22%;
+    animation-duration: 16s;
+    animation-delay: 3s;
+  }
+  .tablet-image:nth-child(13) {
+    left: 32%;
+    animation-duration: 13s;
+    animation-delay: 5s;
+  }
+  .tablet-image:nth-child(14) {
+    left: 42%;
+    animation-duration: 15s;
+    animation-delay: 2s;
+  }
+  .tablet-image:nth-child(15) {
+    left: 52%;
+    animation-duration: 17s;
+    animation-delay: 4s;
+  }
+  .tablet-image:nth-child(16) {
+    left: 62%;
+    animation-duration: 12s;
+    animation-delay: 1.5s;
+  }
+  .tablet-image:nth-child(17) {
+    left: 72%;
+    animation-duration: 16s;
+    animation-delay: 3.5s;
+  }
+  .tablet-image:nth-child(18) {
+    left: 82%;
+    animation-duration: 14s;
+    animation-delay: 5.5s;
   }
   .content-wrapper {
     position: relative;
@@ -491,11 +843,45 @@ const categoryIcon = categoryIcons[category] || '🌱';
 </style>
 
 <Layout title={seoTitle || `${categoryName} - Cannabis Products`} description={seoDescription || categoryDescription || `Browse ${categoryName} cannabis products`}>
-  <!-- Video Background -->
+  <!-- Background - Different videos/animations for different categories -->
   <div class="video-background">
-    <video autoplay loop muted playsinline>
-      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
-    </video>
+    {category === 'cannabis-capsules-and-tablets' ? (
+      <>
+        <!-- Pills using CSS capsules -->
+        <div class="pill-image"></div>
+        <div class="pill-image"></div>
+        <div class="pill-image"></div>
+        <div class="pill-image"></div>
+        <div class="pill-image"></div>
+        <div class="pill-image"></div>
+        <div class="pill-image"></div>
+        <div class="pill-image"></div>
+        <div class="pill-image"></div>
+        <div class="pill-image"></div>
+
+        <!-- Tablets using CSS shapes -->
+        <div class="tablet-image"></div>
+        <div class="tablet-image"></div>
+        <div class="tablet-image"></div>
+        <div class="tablet-image"></div>
+        <div class="tablet-image"></div>
+        <div class="tablet-image"></div>
+        <div class="tablet-image"></div>
+        <div class="tablet-image"></div>
+      </>
+    ) : category === 'topicals' ? (
+      <video autoplay loop muted playsinline>
+        {/* TODO: Replace with your athletic video (weightlifting, hurdles, aerobics) */}
+        {/* Place your video file in /public/videos/ folder and update the path below */}
+        <source src="/videos/athletic-activities.mp4" type="video/mp4">
+        {/* Fallback to stock video if custom video not available */}
+        <source src="https://static.videezy.com/system/resources/previews/000/005/529/original/Athlete_Weights_11.mp4" type="video/mp4">
+      </video>
+    ) : (
+      <video autoplay loop muted playsinline>
+        <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+      </video>
+    )}
   </div>
 
   <!-- Content Wrapper -->
