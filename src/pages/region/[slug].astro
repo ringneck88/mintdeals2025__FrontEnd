@@ -15,13 +15,13 @@ let stores: any[] = [];
 
 try {
   // First, try to find region by slug
-  const regionResponse = await fetch(`${API_BASE}/regions?filters[slug][$eq]=${slug}&populate[stores][populate]=*&pagination[pageSize]=100`);
+  const regionResponse = await fetch(`${API_BASE}/regions?filters[slug][$eq]=${slug}&populate[stores][populate]=*&populate[image]=*&pagination[pageSize]=100`);
   let regionData = await regionResponse.json();
 
   // If no region found by slug, try by name
   if (!regionData?.data || regionData.data.length === 0) {
     const nameToSearch = slug.replace(/-/g, ' ');
-    const regionByNameResponse = await fetch(`${API_BASE}/regions?filters[name][$eqi]=${encodeURIComponent(nameToSearch)}&populate[stores][populate]=*&pagination[pageSize]=100`);
+    const regionByNameResponse = await fetch(`${API_BASE}/regions?filters[name][$eqi]=${encodeURIComponent(nameToSearch)}&populate[stores][populate]=*&populate[image]=*&pagination[pageSize]=100`);
     regionData = await regionByNameResponse.json();
   }
 
