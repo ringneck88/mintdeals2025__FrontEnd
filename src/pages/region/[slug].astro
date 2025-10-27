@@ -1,36 +1,7 @@
 ---
-export const prerender = true;
-
 import Layout from '../../layouts/Layout.astro';
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
-
-export async function getStaticPaths() {
-  try {
-    // Fetch regions with stores populated
-    const response = await fetch(`${API_BASE}/regions?populate[stores][populate]=*&pagination[pageSize]=100`);
-    const data = await response.json();
-
-    if (data?.data && Array.isArray(data.data)) {
-      return data.data.map((region: any) => ({
-        params: {
-          slug: region.slug || (region.name ? region.name.toLowerCase().replace(/\s+/g, '-') : region.documentId)
-        },
-        props: {
-          region,
-          regionStores: region.stores || []
-        }
-      }));
-    }
-  } catch (error) {
-    console.error('Error fetching regions:', error);
-  }
-
-  // Fallback
-  return [{ params: { slug: 'test-region' } }];
-}
-
-const { region, regionStores } = Astro.props;
 const { slug } = Astro.params;
 
 // Helper function to safely extract string values
@@ -38,8 +9,30 @@ const getStringValue = (value, fallback = '') => {
   return typeof value === 'string' ? value : fallback;
 };
 
-// Use stores from props (already fetched in getStaticPaths)
-let stores: any[] = regionStores || [];
+// Fetch region data with stores
+let region: any = null;
+let stores: any[] = [];
+
+try {
+  // First, try to find region by slug
+  const regionResponse = await fetch(`${API_BASE}/regions?filters[slug][$eq]=${slug}&populate[stores][populate]=*&pagination[pageSize]=100`);
+  let regionData = await regionResponse.json();
+
+  // If no region found by slug, try by name
+  if (!regionData?.data || regionData.data.length === 0) {
+    const nameToSearch = slug.replace(/-/g, ' ');
+    const regionByNameResponse = await fetch(`${API_BASE}/regions?filters[name][$eqi]=${encodeURIComponent(nameToSearch)}&populate[stores][populate]=*&pagination[pageSize]=100`);
+    regionData = await regionByNameResponse.json();
+  }
+
+  if (regionData?.data && regionData.data.length > 0) {
+    region = regionData.data[0];
+    stores = region.stores || [];
+    console.log(`✅ Region ${region.name}: ${stores.length} stores found`);
+  }
+} catch (error) {
+  console.error('Error fetching region data:', error);
+}
 
 const regionName = region?.name || region?.Name || slug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
 const regionDescription = region?.description || region?.Description || 'Discover premium cannabis dispensaries and products in the ' + regionName + ' area. Our trusted retail partners offer a carefully curated selection of high-quality cannabis products, expert guidance, and exceptional customer service. Whether you\'re a seasoned enthusiast or new to cannabis, you\'ll find knowledgeable staff ready to help you find the perfect products for your needs. Explore our locations to experience the best cannabis retail has to offer in ' + regionName + '.';
