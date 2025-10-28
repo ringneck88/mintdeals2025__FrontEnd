@@ -272,6 +272,10 @@ try {
     padding: 0.5rem 0;
   }
 
+  .hero-section h1 {
+    line-height: 1.2;
+  }
+
   @media (min-width: 768px) {
     .hero-section {
       min-height: 30vh; /* Half of original 60vh */
@@ -300,8 +304,10 @@ try {
     <div class="text-white hero-section">
     <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
       <div class="text-center">
-        <h1 class="mb-4 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
-          Mint Cannabis Deals
+        <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl" style="line-height: 1.2;">
+          <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
+            Mint Cannabis Deals
+          </span>
         </h1>
         <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
           Your trusted source for premium cannabis products and information

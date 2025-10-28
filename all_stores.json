@@ -1,1 +1,4266 @@
-Expecting value: line 1 column 1 (char 0)
+{
+  "data": [
+    {
+      "id": 2,
+      "documentId": "mp200avvvkk4qdk3uo72sgb9",
+      "name": "Mint Cannabis 75th Ave Phoenix",
+      "slug": "mint-cannabis-75th-ave-phoenix",
+      "store_code": null,
+      "phone": "(480) 749-6468",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/63d1ac437ca84600702d3970.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/63d1ac437ca84600702d3970.js\"></script></div>",
+      "createdAt": "2025-09-24T23:01:27.503Z",
+      "updatedAt": "2025-10-17T20:14:54.452Z",
+      "publishedAt": "2025-10-17T20:14:54.435Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": "f8dbdb94-7bea-4741-a3a9-6631d8430544",
+      "geo": {
+        "lat": 33.4609786,
+        "lng": -112.2205455
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 17,
+        "documentId": "rou9s393k72quf1xwyal526j",
+        "name": "Arizona",
+        "timezone": "America/Phoenix",
+        "createdAt": "2025-09-24T21:35:18.992Z",
+        "updatedAt": "2025-10-07T19:03:42.710Z",
+        "publishedAt": "2025-10-07T19:03:42.776Z"
+      },
+      "address": {
+        "id": 2,
+        "street": "1211 North 75th Avenue",
+        "city": "Phoenix",
+        "state": "Arizona",
+        "zipCode": "85043",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 8,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "21:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 9,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "21:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 10,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "21:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 11,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "21:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 12,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "21:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 13,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "21:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 14,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "21:30:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 212,
+        "metaTitle": "Mint Cannabis 75th Ave Phoenix | Phoenix, Arizona Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis 75th Ave Phoenix in Phoenix, Arizona. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 3,
+      "documentId": "byvqdonk97qdwe2h5f2xebzj",
+      "name": "Mint Cannabis El Mirage",
+      "slug": "mint-cannabis-el-mirage",
+      "store_code": null,
+      "phone": "(480) 749-6468",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/68063f3c7f3a4de4fc89e2f4.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/68063f3c7f3a4de4fc89e2f4.js\"></script></div>",
+      "createdAt": "2025-09-24T23:28:06.795Z",
+      "updatedAt": "2025-10-17T20:14:55.064Z",
+      "publishedAt": "2025-10-17T20:14:55.047Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": "1b81f825-ab2e-45c2-9ad7-add16236e95a",
+      "geo": {
+        "lat": 33.6228378,
+        "lng": -112.3402034
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 17,
+        "documentId": "rou9s393k72quf1xwyal526j",
+        "name": "Arizona",
+        "timezone": "America/Phoenix",
+        "createdAt": "2025-09-24T21:35:18.992Z",
+        "updatedAt": "2025-10-07T19:03:42.710Z",
+        "publishedAt": "2025-10-07T19:03:42.776Z"
+      },
+      "address": {
+        "id": 3,
+        "street": "15235 North Dysart Road ste 111d",
+        "city": " El Mirage",
+        "state": "Arizona",
+        "zipCode": "85335",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 15,
+          "dayOfWeek": "sunday",
+          "openTime": "07:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 16,
+          "dayOfWeek": "monday",
+          "openTime": "07:00:00",
+          "closeTime": "23:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 17,
+          "dayOfWeek": "tuesday",
+          "openTime": "07:00:00",
+          "closeTime": "23:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 18,
+          "dayOfWeek": "wednesday",
+          "openTime": "07:00:00",
+          "closeTime": "23:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 19,
+          "dayOfWeek": "thursday",
+          "openTime": "07:00:00",
+          "closeTime": "23:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 20,
+          "dayOfWeek": "friday",
+          "openTime": "07:00:00",
+          "closeTime": "23:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 21,
+          "dayOfWeek": "saturday",
+          "openTime": "07:00:00",
+          "closeTime": "23:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 213,
+        "metaTitle": "Mint Cannabis El Mirage |  El Mirage, Arizona Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis El Mirage in  El Mirage, Arizona. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 4,
+      "documentId": "yz1lwmcntgh1y5znq1ac4wa4",
+      "name": "Mint Cannabis Mesa",
+      "slug": "mint-cannabis-mesa",
+      "store_code": null,
+      "phone": "(480) 749-6468",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/m4TjY5MzPPa6sSkn2.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/m4TjY5MzPPa6sSkn2.js\"></script></div>",
+      "createdAt": "2025-09-24T23:38:06.804Z",
+      "updatedAt": "2025-10-17T20:14:55.660Z",
+      "publishedAt": "2025-10-17T20:14:55.641Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": "242ef5f9-5fc9-41ef-bf44-5a7a4a2954a9",
+      "geo": {
+        "lat": 33.3936432,
+        "lng": -111.8238394
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 17,
+        "documentId": "rou9s393k72quf1xwyal526j",
+        "name": "Arizona",
+        "timezone": "America/Phoenix",
+        "createdAt": "2025-09-24T21:35:18.992Z",
+        "updatedAt": "2025-10-07T19:03:42.710Z",
+        "publishedAt": "2025-10-07T19:03:42.776Z"
+      },
+      "address": {
+        "id": 4,
+        "street": "330 E Southern Ave",
+        "city": "Mesa",
+        "state": "AZ",
+        "zipCode": "85210",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 22,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 23,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 24,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 25,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 26,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 27,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 28,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 214,
+        "metaTitle": "Mint Cannabis Mesa | Mesa, AZ Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Mesa in Mesa, AZ. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 11,
+      "documentId": "wyhmc8j7wkhwti8e6cugubi0",
+      "name": "Mint Cannabis Las Vegas Strip Dispensary",
+      "slug": "mint-cannabis-las-vegas-strip-dispensary",
+      "store_code": null,
+      "phone": "(702) 389-8556",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671f98a3c6bfda9a796ead94.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671f98a3c6bfda9a796ead94.js\"></script></div>",
+      "createdAt": "2025-09-25T22:32:11.820Z",
+      "updatedAt": "2025-10-17T20:14:56.250Z",
+      "publishedAt": "2025-10-17T20:14:56.229Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": "dbc5deb8-6bbc-4edc-b4df-11d7b2964de0",
+      "geo": {
+        "lat": 36.1070679,
+        "lng": -115.152229
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 30,
+        "documentId": "vggg7apoja5mgyloolxzuzev",
+        "name": "Nevada",
+        "timezone": "America/Carson City",
+        "createdAt": "2025-09-24T21:47:08.409Z",
+        "updatedAt": "2025-10-08T17:50:48.123Z",
+        "publishedAt": "2025-10-08T17:50:48.181Z"
+      },
+      "address": {
+        "id": 11,
+        "street": "4503 Paradise Road",
+        "city": "Las Vegas",
+        "state": "Nevada ",
+        "zipCode": "89119",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 71,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 72,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 73,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 74,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 75,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 76,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 77,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 215,
+        "metaTitle": "Mint Cannabis Las Vegas Strip Dispensary | Las Vegas, Nevada  Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Las Vegas Strip Dispensary in Las Vegas, Nevada . Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 10,
+      "documentId": "mzuco2x996ably05ojkjeqxi",
+      "name": "Mint Cannabis - St. Peters Dispensary",
+      "slug": "mint-cannabis-st-peters-dispensary",
+      "store_code": null,
+      "phone": "(636) 387-1144",
+      "email": null,
+      "timezone": "America/Chicago",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/6011bb98c3a8f600d16b9cc7.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/6011bb98c3a8f600d16b9cc7.js\"></script></div>",
+      "createdAt": "2025-09-25T22:09:17.036Z",
+      "updatedAt": "2025-10-17T20:14:56.838Z",
+      "publishedAt": "2025-10-17T20:14:56.817Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 38.7983778,
+        "lng": -90.6192403
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 28,
+        "documentId": "lxfft0bdwb9ew7bxy5e1pxve",
+        "name": "Missouri",
+        "timezone": "America/Chicago",
+        "createdAt": "2025-09-24T21:53:27.839Z",
+        "updatedAt": "2025-10-08T15:48:28.479Z",
+        "publishedAt": "2025-10-08T15:48:28.557Z"
+      },
+      "address": {
+        "id": 10,
+        "street": "150 Mid Rivers Mall Circle",
+        "city": "St. Peters",
+        "state": "Missouri",
+        "zipCode": "63376",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 64,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 65,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 66,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 67,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 68,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 69,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 70,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": false
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": {
+        "id": 16,
+        "documentId": "d0xm8dqakohplnx6ka2wlgju",
+        "name": "2024-08-22.webp",
+        "alternativeText": null,
+        "caption": null,
+        "width": 680,
+        "height": 510,
+        "formats": {
+          "small": {
+            "ext": ".webp",
+            "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864568/mintdeals/small_2024_08_22_28a786aadd.webp",
+            "hash": "small_2024_08_22_28a786aadd",
+            "mime": "image/webp",
+            "name": "small_2024-08-22.webp",
+            "path": null,
+            "size": 31.87,
+            "width": 500,
+            "height": 375,
+            "sizeInBytes": 31866,
+            "provider_metadata": {
+              "public_id": "mintdeals/small_2024_08_22_28a786aadd",
+              "resource_type": "image"
+            }
+          },
+          "thumbnail": {
+            "ext": ".webp",
+            "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864570/mintdeals/thumbnail_2024_08_22_28a786aadd.webp",
+            "hash": "thumbnail_2024_08_22_28a786aadd",
+            "mime": "image/webp",
+            "name": "thumbnail_2024-08-22.webp",
+            "path": null,
+            "size": 6.87,
+            "width": 208,
+            "height": 156,
+            "sizeInBytes": 6870,
+            "provider_metadata": {
+              "public_id": "mintdeals/thumbnail_2024_08_22_28a786aadd",
+              "resource_type": "image"
+            }
+          }
+        },
+        "hash": "2024_08_22_28a786aadd",
+        "ext": ".webp",
+        "mime": "image/webp",
+        "size": 69.3,
+        "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864568/mintdeals/2024_08_22_28a786aadd.webp",
+        "previewUrl": null,
+        "provider": "cloudinary",
+        "provider_metadata": {
+          "public_id": "mintdeals/2024_08_22_28a786aadd",
+          "resource_type": "image"
+        },
+        "createdAt": "2025-10-07T19:16:14.285Z",
+        "updatedAt": "2025-10-07T19:16:14.285Z",
+        "publishedAt": "2025-10-07T19:16:14.285Z"
+      },
+      "gallery": [
+        {
+          "id": 17,
+          "documentId": "pakeiclicaeykeep5f73okp9",
+          "name": "MO.png",
+          "alternativeText": null,
+          "caption": null,
+          "width": 900,
+          "height": 400,
+          "formats": {
+            "small": {
+              "ext": ".png",
+              "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864591/mintdeals/small_MO_5f873f7043.png",
+              "hash": "small_MO_5f873f7043",
+              "mime": "image/png",
+              "name": "small_MO.png",
+              "path": null,
+              "size": 267.3,
+              "width": 500,
+              "height": 222,
+              "sizeInBytes": 267299,
+              "provider_metadata": {
+                "public_id": "mintdeals/small_MO_5f873f7043",
+                "resource_type": "image"
+              }
+            },
+            "medium": {
+              "ext": ".png",
+              "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864591/mintdeals/medium_MO_5f873f7043.png",
+              "hash": "medium_MO_5f873f7043",
+              "mime": "image/png",
+              "name": "medium_MO.png",
+              "path": null,
+              "size": 588.93,
+              "width": 750,
+              "height": 333,
+              "sizeInBytes": 588935,
+              "provider_metadata": {
+                "public_id": "mintdeals/medium_MO_5f873f7043",
+                "resource_type": "image"
+              }
+            },
+            "thumbnail": {
+              "ext": ".png",
+              "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864591/mintdeals/thumbnail_MO_5f873f7043.png",
+              "hash": "thumbnail_MO_5f873f7043",
+              "mime": "image/png",
+              "name": "thumbnail_MO.png",
+              "path": null,
+              "size": 68.89,
+              "width": 245,
+              "height": 109,
+              "sizeInBytes": 68894,
+              "provider_metadata": {
+                "public_id": "mintdeals/thumbnail_MO_5f873f7043",
+                "resource_type": "image"
+              }
+            }
+          },
+          "hash": "MO_5f873f7043",
+          "ext": ".png",
+          "mime": "image/png",
+          "size": 181.66,
+          "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864591/mintdeals/MO_5f873f7043.png",
+          "previewUrl": null,
+          "provider": "cloudinary",
+          "provider_metadata": {
+            "public_id": "mintdeals/MO_5f873f7043",
+            "resource_type": "image"
+          },
+          "createdAt": "2025-10-07T19:16:32.524Z",
+          "updatedAt": "2025-10-07T19:16:32.524Z",
+          "publishedAt": "2025-10-07T19:16:32.524Z"
+        },
+        {
+          "id": 16,
+          "documentId": "d0xm8dqakohplnx6ka2wlgju",
+          "name": "2024-08-22.webp",
+          "alternativeText": null,
+          "caption": null,
+          "width": 680,
+          "height": 510,
+          "formats": {
+            "small": {
+              "ext": ".webp",
+              "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864568/mintdeals/small_2024_08_22_28a786aadd.webp",
+              "hash": "small_2024_08_22_28a786aadd",
+              "mime": "image/webp",
+              "name": "small_2024-08-22.webp",
+              "path": null,
+              "size": 31.87,
+              "width": 500,
+              "height": 375,
+              "sizeInBytes": 31866,
+              "provider_metadata": {
+                "public_id": "mintdeals/small_2024_08_22_28a786aadd",
+                "resource_type": "image"
+              }
+            },
+            "thumbnail": {
+              "ext": ".webp",
+              "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864570/mintdeals/thumbnail_2024_08_22_28a786aadd.webp",
+              "hash": "thumbnail_2024_08_22_28a786aadd",
+              "mime": "image/webp",
+              "name": "thumbnail_2024-08-22.webp",
+              "path": null,
+              "size": 6.87,
+              "width": 208,
+              "height": 156,
+              "sizeInBytes": 6870,
+              "provider_metadata": {
+                "public_id": "mintdeals/thumbnail_2024_08_22_28a786aadd",
+                "resource_type": "image"
+              }
+            }
+          },
+          "hash": "2024_08_22_28a786aadd",
+          "ext": ".webp",
+          "mime": "image/webp",
+          "size": 69.3,
+          "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759864568/mintdeals/2024_08_22_28a786aadd.webp",
+          "previewUrl": null,
+          "provider": "cloudinary",
+          "provider_metadata": {
+            "public_id": "mintdeals/2024_08_22_28a786aadd",
+            "resource_type": "image"
+          },
+          "createdAt": "2025-10-07T19:16:14.285Z",
+          "updatedAt": "2025-10-07T19:16:14.285Z",
+          "publishedAt": "2025-10-07T19:16:14.285Z"
+        },
+        {
+          "id": 15,
+          "documentId": "kaimdkkrphd2z4zpbv9d7484",
+          "name": "20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+          "alternativeText": null,
+          "caption": null,
+          "width": 1536,
+          "height": 1024,
+          "formats": {
+            "large": {
+              "ext": ".png",
+              "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/large_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+              "hash": "large_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+              "mime": "image/png",
+              "name": "large_20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+              "path": null,
+              "size": 1490.45,
+              "width": 1000,
+              "height": 667,
+              "sizeInBytes": 1490451,
+              "provider_metadata": {
+                "public_id": "mintdeals/large_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+                "resource_type": "image"
+              }
+            },
+            "small": {
+              "ext": ".png",
+              "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/small_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+              "hash": "small_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+              "mime": "image/png",
+              "name": "small_20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+              "path": null,
+              "size": 377.44,
+              "width": 500,
+              "height": 333,
+              "sizeInBytes": 377436,
+              "provider_metadata": {
+                "public_id": "mintdeals/small_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+                "resource_type": "image"
+              }
+            },
+            "medium": {
+              "ext": ".png",
+              "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/medium_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+              "hash": "medium_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+              "mime": "image/png",
+              "name": "medium_20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+              "path": null,
+              "size": 838.01,
+              "width": 750,
+              "height": 500,
+              "sizeInBytes": 838005,
+              "provider_metadata": {
+                "public_id": "mintdeals/medium_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+                "resource_type": "image"
+              }
+            },
+            "thumbnail": {
+              "ext": ".png",
+              "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/thumbnail_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+              "hash": "thumbnail_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+              "mime": "image/png",
+              "name": "thumbnail_20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+              "path": null,
+              "size": 89.46,
+              "width": 234,
+              "height": 156,
+              "sizeInBytes": 89455,
+              "provider_metadata": {
+                "public_id": "mintdeals/thumbnail_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+                "resource_type": "image"
+              }
+            }
+          },
+          "hash": "20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+          "ext": ".png",
+          "mime": "image/png",
+          "size": 814.25,
+          "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+          "previewUrl": null,
+          "provider": "cloudinary",
+          "provider_metadata": {
+            "public_id": "mintdeals/20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+            "resource_type": "image"
+          },
+          "createdAt": "2025-10-07T18:57:18.890Z",
+          "updatedAt": "2025-10-07T18:57:18.890Z",
+          "publishedAt": "2025-10-07T18:57:18.891Z"
+        }
+      ],
+      "cta_blocks": [],
+      "seo": {
+        "id": 216,
+        "metaTitle": "Mint Cannabis - St. Peters Dispensary | St. Peters, Missouri Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis - St. Peters Dispensary in St. Peters, Missouri. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 12,
+      "documentId": "i62lemedu97ky11jp4o31ug5",
+      "name": "Mint Cannabis West Las Vegas Dispensary",
+      "slug": "mint-cannabis-west-las-vegas-dispensary",
+      "store_code": null,
+      "phone": "(702) 659-7356",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671f9874430e7faa3d15202c.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671f9874430e7faa3d15202c.js\"></script></div>",
+      "createdAt": "2025-09-25T22:38:19.634Z",
+      "updatedAt": "2025-10-17T20:14:57.433Z",
+      "publishedAt": "2025-10-17T20:14:57.412Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": "577553d7-7604-4f34-948c-ee123dfd79ce",
+      "geo": {
+        "lat": 36.0737003,
+        "lng": -115.2421173
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 30,
+        "documentId": "vggg7apoja5mgyloolxzuzev",
+        "name": "Nevada",
+        "timezone": "America/Carson City",
+        "createdAt": "2025-09-24T21:47:08.409Z",
+        "updatedAt": "2025-10-08T17:50:48.123Z",
+        "publishedAt": "2025-10-08T17:50:48.181Z"
+      },
+      "address": {
+        "id": 12,
+        "street": "6332 South Rainbow Boulevard #105",
+        "city": "Las Vegas",
+        "state": "Nevada ",
+        "zipCode": "89118",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 78,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 79,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 80,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 81,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 82,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 83,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 84,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 217,
+        "metaTitle": "Mint Cannabis West Las Vegas Dispensary | Las Vegas, Nevada  Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis West Las Vegas Dispensary in Las Vegas, Nevada . Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 1,
+      "documentId": "ue9jfphqhqrt5k7uplbikcze",
+      "name": "Mint Cannabis Buckeye",
+      "slug": "mint-cannabis-buckeye",
+      "store_code": null,
+      "phone": "(480) 749-6468",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/68063ee311f2910be90b0cb5.js\"></script></div>",
+      "online_ordering_url": null,
+      "createdAt": "2025-09-24T22:12:13.928Z",
+      "updatedAt": "2025-10-17T20:14:58.027Z",
+      "publishedAt": "2025-10-17T20:14:58.004Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": "b5f4110e-6eb8-428b-aaaa-b4271d5eb327",
+      "geo": {
+        "lat": 33.466307,
+        "lng": -112.478267
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 17,
+        "documentId": "rou9s393k72quf1xwyal526j",
+        "name": "Arizona",
+        "timezone": "America/Phoenix",
+        "createdAt": "2025-09-24T21:35:18.992Z",
+        "updatedAt": "2025-10-07T19:03:42.710Z",
+        "publishedAt": "2025-10-07T19:03:42.776Z"
+      },
+      "address": {
+        "id": 1,
+        "street": "1629 N 195th Ave Suite #101",
+        "city": "Buckeye",
+        "state": "AZ",
+        "zipCode": "85396",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 1,
+          "dayOfWeek": "sunday",
+          "openTime": "07:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 2,
+          "dayOfWeek": "monday",
+          "openTime": "07:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 3,
+          "dayOfWeek": "tuesday",
+          "openTime": "07:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 4,
+          "dayOfWeek": "wednesday",
+          "openTime": "07:00:00",
+          "closeTime": "00:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 5,
+          "dayOfWeek": "thursday",
+          "openTime": "07:00:00",
+          "closeTime": "03:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 6,
+          "dayOfWeek": "friday",
+          "openTime": "07:00:00",
+          "closeTime": "03:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 7,
+          "dayOfWeek": "saturday",
+          "openTime": "07:00:00",
+          "closeTime": "03:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": {
+        "id": 3,
+        "documentId": "oifnxeezwq1yl496ueiy9cvd",
+        "name": "MINT CANNABIS BUCKEYE AZ - DISPENSARY 1.png",
+        "alternativeText": null,
+        "caption": null,
+        "width": 800,
+        "height": 450,
+        "formats": {
+          "small": {
+            "ext": ".png",
+            "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759252096/mintdeals/small_MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a.png",
+            "hash": "small_MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a",
+            "mime": "image/png",
+            "name": "small_MINT CANNABIS BUCKEYE AZ - DISPENSARY 1.png",
+            "path": null,
+            "size": 311.03,
+            "width": 500,
+            "height": 281,
+            "sizeInBytes": 311028,
+            "provider_metadata": {
+              "public_id": "mintdeals/small_MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a",
+              "resource_type": "image"
+            }
+          },
+          "medium": {
+            "ext": ".png",
+            "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759252096/mintdeals/medium_MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a.png",
+            "hash": "medium_MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a",
+            "mime": "image/png",
+            "name": "medium_MINT CANNABIS BUCKEYE AZ - DISPENSARY 1.png",
+            "path": null,
+            "size": 641.32,
+            "width": 750,
+            "height": 422,
+            "sizeInBytes": 641317,
+            "provider_metadata": {
+              "public_id": "mintdeals/medium_MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a",
+              "resource_type": "image"
+            }
+          },
+          "thumbnail": {
+            "ext": ".png",
+            "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759252096/mintdeals/thumbnail_MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a.png",
+            "hash": "thumbnail_MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a",
+            "mime": "image/png",
+            "name": "thumbnail_MINT CANNABIS BUCKEYE AZ - DISPENSARY 1.png",
+            "path": null,
+            "size": 84.8,
+            "width": 245,
+            "height": 138,
+            "sizeInBytes": 84799,
+            "provider_metadata": {
+              "public_id": "mintdeals/thumbnail_MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a",
+              "resource_type": "image"
+            }
+          }
+        },
+        "hash": "MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a",
+        "ext": ".png",
+        "mime": "image/png",
+        "size": 154.22,
+        "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759252096/mintdeals/MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a.png",
+        "previewUrl": null,
+        "provider": "cloudinary",
+        "provider_metadata": {
+          "public_id": "mintdeals/MINT_CANNABIS_BUCKEYE_AZ_DISPENSARY_1_b30a8ff40a",
+          "resource_type": "image"
+        },
+        "createdAt": "2025-09-30T17:08:18.124Z",
+        "updatedAt": "2025-09-30T17:08:36.831Z",
+        "publishedAt": "2025-09-30T17:08:18.125Z"
+      },
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 218,
+        "metaTitle": "Mint Cannabis Buckeye | Buckeye, AZ Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Buckeye in Buckeye, AZ. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 13,
+      "documentId": "bq5t0w46eepzkds10atdgmrq",
+      "name": "Mint Cannabis Monroe MI Dispensary",
+      "slug": "mint-cannabis-monroe-mi-dispensary",
+      "store_code": null,
+      "phone": "(734) 384-3248",
+      "email": null,
+      "timezone": "America/Lansing",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/62058ef65b73e100946b628d.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/62058ef65b73e100946b628d.js\"></script></div>",
+      "createdAt": "2025-09-25T23:06:46.816Z",
+      "updatedAt": "2025-10-17T20:14:58.623Z",
+      "publishedAt": "2025-10-17T20:14:58.601Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 41.8830999,
+        "lng": -83.4399075
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 32,
+        "documentId": "vshpq65s6xe59ckoy6a7egue",
+        "name": "Michigan",
+        "timezone": "America/Lansing",
+        "createdAt": "2025-09-24T21:56:32.975Z",
+        "updatedAt": "2025-10-08T17:52:58.995Z",
+        "publishedAt": "2025-10-08T17:52:59.065Z"
+      },
+      "address": {
+        "id": 13,
+        "street": "760 South Telegraph Road",
+        "city": "Monroe",
+        "state": "Michigan",
+        "zipCode": "48161",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 85,
+          "dayOfWeek": "sunday",
+          "openTime": "09:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 86,
+          "dayOfWeek": "monday",
+          "openTime": "09:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 87,
+          "dayOfWeek": "tuesday",
+          "openTime": "09:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 88,
+          "dayOfWeek": "wednesday",
+          "openTime": "09:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 89,
+          "dayOfWeek": "thursday",
+          "openTime": "09:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 90,
+          "dayOfWeek": "friday",
+          "openTime": "09:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 91,
+          "dayOfWeek": "saturday",
+          "openTime": "09:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 219,
+        "metaTitle": "Mint Cannabis Monroe MI Dispensary | Monroe, Michigan Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Monroe MI Dispensary in Monroe, Michigan. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 14,
+      "documentId": "ti3ax0c61hhs86xhflelrx8c",
+      "name": "Mint Cannabis Kalamazoo MI Dispensary",
+      "slug": "mint-cannabis-kalamazoo-mi-dispensary",
+      "store_code": null,
+      "phone": "(269) 743-7444",
+      "email": null,
+      "timezone": "America/Lansing",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/5f9c6e3ba6d87c0107a0a34f.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/5f9c6e3ba6d87c0107a0a34f.js\"></script></div>",
+      "createdAt": "2025-09-25T23:12:15.547Z",
+      "updatedAt": "2025-10-17T20:14:59.230Z",
+      "publishedAt": "2025-10-17T20:14:59.208Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": "660d73ec-635f-437b-b064-a602623e4684",
+      "geo": {
+        "lat": 42.2593329,
+        "lng": -85.5717185
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 32,
+        "documentId": "vshpq65s6xe59ckoy6a7egue",
+        "name": "Michigan",
+        "timezone": "America/Lansing",
+        "createdAt": "2025-09-24T21:56:32.975Z",
+        "updatedAt": "2025-10-08T17:52:58.995Z",
+        "publishedAt": "2025-10-08T17:52:59.065Z"
+      },
+      "address": {
+        "id": 14,
+        "street": "730 E. Cork St",
+        "city": "Kalamazoo",
+        "state": "Michigan",
+        "zipCode": "49001",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 92,
+          "dayOfWeek": "sunday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 93,
+          "dayOfWeek": "monday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 94,
+          "dayOfWeek": "tuesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 95,
+          "dayOfWeek": "wednesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 96,
+          "dayOfWeek": "thursday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 97,
+          "dayOfWeek": "friday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 98,
+          "dayOfWeek": "saturday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 220,
+        "metaTitle": "Mint Cannabis Kalamazoo MI Dispensary | Kalamazoo, Michigan Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Kalamazoo MI Dispensary in Kalamazoo, Michigan. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 15,
+      "documentId": "q475f8v34xoxqzpej2ygk1xj",
+      "name": "Mint Cannabis Coldwater MI Dispensary",
+      "slug": "mint-cannabis-coldwater-mi-dispensary",
+      "store_code": null,
+      "phone": "(517) 924-1232",
+      "email": null,
+      "timezone": "America/Lansing",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/614ba1c55c059400aae4ed02.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/614ba1c55c059400aae4ed02.js\"></script></div>",
+      "createdAt": "2025-09-25T23:15:15.354Z",
+      "updatedAt": "2025-10-17T20:14:59.827Z",
+      "publishedAt": "2025-10-17T20:14:59.808Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": "80b86ddb-672e-4fcc-adf1-b6ebe7e9927f",
+      "geo": {
+        "lat": 41.9457237,
+        "lng": -84.9713102
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 32,
+        "documentId": "vshpq65s6xe59ckoy6a7egue",
+        "name": "Michigan",
+        "timezone": "America/Lansing",
+        "createdAt": "2025-09-24T21:56:32.975Z",
+        "updatedAt": "2025-10-08T17:52:58.995Z",
+        "publishedAt": "2025-10-08T17:52:59.065Z"
+      },
+      "address": {
+        "id": 15,
+        "street": "365 N Willowbrook Rd",
+        "city": "Coldwater",
+        "state": "Michigan",
+        "zipCode": "49036",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 99,
+          "dayOfWeek": "sunday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 100,
+          "dayOfWeek": "monday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 101,
+          "dayOfWeek": "tuesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 102,
+          "dayOfWeek": "wednesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 103,
+          "dayOfWeek": "thursday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 104,
+          "dayOfWeek": "friday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 105,
+          "dayOfWeek": "saturday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 221,
+        "metaTitle": "Mint Cannabis Coldwater MI Dispensary | Coldwater, Michigan Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Coldwater MI Dispensary in Coldwater, Michigan. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 16,
+      "documentId": "ch6z7yorcyqggcjspizqrpci",
+      "name": "Mint Cannabis Portage MI Dispensary",
+      "slug": "mint-cannabis-portage-mi-dispensary",
+      "store_code": null,
+      "phone": "(269) 459-1204",
+      "email": null,
+      "timezone": "America/Lansing",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/62058f353a2faf44d2567746.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/62058f353a2faf44d2567746.js\"></script></div>",
+      "createdAt": "2025-09-25T23:19:15.075Z",
+      "updatedAt": "2025-10-17T20:15:00.422Z",
+      "publishedAt": "2025-10-17T20:15:00.400Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": "ff7a275b-251c-464a-93c2-de4b454cf265",
+      "geo": {
+        "lat": 42.2331563,
+        "lng": -85.5889628
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 32,
+        "documentId": "vshpq65s6xe59ckoy6a7egue",
+        "name": "Michigan",
+        "timezone": "America/Lansing",
+        "createdAt": "2025-09-24T21:56:32.975Z",
+        "updatedAt": "2025-10-08T17:52:58.995Z",
+        "publishedAt": "2025-10-08T17:52:59.065Z"
+      },
+      "address": {
+        "id": 16,
+        "street": "5747 S Westnedge Ave",
+        "city": "Portage",
+        "state": "Michigan",
+        "zipCode": "49002",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 106,
+          "dayOfWeek": "sunday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 107,
+          "dayOfWeek": "monday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 108,
+          "dayOfWeek": "tuesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 109,
+          "dayOfWeek": "wednesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 110,
+          "dayOfWeek": "thursday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 111,
+          "dayOfWeek": "friday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 112,
+          "dayOfWeek": "saturday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 222,
+        "metaTitle": "Mint Cannabis Portage MI Dispensary | Portage, Michigan Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Portage MI Dispensary in Portage, Michigan. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 5,
+      "documentId": "aei1oqu0zgvktwnejfsz5i7n",
+      "name": "Mint Cannabis Tempe",
+      "slug": "mint-cannabis-tempe",
+      "store_code": null,
+      "phone": "(480) 749-6468",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/se4ekt2e7rH5pspyn.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/se4ekt2e7rH5pspyn.js\"></script></div>",
+      "createdAt": "2025-09-25T21:18:20.776Z",
+      "updatedAt": "2025-10-17T20:15:01.038Z",
+      "publishedAt": "2025-10-17T20:15:01.015Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": true,
+      "DutchieStoreID": "92fd0875-cc39-479b-9fbd-0a7db947c694",
+      "geo": {
+        "lat": 33.3771873,
+        "lng": -111.9637536
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 27,
+        "documentId": "g3s503orb4ypvantbejjf8cg",
+        "name": "ASU Main",
+        "timezone": "America/Phoenix",
+        "createdAt": "2025-10-07T19:07:09.446Z",
+        "updatedAt": "2025-10-07T19:08:38.866Z",
+        "publishedAt": "2025-10-07T19:08:38.930Z"
+      },
+      "address": {
+        "id": 5,
+        "street": "5210 South Priest Drive",
+        "city": "Guadalupe",
+        "state": "AZ",
+        "zipCode": "85283",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 29,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 30,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": true
+        },
+        {
+          "id": 31,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": true
+        },
+        {
+          "id": 32,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": true
+        },
+        {
+          "id": 33,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": true
+        },
+        {
+          "id": 34,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": true
+        },
+        {
+          "id": 35,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:30:00",
+          "isClosed": false,
+          "is24hours": true
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 223,
+        "metaTitle": "Mint Cannabis Tempe | Guadalupe, AZ Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Tempe in Guadalupe, AZ. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 7,
+      "documentId": "ogfxqu62yb9ut9ukzmatiok9",
+      "name": "Mint Cannabis Phoenix",
+      "slug": "mint-cannabis-phoenix",
+      "store_code": null,
+      "phone": "(480) 749-6468",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/603fdcc87a116c00b3035d1e.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/603fdcc87a116c00b3035d1e.js\"></script></div>",
+      "createdAt": "2025-09-25T21:34:58.917Z",
+      "updatedAt": "2025-10-17T20:15:01.640Z",
+      "publishedAt": "2025-10-17T20:15:01.613Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": true,
+      "DutchieStoreID": "a4d8b494-b542-4f69-acb8-cf67d6a6c3aa",
+      "geo": {
+        "lat": 33.6410373,
+        "lng": -112.0309549
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 17,
+        "documentId": "rou9s393k72quf1xwyal526j",
+        "name": "Arizona",
+        "timezone": "America/Phoenix",
+        "createdAt": "2025-09-24T21:35:18.992Z",
+        "updatedAt": "2025-10-07T19:03:42.710Z",
+        "publishedAt": "2025-10-07T19:03:42.776Z"
+      },
+      "address": {
+        "id": 7,
+        "street": "17036 North Cave Creek Road",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "85032",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 43,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 44,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 45,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 46,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 47,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 48,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 49,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 224,
+        "metaTitle": "Mint Cannabis Phoenix | Phoenix, AZ Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Phoenix in Phoenix, AZ. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 32,
+      "documentId": "pzn841yqnmd7d0ydf85phmv3",
+      "name": "Mint Cannabis Stuart FL Dispensary",
+      "slug": "mint-cannabis-stuart-fl-dispensary",
+      "store_code": null,
+      "phone": "(772) 678-3958",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc6d5e3a0af12d0fe3048.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc6d5e3a0af12d0fe3048.js\"></script></div>",
+      "createdAt": "2025-09-26T00:24:14.211Z",
+      "updatedAt": "2025-10-17T20:13:33.860Z",
+      "publishedAt": "2025-10-17T20:13:33.841Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 27.1540593,
+        "lng": -80.2188957
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 32,
+        "street": "4203 SE Federal Hwy #103",
+        "city": "Stuart",
+        "state": "Florida",
+        "zipCode": "34997",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 218,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 219,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 220,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 221,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 222,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 223,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 224,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 191,
+        "metaTitle": "Mint Cannabis Stuart FL Dispensary | Stuart, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Stuart FL Dispensary in Stuart, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 19,
+      "documentId": "m5yv0xgf7o5s7hhpo7mja1jz",
+      "name": "Mint Cannabis Bonita Springs FL Dispensary",
+      "slug": "mint-cannabis-bonita-springs-fl-dispensary",
+      "store_code": null,
+      "phone": "(239) 345-4024",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc651df90a241e0cd83a6.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc651df90a241e0cd83a6.js\"></script></div>",
+      "createdAt": "2025-09-25T23:44:36.849Z",
+      "updatedAt": "2025-10-17T20:15:02.259Z",
+      "publishedAt": "2025-10-17T20:15:02.233Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": "671fc651df90a241e0cd83a6",
+      "geo": {
+        "lat": 26.3538,
+        "lng": -81.807441
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 19,
+        "street": "8800 Terrene Ct.",
+        "city": "Bonita Springs",
+        "state": "Florida",
+        "zipCode": "34135",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 127,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 128,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 129,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 130,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 131,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 132,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 133,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": {
+        "id": 15,
+        "documentId": "kaimdkkrphd2z4zpbv9d7484",
+        "name": "20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+        "alternativeText": null,
+        "caption": null,
+        "width": 1536,
+        "height": 1024,
+        "formats": {
+          "large": {
+            "ext": ".png",
+            "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/large_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+            "hash": "large_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+            "mime": "image/png",
+            "name": "large_20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+            "path": null,
+            "size": 1490.45,
+            "width": 1000,
+            "height": 667,
+            "sizeInBytes": 1490451,
+            "provider_metadata": {
+              "public_id": "mintdeals/large_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+              "resource_type": "image"
+            }
+          },
+          "small": {
+            "ext": ".png",
+            "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/small_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+            "hash": "small_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+            "mime": "image/png",
+            "name": "small_20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+            "path": null,
+            "size": 377.44,
+            "width": 500,
+            "height": 333,
+            "sizeInBytes": 377436,
+            "provider_metadata": {
+              "public_id": "mintdeals/small_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+              "resource_type": "image"
+            }
+          },
+          "medium": {
+            "ext": ".png",
+            "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/medium_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+            "hash": "medium_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+            "mime": "image/png",
+            "name": "medium_20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+            "path": null,
+            "size": 838.01,
+            "width": 750,
+            "height": 500,
+            "sizeInBytes": 838005,
+            "provider_metadata": {
+              "public_id": "mintdeals/medium_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+              "resource_type": "image"
+            }
+          },
+          "thumbnail": {
+            "ext": ".png",
+            "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/thumbnail_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+            "hash": "thumbnail_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+            "mime": "image/png",
+            "name": "thumbnail_20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png",
+            "path": null,
+            "size": 89.46,
+            "width": 234,
+            "height": 156,
+            "sizeInBytes": 89455,
+            "provider_metadata": {
+              "public_id": "mintdeals/thumbnail_20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+              "resource_type": "image"
+            }
+          }
+        },
+        "hash": "20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+        "ext": ".png",
+        "mime": "image/png",
+        "size": 814.25,
+        "url": "https://res.cloudinary.com/dcltaajwj/image/upload/v1759863437/mintdeals/20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22.png",
+        "previewUrl": null,
+        "provider": "cloudinary",
+        "provider_metadata": {
+          "public_id": "mintdeals/20251001_1059_Vibrant_Festival_Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja_09610e0a22",
+          "resource_type": "image"
+        },
+        "createdAt": "2025-10-07T18:57:18.890Z",
+        "updatedAt": "2025-10-07T18:57:18.890Z",
+        "publishedAt": "2025-10-07T18:57:18.891Z"
+      },
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 225,
+        "metaTitle": "Mint Cannabis Bonita Springs FL Dispensary | Bonita Springs, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Bonita Springs FL Dispensary in Bonita Springs, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 20,
+      "documentId": "n37xrz8tqaty9a9j60ck44fz",
+      "name": "Mint Cannabis Bradenton FL Dispensary",
+      "slug": "mint-cannabis-bradenton-fl-dispensary",
+      "store_code": null,
+      "phone": "(941) 216-7838",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc67bbb7215cb3766c9f0.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc67bbb7215cb3766c9f0.js\"></script></div>",
+      "createdAt": "2025-09-25T23:48:24.924Z",
+      "updatedAt": "2025-10-17T20:15:02.872Z",
+      "publishedAt": "2025-10-17T20:15:02.849Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 27.4587096,
+        "lng": -82.5752689
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 20,
+        "street": "4549 14th St. West",
+        "city": "Bradenton",
+        "state": "Florida",
+        "zipCode": "34207",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 134,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 135,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 136,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 137,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 138,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 139,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 140,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 226,
+        "metaTitle": "Mint Cannabis Bradenton FL Dispensary | Bradenton, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Bradenton FL Dispensary in Bradenton, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 22,
+      "documentId": "erjiglnah2refr3do1d0juzq",
+      "name": "Mint Cannabis Cape Coral FL Dispensary",
+      "slug": "mint-cannabis-cape-coral-fl-dispensary",
+      "store_code": null,
+      "phone": "(239) 347-4574",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc62366a1a243eddfc444.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc62366a1a243eddfc444.js\"></script></div>",
+      "createdAt": "2025-09-25T23:54:02.391Z",
+      "updatedAt": "2025-10-17T20:15:03.475Z",
+      "publishedAt": "2025-10-17T20:15:03.452Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 26.6129443,
+        "lng": -81.9412084
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 22,
+        "street": "2126 Del Prado Boulevard South",
+        "city": "Cape Coral",
+        "state": "Florida",
+        "zipCode": "33990",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 148,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 149,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 150,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 151,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 152,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 153,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 154,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 227,
+        "metaTitle": "Mint Cannabis Cape Coral FL Dispensary | Cape Coral, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Cape Coral FL Dispensary in Cape Coral, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 23,
+      "documentId": "qr8ck57qddm7wx32viss7ayh",
+      "name": "Mint Cannabis Delray Beach FL Dispensary",
+      "slug": "mint-cannabis-delray-beach-fl-dispensary",
+      "store_code": null,
+      "phone": "(561) 303-0551",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc5cc61f4e1b53aea6450.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc5cc61f4e1b53aea6450.js\"></script></div>",
+      "createdAt": "2025-09-25T23:57:23.074Z",
+      "updatedAt": "2025-10-17T20:15:04.073Z",
+      "publishedAt": "2025-10-17T20:15:04.057Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 26.4577487,
+        "lng": -80.1270513
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 23,
+        "street": "6110 West Atlantic Avenue",
+        "city": "Delray Beach",
+        "state": "Florida",
+        "zipCode": "33484",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 155,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 156,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 157,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 158,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 159,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 160,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 161,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 228,
+        "metaTitle": "Mint Cannabis Delray Beach FL Dispensary | Delray Beach, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Delray Beach FL Dispensary in Delray Beach, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 24,
+      "documentId": "zo49pa7yw8s1cnixhnm8ra6m",
+      "name": "Mint Cannabis Gainesville FL Dispensary",
+      "slug": "mint-cannabis-gainesville-fl-dispensary",
+      "store_code": null,
+      "phone": "(352) 415-1824",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc4c7a27a2442500cf12e.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc4c7a27a2442500cf12e.js\"></script></div>",
+      "createdAt": "2025-09-26T00:05:52.669Z",
+      "updatedAt": "2025-10-17T20:15:04.693Z",
+      "publishedAt": "2025-10-17T20:15:04.652Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 29.6542143,
+        "lng": -82.3393713
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 24,
+        "street": "318 NW 13th St.",
+        "city": "Gainesville",
+        "state": "Florida",
+        "zipCode": "32601",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 162,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 163,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 164,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 165,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 166,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 167,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 168,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 229,
+        "metaTitle": "Mint Cannabis Gainesville FL Dispensary | Gainesville, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Gainesville FL Dispensary in Gainesville, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 25,
+      "documentId": "a8h4bnnx8ipf14ddgrefrdrr",
+      "name": "Mint Cannabis Jacksonville FL Dispensary",
+      "slug": "mint-cannabis-jacksonville-fl-dispensary",
+      "store_code": null,
+      "phone": "(904) 694-2174",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc49f3d6012bd2de86727.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc49f3d6012bd2de86727.js\"></script></div>",
+      "createdAt": "2025-09-26T00:07:56.559Z",
+      "updatedAt": "2025-10-17T20:15:05.307Z",
+      "publishedAt": "2025-10-17T20:15:05.290Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 30.2785261,
+        "lng": -81.6033448
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 25,
+        "street": "4332 University Blvd S.",
+        "city": "Jacksonville",
+        "state": "Florida",
+        "zipCode": "32216",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 169,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 170,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 171,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 172,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 173,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 174,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 175,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 230,
+        "metaTitle": "Mint Cannabis Jacksonville FL Dispensary | Jacksonville, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Jacksonville FL Dispensary in Jacksonville, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 26,
+      "documentId": "f1kh8vf9j6w8zaet1vayykv0",
+      "name": "Mint Cannabis Longwood FL Dispensary",
+      "slug": "mint-cannabis-longwood-fl-dispensary",
+      "store_code": null,
+      "phone": "(407) 357-0805",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc4f7b9b12fea1136ac7d.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc4f7b9b12fea1136ac7d.js\"></script></div>",
+      "createdAt": "2025-09-26T00:10:39.702Z",
+      "updatedAt": "2025-10-17T20:15:05.924Z",
+      "publishedAt": "2025-10-17T20:15:05.892Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 28.697834,
+        "lng": -81.376002
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 26,
+        "street": "1415 West State Road 434",
+        "city": "Longwood",
+        "state": "Florida",
+        "zipCode": "32750",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 176,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 177,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 178,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 179,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 180,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 181,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 182,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 231,
+        "metaTitle": "Mint Cannabis Longwood FL Dispensary | Longwood, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Longwood FL Dispensary in Longwood, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 27,
+      "documentId": "r08wu4tpyuc9unl5bw4265kt",
+      "name": "Mint Cannabis Melbourne FL Dispensary",
+      "slug": "mint-cannabis-melbourne-fl-dispensary",
+      "store_code": null,
+      "phone": "(321) 294-4465",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc56cb62833e71c2a2ba6.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc56cb62833e71c2a2ba6.js\"></script></div>",
+      "createdAt": "2025-09-26T00:13:35.916Z",
+      "updatedAt": "2025-10-17T20:15:06.544Z",
+      "publishedAt": "2025-10-17T20:15:06.518Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 28.2279756,
+        "lng": -80.6794621
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 27,
+        "street": "21 Suntree Place",
+        "city": "Melbourne",
+        "state": "Florida",
+        "zipCode": "32940",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 183,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 184,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 185,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 186,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 187,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 188,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 189,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 232,
+        "metaTitle": "Mint Cannabis Melbourne FL Dispensary | Melbourne, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Melbourne FL Dispensary in Melbourne, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 17,
+      "documentId": "x5rbpkt36jyyhb26sd92ukp1",
+      "name": "Mint Cannabis Roseville MI Dispensary",
+      "slug": "mint-cannabis-roseville-mi-dispensary",
+      "store_code": null,
+      "phone": "(586) 541-8897",
+      "email": null,
+      "timezone": "America/Lansing",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"/api/v2/embedded-menu/667d88ced37eda7eb437c93d.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"/api/v2/embedded-menu/667d88ced37eda7eb437c93d.js\"></script></div>",
+      "createdAt": "2025-09-25T23:23:26.882Z",
+      "updatedAt": "2025-10-17T20:15:07.149Z",
+      "publishedAt": "2025-10-17T20:15:07.132Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": "5c49a3be-6547-4dd0-975b-5644bc07d8c6",
+      "geo": {
+        "lat": 42.5082061,
+        "lng": -82.9681106
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 32,
+        "documentId": "vshpq65s6xe59ckoy6a7egue",
+        "name": "Michigan",
+        "timezone": "America/Lansing",
+        "createdAt": "2025-09-24T21:56:32.975Z",
+        "updatedAt": "2025-10-08T17:52:58.995Z",
+        "publishedAt": "2025-10-08T17:52:59.065Z"
+      },
+      "address": {
+        "id": 17,
+        "street": "28970 Hayes Road",
+        "city": "Roseville",
+        "state": "Michigan",
+        "zipCode": "48066",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 113,
+          "dayOfWeek": "sunday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 114,
+          "dayOfWeek": "monday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 115,
+          "dayOfWeek": "tuesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 116,
+          "dayOfWeek": "wednesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 117,
+          "dayOfWeek": "thursday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 118,
+          "dayOfWeek": "friday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 119,
+          "dayOfWeek": "saturday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 233,
+        "metaTitle": "Mint Cannabis Roseville MI Dispensary | Roseville, Michigan Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Roseville MI Dispensary in Roseville, Michigan. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 29,
+      "documentId": "p567tho8y2c7rfo8t7za9zxa",
+      "name": "Mint Cannabis  Orlando FL Dispensary",
+      "slug": "mint-cannabis-orlando-fl-dispensary",
+      "store_code": null,
+      "phone": "(407) 843-3445",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc52e97a672c710822c0f.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc52e97a672c710822c0f.js\"></script></div>",
+      "createdAt": "2025-09-26T00:17:32.483Z",
+      "updatedAt": "2025-10-17T20:15:07.766Z",
+      "publishedAt": "2025-10-17T20:15:07.748Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 28.5534194,
+        "lng": -81.3222076
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 29,
+        "street": "10615 East Colonial Dr.",
+        "city": "Orlando",
+        "state": "Florida",
+        "zipCode": "32817",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 197,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 198,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 199,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 200,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 201,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 202,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 203,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 234,
+        "metaTitle": "Mint Cannabis  Orlando FL Dispensary | Orlando, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis  Orlando FL Dispensary in Orlando, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 30,
+      "documentId": "dh5ng4lz79b97nleyo6hwtg3",
+      "name": "Mint Cannabis Sarasota FL Dispensary",
+      "slug": "mint-cannabis-sarasota-fl-dispensary",
+      "store_code": null,
+      "phone": "(941) 500-3128",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc6a378379f3aa0b16209.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc6a378379f3aa0b16209.js\"></script></div>",
+      "createdAt": "2025-09-26T00:20:33.619Z",
+      "updatedAt": "2025-10-17T20:15:08.420Z",
+      "publishedAt": "2025-10-17T20:15:08.402Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 27.2549537,
+        "lng": -82.5177433
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 30,
+        "street": "6979 S. Tamiami Trail",
+        "city": "Sarasota",
+        "state": "Florida",
+        "zipCode": "34231",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 204,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": true,
+          "is24hours": null
+        },
+        {
+          "id": 205,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 206,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 207,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 208,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 209,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 210,
+          "dayOfWeek": "saturday",
+          "openTime": "07:00:00",
+          "closeTime": "12:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 235,
+        "metaTitle": "Mint Cannabis Sarasota FL Dispensary | Sarasota, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis Sarasota FL Dispensary in Sarasota, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 31,
+      "documentId": "ek2kvoe6sz2v81fkl0yrctku",
+      "name": "Mint Cannabis St. Augustine FL Dispensary",
+      "slug": "mint-cannabis-st-augustine-fl-dispensary",
+      "store_code": null,
+      "phone": "(904) 830-0011",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc4690cde725c00594311.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc4690cde725c00594311.js\"></script></div>",
+      "createdAt": "2025-09-26T00:22:56.740Z",
+      "updatedAt": "2025-10-17T20:15:09.043Z",
+      "publishedAt": "2025-10-17T20:15:09.026Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 29.8914648,
+        "lng": -81.3238198
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 31,
+        "street": "160 King St",
+        "city": "St Augustine",
+        "state": "Florida",
+        "zipCode": "32084",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 211,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 212,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 213,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 214,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 215,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 216,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 217,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": {
+        "id": 236,
+        "metaTitle": "Mint Cannabis St. Augustine FL Dispensary | St Augustine, Florida Dispensary | Mint Cannabis",
+        "metaDescription": "Visit Mint Cannabis St. Augustine FL Dispensary in St Augustine, Florida. Premium cannabis products, exclusive deals, and expert staff. Find flower, concentrates, edibles, and more.",
+        "keywords": null,
+        "metaRobots": null,
+        "structuredData": null,
+        "metaViewport": null,
+        "canonicalURL": null
+      },
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 6,
+      "documentId": "p4hq6mn2cmxvbnm2fbuj4r10",
+      "name": "Mint Cannabis Northern Phoenix",
+      "slug": "mint-cannabis-northern-phoenix",
+      "store_code": null,
+      "phone": "(480) 749-6468",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/63642727d3c46800ce0ae22c.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/63642727d3c46800ce0ae22c.js\"></script></div>",
+      "createdAt": "2025-09-25T21:28:08.354Z",
+      "updatedAt": "2025-09-28T15:56:46.349Z",
+      "publishedAt": "2025-09-28T15:56:46.236Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": false,
+      "DutchieStoreID": "1e30427d-d8db-4e60-84c8-8487d1d6bcd6",
+      "geo": {
+        "lat": 33.5533884,
+        "lng": -112.1115202
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 17,
+        "documentId": "rou9s393k72quf1xwyal526j",
+        "name": "Arizona",
+        "timezone": "America/Phoenix",
+        "createdAt": "2025-09-24T21:35:18.992Z",
+        "updatedAt": "2025-10-07T19:03:42.710Z",
+        "publishedAt": "2025-10-07T19:03:42.776Z"
+      },
+      "address": {
+        "id": 6,
+        "street": "2444 W Northern Ave",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "85021",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 36,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 37,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": true
+        },
+        {
+          "id": 38,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 39,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 40,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 41,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 42,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": null,
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 8,
+      "documentId": "g9202obnee8ss1zq782om8rr",
+      "name": "Mint Cannabis Scottsdale",
+      "slug": "mint-cannabis-scottsdale",
+      "store_code": null,
+      "phone": "(480) 659-9728",
+      "email": null,
+      "timezone": "America/Phoenix",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/659c2a50bfe8590009898332.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/659c2a50bfe8590009898332.js\"></script></div>",
+      "createdAt": "2025-09-25T21:40:05.115Z",
+      "updatedAt": "2025-09-30T22:27:37.213Z",
+      "publishedAt": "2025-09-30T22:27:37.104Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": false,
+      "DutchieStoreID": "86441745-c533-4602-9264-f3a30db9753b",
+      "geo": {
+        "lat": 33.5539723,
+        "lng": -112.0407997
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 27,
+        "documentId": "g3s503orb4ypvantbejjf8cg",
+        "name": "ASU Main",
+        "timezone": "America/Phoenix",
+        "createdAt": "2025-10-07T19:07:09.446Z",
+        "updatedAt": "2025-10-07T19:08:38.866Z",
+        "publishedAt": "2025-10-07T19:08:38.930Z"
+      },
+      "address": {
+        "id": 8,
+        "street": "8729 East Manzanita Drive",
+        "city": "Phoenix",
+        "state": "AZ",
+        "zipCode": "85258",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 50,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 51,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 52,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 53,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 54,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 55,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        },
+        {
+          "id": 56,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": false
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": null,
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 9,
+      "documentId": "pnk0h6w815o5aqrvqmg7jklj",
+      "name": "Mint Cannabis - Willowbrook IL Dispensary",
+      "slug": "mint-cannabis-willowbrook-il-dispensary",
+      "store_code": null,
+      "phone": "(630) 216-9135",
+      "email": null,
+      "timezone": "America/Chicago",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/65fdeeae06646630b2240e29.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/65fdeeae06646630b2240e29.js\"></script></div>",
+      "createdAt": "2025-09-25T21:53:01.014Z",
+      "updatedAt": "2025-10-07T19:19:51.375Z",
+      "publishedAt": "2025-10-07T19:19:51.254Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": "a3d2eecc-1703-4aae-bb52-3c6b133c0a9f",
+      "geo": {
+        "lat": 41.7526296,
+        "lng": -87.9433317
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 31,
+        "documentId": "roebocf6f4gjvyz4wvfmkc03",
+        "name": "Illinois",
+        "timezone": "America/Chicago",
+        "createdAt": "2025-09-24T21:55:09.177Z",
+        "updatedAt": "2025-10-08T17:51:16.722Z",
+        "publishedAt": "2025-10-08T17:51:16.775Z"
+      },
+      "address": {
+        "id": 9,
+        "street": "900 75th Street",
+        "city": "Willowbrook",
+        "state": "Illinois",
+        "zipCode": "60527",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 57,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 58,
+          "dayOfWeek": "monday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 59,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 60,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 61,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 62,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 63,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "22:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": null,
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 18,
+      "documentId": "snmtgtht40799m1qf3sr8wu1",
+      "name": "Mint Cannabis New Buffalo MI Dispensary",
+      "slug": "mint-cannabis-new-buffalo-mi-dispensary",
+      "store_code": null,
+      "phone": "(269) 231-5473",
+      "email": null,
+      "timezone": "America/Lansing",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/667d85c3a142f9f96981b4fd.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/667d85c3a142f9f96981b4fd.js\"></script></div>",
+      "createdAt": "2025-09-25T23:25:57.076Z",
+      "updatedAt": "2025-09-25T23:25:57.076Z",
+      "publishedAt": "2025-09-25T23:06:46.770Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": null,
+      "isRecreational": true,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 41.7890235,
+        "lng": -86.7557948
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 32,
+        "documentId": "vshpq65s6xe59ckoy6a7egue",
+        "name": "Michigan",
+        "timezone": "America/Lansing",
+        "createdAt": "2025-09-24T21:56:32.975Z",
+        "updatedAt": "2025-10-08T17:52:58.995Z",
+        "publishedAt": "2025-10-08T17:52:59.065Z"
+      },
+      "address": {
+        "id": 18,
+        "street": "18300 US-12",
+        "city": "New Buffalo",
+        "state": "Michigan",
+        "zipCode": "49117",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 120,
+          "dayOfWeek": "sunday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 121,
+          "dayOfWeek": "monday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 122,
+          "dayOfWeek": "tuesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 123,
+          "dayOfWeek": "wednesday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 124,
+          "dayOfWeek": "thursday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 125,
+          "dayOfWeek": "friday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 126,
+          "dayOfWeek": "saturday",
+          "openTime": "09:00:00",
+          "closeTime": "21:00:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": null,
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 21,
+      "documentId": "ggmplzq05kp6sio8nwj8l661",
+      "name": "Mint Cannabis Brandon FL Dispensary",
+      "slug": "mint-cannabis-brandon-fl-dispensary",
+      "store_code": null,
+      "phone": "(813) 502-1122",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc5f895b82d1469b3a1c9.js\"></script></div>",
+      "online_ordering_url": null,
+      "createdAt": "2025-09-25T23:51:43.046Z",
+      "updatedAt": "2025-09-30T21:19:23.187Z",
+      "publishedAt": "2025-09-30T21:19:22.950Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": false,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 27.9376226,
+        "lng": -82.2977185
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 21,
+        "street": "2116 West Brandon Boulevard",
+        "city": "Brandon",
+        "state": "Florida",
+        "zipCode": "33511",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 141,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 142,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 143,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 144,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 145,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 146,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 147,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": null,
+      "offers": [],
+      "localizations": []
+    },
+    {
+      "id": 28,
+      "documentId": "lpyg9g7wf6yi50dbv4ws6wso",
+      "name": "Mint Cannabis Miami FL Dispensary",
+      "slug": "mint-cannabis-miami-fl-dispensary",
+      "store_code": null,
+      "phone": "(305) 692-0317",
+      "email": null,
+      "timezone": "America/Miami",
+      "is_active": true,
+      "pos_location_id": null,
+      "menu_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc59e78379f3aa0b16189.js\"></script></div>",
+      "online_ordering_url": "<div><script async=\"\" id=\"dutchie--embed__script\" src=\"https://dutchie.com/api/v2/embedded-menu/671fc59e78379f3aa0b16189.js\"></script></div>",
+      "createdAt": "2025-09-26T00:15:16.555Z",
+      "updatedAt": "2025-09-26T00:15:16.555Z",
+      "publishedAt": "2025-09-25T23:44:36.801Z",
+      "locale": "en",
+      "LicenseNumber": null,
+      "isMedical": true,
+      "isRecreational": null,
+      "hasCafe": null,
+      "DutchieStoreID": null,
+      "geo": {
+        "lat": 25.654953,
+        "lng": -80.3829759
+      },
+      "multi_location_selector": null,
+      "region": {
+        "id": 33,
+        "documentId": "wib0nscr4e4t4emu0iuyy8l1",
+        "name": "Florida",
+        "timezone": "America/Miami",
+        "createdAt": "2025-09-24T21:57:53.396Z",
+        "updatedAt": "2025-10-08T18:16:01.386Z",
+        "publishedAt": "2025-10-08T18:16:01.447Z"
+      },
+      "address": {
+        "id": 28,
+        "street": "12083 SW 117th Ave",
+        "city": "Miami",
+        "state": "Florida",
+        "zipCode": "33186",
+        "country": "United States"
+      },
+      "services": [],
+      "amenities": [],
+      "hours": [
+        {
+          "id": 190,
+          "dayOfWeek": "sunday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 191,
+          "dayOfWeek": "monday",
+          "openTime": "08:45:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 192,
+          "dayOfWeek": "tuesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 193,
+          "dayOfWeek": "wednesday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 194,
+          "dayOfWeek": "thursday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 195,
+          "dayOfWeek": "friday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        },
+        {
+          "id": 196,
+          "dayOfWeek": "saturday",
+          "openTime": "08:00:00",
+          "closeTime": "20:45:00",
+          "isClosed": false,
+          "is24hours": null
+        }
+      ],
+      "hour_exceptions": [],
+      "hero_media": null,
+      "gallery": null,
+      "cta_blocks": [],
+      "seo": null,
+      "offers": [],
+      "localizations": []
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "page": 1,
+      "pageSize": 500,
+      "pageCount": 1,
+      "total": 32
+    }
+  }
+}
