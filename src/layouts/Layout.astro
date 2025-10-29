@@ -40,7 +40,7 @@ try {
 // Fetch regions for navigation
 let navRegions: any[] = [];
 try {
-  const response = await fetch(`${API_BASE}/regions?pagination[pageSize]=100`);
+  const response = await fetch(`${API_BASE}/regions?populate=region_type&pagination[pageSize]=100`);
   if (response.ok) {
     const data = await response.json();
 
@@ -49,14 +49,25 @@ try {
       const code = region.code || '';
       const slug = name ? name.toLowerCase().replace(/\s+/g, '-') : '';
 
+      // Get region type
+      const regionType = region.region_type?.name || region.region_type?.Name || '';
+
       return {
         id: region.id || region.documentId,
         name,
         code,
-        slug
+        slug,
+        regionType
       };
-    }).filter((region: any) => region.name && region.slug)
-      .sort((a: any, b: any) => a.name.localeCompare(b.name));
+    })
+    .filter((region: any) => {
+      // Filter for only states - check if region type is "State" or contains "state"
+      const isState = region.regionType &&
+                     (region.regionType.toLowerCase() === 'state' ||
+                      region.regionType.toLowerCase().includes('state'));
+      return region.name && region.slug && isState;
+    })
+    .sort((a: any, b: any) => a.name.localeCompare(b.name));
   }
 } catch (error) {
   // Silently handle error - regions will remain empty array
@@ -207,10 +218,10 @@ function getCategoryIcon(slug: string) {
               </div>
             </div>
 
-            <!-- Regions Dropdown -->
+            <!-- States Dropdown -->
             <div class="relative" id="regionsDropdown">
               <a href="/regions" class="text-gray-200 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
-                Regions
+                States
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
@@ -220,7 +231,7 @@ function getCategoryIcon(slug: string) {
               <div id="regionsMenu" class="absolute left-0 mt-1 w-64 bg-black border-2 border-blue-600 rounded-lg shadow-2xl hidden z-50">
                 <div class="py-2 max-h-96 overflow-y-auto">
                   <div class="px-4 py-3 border-b-2 border-blue-800 bg-gradient-to-r from-blue-900 to-blue-800">
-                    <p class="text-yellow-400 font-bold text-sm pb-1 leading-snug">Browse by Region</p>
+                    <p class="text-yellow-400 font-bold text-sm pb-1 leading-snug">Browse by State</p>
                   </div>
                   {navRegions.map(region => (
                     <a
@@ -233,7 +244,7 @@ function getCategoryIcon(slug: string) {
                     </a>
                   ))}
                   <a href="/regions" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-blue-800 bg-gradient-to-r from-yellow-400 to-transparent text-white hover:from-yellow-500 hover:to-transparent transition-all">
-                    🗺️ View All Regions →
+                    🗺️ View All States →
                   </a>
                 </div>
               </div>

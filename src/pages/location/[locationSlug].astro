@@ -206,10 +206,8 @@ try {
 
         <!-- Store Info -->
         <div class="lg:col-span-2">
-          <h1 class="text-4xl md:text-5xl font-bold mb-4">
-            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-              {storeName}
-            </span>
+          <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white">
+            {storeName}
           </h1>
 
           {(storeCity || storeState) && (
@@ -225,45 +223,6 @@ try {
           <p class="text-lg text-green-100 mb-6 leading-relaxed">
             {storeShortDescription}
           </p>
-
-          <!-- Quick Actions -->
-          <div class="flex flex-wrap gap-4">
-            {dutchieStoreId && (
-              <a
-                href={`/location/${locationSlug}/menu`}
-                class="inline-flex items-center px-6 py-3 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"
-              >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                </svg>
-                View Full Menu
-              </a>
-            )}
-            {mapsUrl && (
-              <a
-                href={mapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center px-6 py-3 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"
-              >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                </svg>
-                Get Driving Directions
-              </a>
-            )}
-            {storePhone && (
-              <a
-                href={`tel:${storePhone}`}
-                class="inline-flex items-center px-6 py-3 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"
-              >
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                </svg>
-                Call Store
-              </a>
-            )}
-          </div>
         </div>
       </div>
     </div>
@@ -271,45 +230,32 @@ try {
 
   <!-- Main Content -->
   <div class="bg-black py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="max-w-7xl mx-auto md:px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-8">
 
         <!-- Main Column -->
-        <div class="lg:col-span-2 space-y-8">
-
-          <!-- About This Location Section -->
-          <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-8 border-2 border-green-500">
-            <h2 class="text-3xl font-bold mb-6 flex items-center">
-              <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.35rem;">About This Location</span>
-            </h2>
-            <p class="text-green-100 text-lg leading-relaxed">
-              {storeLongDescription}
-            </p>
-          </div>
+        <div class="lg:col-span-2 space-y-8 md:space-y-8">
 
           <!-- Products Section -->
-          <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-8 border-2 border-green-500">
-            <h2 class="text-3xl font-bold mb-6 flex items-center">
+          <div class="md:bg-gradient-to-br md:from-green-900/40 md:to-black/60 md:rounded-lg md:shadow-xl md:p-8 border-0 md:border-2 md:border-green-500">
+            <h2 class="text-3xl font-bold mb-6 flex items-center text-white px-4 md:px-0">
               <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
               </svg>
-              <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.35rem;">Available Products</span>
+              Available Products
             </h2>
 
             <!-- Dutchie Carousel Embed -->
             {(carouselRetailerId && carouselId) ? (
-              <div class="w-full bg-white rounded-lg p-6 min-h-[300px]">
+              <div class="w-full bg-white md:rounded-lg p-6 min-h-[300px]">
                 <DutchieCarousel retailerId={carouselRetailerId} carouselId={carouselId} routeRoot={routeRoot} />
               </div>
             ) : dutchieStoreId ? (
-              <div class="w-full bg-white rounded-lg p-6 min-h-[300px]">
+              <div class="w-full bg-white md:rounded-lg p-6 min-h-[300px]">
                 <DutchieEmbed storeId={dutchieStoreId} />
               </div>
             ) : (
-              <div class="w-full bg-white rounded-lg p-6 min-h-[300px] flex items-center justify-center">
+              <div class="w-full bg-white md:rounded-lg p-6 min-h-[300px] flex items-center justify-center">
                 <p class="text-gray-500 text-lg">Product menu not available for this location.</p>
               </div>
             )}
@@ -318,15 +264,15 @@ try {
         </div>
 
         <!-- Sidebar -->
-        <div class="lg:col-span-1 space-y-6">
+        <div class="lg:col-span-1 space-y-6 px-4 md:px-0">
 
           <!-- Contact Info Card -->
           <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-6 border-2 border-green-500">
-            <h3 class="text-xl font-bold mb-4 flex items-center">
+            <h3 class="text-xl font-bold mb-4 flex items-center text-white">
               <svg class="w-6 h-6 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
               </svg>
-              <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.25rem;">Contact</span>
+              Contact
             </h3>
             <div class="space-y-3">
               {storeAddress && (
@@ -380,11 +326,11 @@ try {
           {store?.hours && store.hours.length > 0 && (
             <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-6 border-2 border-green-500">
               <div class="mb-4">
-                <h3 class="text-xl font-bold flex items-center">
+                <h3 class="text-xl font-bold flex items-center text-white">
                   <svg class="w-6 h-6 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
-                  <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.25rem;">Store Hours</span>
+                  Store Hours
                 </h3>
                 <div id="countdown-timer" class="text-sm text-green-300 mt-2 ml-8"></div>
               </div>
@@ -438,11 +384,24 @@ try {
             </div>
           )}
 
+          <!-- About This Location Section -->
+          <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-6 border-2 border-green-500">
+            <h3 class="text-xl font-bold mb-4 flex items-center text-white">
+              <svg class="w-6 h-6 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              About This Location
+            </h3>
+            <p class="text-green-100 text-base leading-relaxed">
+              {storeLongDescription}
+            </p>
+          </div>
+
         </div>
       </div>
 
       <!-- Back Button -->
-      <div class="mt-12 text-center">
+      <div class="mt-12 text-center px-4 md:px-0">
         <a
           href="/stores"
           class="inline-flex items-center px-6 py-3 font-medium text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"

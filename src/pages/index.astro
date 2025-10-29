@@ -209,6 +209,10 @@ try {
       const isV4 = !!region.attributes;
       const data = isV4 ? region.attributes : region;
 
+      // Get region type
+      const regionTypeData = data.region_type?.data || data.region_type;
+      const regionType = regionTypeData?.attributes?.name || regionTypeData?.name || regionTypeData?.Name || '';
+
       // Helper function to get image URL
       function getImageUrl(imageData) {
         if (!imageData || imageData === null) return null;
@@ -250,11 +254,18 @@ try {
         name: data.name || data.Name || '',
         slug: data.slug || data.Slug || region.documentId || region.id,
         description: data.description || data.Description || '',
-        image: imageUrl
+        image: imageUrl,
+        regionType
       };
     });
 
-    regions = regions.filter(region => region.name);
+    // Filter for only states
+    regions = regions.filter(region => {
+      const isState = region.regionType &&
+                     (region.regionType.toLowerCase() === 'state' ||
+                      region.regionType.toLowerCase().includes('state'));
+      return region.name && isState;
+    });
   }
 
 } catch (error) {
@@ -534,12 +545,12 @@ try {
     </div>
   </div>
 
-  <!-- Regions Section -->
+  <!-- States Section -->
   <div class="py-16">
     <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
       <div class="mb-8 text-right">
         <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl">
-          Shop by Region
+          Shop by State
         </h2>
       </div>
 
@@ -617,15 +628,15 @@ try {
         <div class="py-12 text-center">
           <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
             <div class="mb-4 text-6xl">📍</div>
-            <h3 class="mb-2 text-lg font-medium text-yellow-400">Regions Coming Soon</h3>
-            <p class="text-green-300">Regional information will be available here.</p>
+            <h3 class="mb-2 text-lg font-medium text-yellow-400">States Coming Soon</h3>
+            <p class="text-green-300">State information will be available here.</p>
           </div>
         </div>
       )}
 
       <div class="mt-12 text-right">
         <a href="/regions" class="text-yellow-400 hover:text-yellow-300 transition-colors underline">
-          View All Regions →
+          View All States →
         </a>
       </div>
     </div>
