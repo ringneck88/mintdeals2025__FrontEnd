@@ -48,7 +48,41 @@ if (store?.geo?.lat && store?.geo?.lng) {
 }
 const storeShortDescription = getStringValue(store?.short_description) || 'Premium cannabis products and expert guidance for your wellness journey.';
 const storeLongDescription = getStringValue(store?.description) || getStringValue(store?.long_description) || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-const storeImage = store?.image?.url ? `https://mintdealsbackend-production.up.railway.app${store.image.url}` : null;
+
+// Helper function to get image URL
+function getImageUrl(imageData: any) {
+  if (!imageData || imageData === null) return null;
+
+  // Case 1: Strapi v4 nested structure
+  if (imageData?.data?.attributes?.url) {
+    const url = imageData.data.attributes.url;
+    return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+  }
+
+  // Case 2: Direct image object with formats (Cloudinary)
+  if (typeof imageData === 'object' && imageData.formats) {
+    if (imageData.formats.large?.url) return imageData.formats.large.url;
+    if (imageData.formats.medium?.url) return imageData.formats.medium.url;
+    if (imageData.formats.small?.url) return imageData.formats.small.url;
+    if (imageData.formats.thumbnail?.url) return imageData.formats.thumbnail.url;
+  }
+
+  // Case 3: Direct image object with url
+  if (typeof imageData === 'object' && imageData.url) {
+    const url = imageData.url;
+    return url.startsWith('http') ? url : `https://mintdealsbackend-production.up.railway.app${url}`;
+  }
+
+  // Case 4: String URL
+  if (typeof imageData === 'string') {
+    return imageData.startsWith('http') ? imageData : `https://mintdealsbackend-production.up.railway.app${imageData}`;
+  }
+
+  return null;
+}
+
+// Get store image - prioritize hero_media, fallback to StoreImage, then image
+const storeImage = getImageUrl(store?.hero_media) || getImageUrl(store?.StoreImage) || getImageUrl(store?.image);
 
 // Get Dutchie Store ID - extract from menu_url field
 let dutchieStoreId = '';

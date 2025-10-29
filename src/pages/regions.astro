@@ -347,11 +347,23 @@ try {
 
                     // Get store details with fallbacks
                     const storeName = store.Name || store.name || 'Store Location';
-                    const storeAddress = store.Address || store.address || null;
-                    const storeCity = store.City || store.city || store.address?.city || '';
-                    const storeState = store.State || store.state || store.address?.state || '';
-                    const storeZip = store.Zip || store.zip || store.address?.zip || '';
-                    const storePhone = store.Phone || store.phone || store.address?.phone || null;
+
+                    // Handle address - it might be an object or a string
+                    let storeAddress = null;
+                    if (typeof store.Address === 'string') {
+                      storeAddress = store.Address;
+                    } else if (typeof store.Address === 'object' && store.Address !== null) {
+                      storeAddress = store.Address.street || store.Address.Street || store.Address.address || null;
+                    } else if (typeof store.address === 'string') {
+                      storeAddress = store.address;
+                    } else if (typeof store.address === 'object' && store.address !== null) {
+                      storeAddress = store.address.street || store.address.Street || store.address.address || null;
+                    }
+
+                    const storeCity = store.City || store.city || store.Address?.city || store.address?.city || '';
+                    const storeState = store.State || store.state || store.Address?.state || store.address?.state || '';
+                    const storeZip = store.Zip || store.zip || store.Address?.zip || store.address?.zip || '';
+                    const storePhone = store.Phone || store.phone || store.Address?.phone || store.address?.phone || null;
 
                     return (
                       <div class="store-card relative overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 hover:scale-105">

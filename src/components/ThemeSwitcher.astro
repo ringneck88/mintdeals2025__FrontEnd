@@ -1,0 +1,209 @@
+---
+// Theme Switcher Component
+---
+
+<div class="theme-switcher fixed bottom-8 right-8 z-50">
+  <!-- Theme Toggle Button -->
+  <button
+    id="theme-toggle-btn"
+    class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 shadow-2xl flex items-center justify-center text-white text-2xl hover:scale-110 transition-transform duration-300 cursor-pointer"
+    aria-label="Change Theme"
+  >
+    🎨
+  </button>
+
+  <!-- Theme Picker Panel -->
+  <div
+    id="theme-picker"
+    class="hidden absolute bottom-20 right-0 bg-gray-900/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 w-96 border border-gray-700"
+  >
+    <h3 class="text-xl font-bold text-white mb-4">Choose Your Vibe</h3>
+
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Mint Theme (Default) -->
+      <button
+        class="theme-option group"
+        data-theme="default"
+      >
+        <div class="relative overflow-hidden rounded-xl h-24 bg-gradient-to-br from-green-500 to-emerald-700 hover:scale-105 transition-transform duration-300">
+          <div class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg drop-shadow-lg">
+            🌿 Mint
+          </div>
+        </div>
+      </button>
+
+      <!-- Street Art Theme -->
+      <button
+        class="theme-option group"
+        data-theme="street-art"
+      >
+        <div class="relative overflow-hidden rounded-xl h-24 bg-gradient-to-br from-pink-600 to-cyan-400 hover:scale-105 transition-transform duration-300">
+          <div class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg drop-shadow-lg">
+            🎨 Street
+          </div>
+        </div>
+      </button>
+
+      <!-- Retro Theme -->
+      <button
+        class="theme-option group"
+        data-theme="retro"
+      >
+        <div class="relative overflow-hidden rounded-xl h-24 bg-gradient-to-br from-orange-500 to-yellow-500 hover:scale-105 transition-transform duration-300">
+          <div class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg drop-shadow-lg">
+            📼 Retro
+          </div>
+        </div>
+      </button>
+
+      <!-- Friends Theme -->
+      <button
+        class="theme-option group"
+        data-theme="friends"
+      >
+        <div class="relative overflow-hidden rounded-xl h-24 bg-gradient-to-br from-purple-600 to-orange-500 hover:scale-105 transition-transform duration-300">
+          <div class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg drop-shadow-lg">
+            ☕ Friends
+          </div>
+        </div>
+      </button>
+
+      <!-- Hip Hop Theme -->
+      <button
+        class="theme-option group"
+        data-theme="hip-hop"
+      >
+        <div class="relative overflow-hidden rounded-xl h-24 bg-gradient-to-br from-yellow-400 to-red-600 hover:scale-105 transition-transform duration-300">
+          <div class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg drop-shadow-lg">
+            🎤 Hip Hop
+          </div>
+        </div>
+      </button>
+
+      <!-- Animated Theme -->
+      <button
+        class="theme-option group"
+        data-theme="animated"
+      >
+        <div class="relative overflow-hidden rounded-xl h-24 bg-gradient-to-br from-pink-500 to-cyan-400 hover:scale-105 transition-transform duration-300">
+          <div class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg drop-shadow-lg">
+            🎬 Animated
+          </div>
+        </div>
+      </button>
+
+      <!-- Space Theme -->
+      <button
+        class="theme-option group"
+        data-theme="space"
+      >
+        <div class="relative overflow-hidden rounded-xl h-24 bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-600 hover:scale-105 transition-transform duration-300">
+          <div class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg drop-shadow-lg">
+            🚀 Space
+          </div>
+        </div>
+      </button>
+
+      <!-- Steampunk Theme -->
+      <button
+        class="theme-option group"
+        data-theme="steampunk"
+      >
+        <div class="relative overflow-hidden rounded-xl h-24 bg-gradient-to-br from-amber-700 to-stone-800 hover:scale-105 transition-transform duration-300">
+          <div class="absolute inset-0 flex items-center justify-center text-white font-bold text-lg drop-shadow-lg">
+            ⚙️ Steampunk
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme Switcher Logic
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('theme-toggle-btn');
+    const themePicker = document.getElementById('theme-picker');
+    const themeOptions = document.querySelectorAll('.theme-option');
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'default';
+    applyTheme(savedTheme);
+
+    // Toggle theme picker
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        if (themePicker) {
+          themePicker.classList.toggle('hidden');
+        }
+      });
+    }
+
+    // Close picker when clicking outside
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (toggleBtn && themePicker && !toggleBtn.contains(target) && !themePicker.contains(target)) {
+        themePicker.classList.add('hidden');
+      }
+    });
+
+    // Theme selection
+    themeOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const theme = option.getAttribute('data-theme');
+        if (theme) {
+          applyTheme(theme);
+          localStorage.setItem('theme', theme);
+          if (themePicker) {
+            themePicker.classList.add('hidden');
+          }
+        }
+      });
+    });
+
+    function applyTheme(theme) {
+      const html = document.documentElement;
+
+      // Remove all theme attributes
+      html.removeAttribute('data-theme');
+
+      // Apply new theme
+      if (theme !== 'default') {
+        html.setAttribute('data-theme', theme);
+      }
+
+      // Add a transition effect
+      html.style.transition = 'background-color 0.5s ease, color 0.5s ease';
+    }
+  });
+</script>
+
+<style>
+  .theme-switcher {
+    cursor: pointer;
+  }
+
+  .theme-option {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .theme-option:hover {
+    transform: scale(1.05);
+  }
+
+  #theme-picker {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

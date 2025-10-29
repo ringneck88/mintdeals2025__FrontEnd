@@ -134,6 +134,16 @@ export default {
           700: '#976f00',
           800: '#654a00',
           900: '#322500',
+        },
+        // Dynamic theme colors (use CSS variables)
+        'theme': {
+          'primary': 'var(--theme-primary)',
+          'primary-light': 'var(--theme-primary-light)',
+          'primary-dark': 'var(--theme-primary-dark)',
+          'secondary': 'var(--theme-secondary)',
+          'accent': 'var(--theme-accent)',
+          'text': 'var(--theme-text)',
+          'text-dark': 'var(--theme-text-dark)',
         }
       }
     },
