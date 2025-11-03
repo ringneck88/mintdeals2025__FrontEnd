@@ -174,7 +174,7 @@ try {
   <div class="content-wrapper">
 
   <!-- Hero Section -->
-  <section class="relative text-white py-16">
+  <section class="relative text-white py-12">
     <div class="absolute inset-0 bg-black opacity-40"></div>
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Breadcrumb -->
@@ -188,92 +188,34 @@ try {
         </div>
       </nav>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <!-- Store Image -->
         <div class="lg:col-span-1">
           {storeImage ? (
             <img
               src={storeImage}
               alt={storeName}
-              class="w-full h-64 lg:h-80 object-cover rounded-lg shadow-xl border-4 border-yellow-400"
+              class="w-full h-52 lg:h-64 object-cover rounded-lg shadow-xl border border-yellow-400"
             />
           ) : (
-            <div class="w-full h-64 lg:h-80 bg-gradient-to-br from-green-900 to-green-800 rounded-lg shadow-xl border-4 border-yellow-400 flex items-center justify-center">
+            <div class="w-full h-52 lg:h-64 bg-gradient-to-br from-green-900 to-green-800 rounded-lg shadow-xl border border-yellow-400 flex items-center justify-center">
               <span class="text-8xl">🏪</span>
             </div>
           )}
         </div>
 
-        <!-- Store Info -->
+        <!-- Store Info & Contact -->
         <div class="lg:col-span-2">
           <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white">
             {storeName}
           </h1>
 
-          {(storeCity || storeState) && (
-            <p class="text-2xl text-yellow-400 mb-6 flex items-center">
-              <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-              {storeCity}{storeCity && storeState ? ', ' : ''}{storeState}
-            </p>
-          )}
-
           <p class="text-lg text-green-100 mb-6 leading-relaxed">
             {storeShortDescription}
           </p>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Main Content -->
-  <div class="bg-black py-16">
-    <div class="max-w-7xl mx-auto md:px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-8">
-
-        <!-- Main Column -->
-        <div class="lg:col-span-2 space-y-8 md:space-y-8">
-
-          <!-- Products Section -->
-          <div class="md:bg-gradient-to-br md:from-green-900/40 md:to-black/60 md:rounded-lg md:shadow-xl md:p-8 border-0 md:border-2 md:border-green-500">
-            <h2 class="text-3xl font-bold mb-6 flex items-center text-white px-4 md:px-0">
-              <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-              </svg>
-              Available Cannabis Items
-            </h2>
-
-            <!-- Dutchie Carousel Embed -->
-            {(carouselRetailerId && carouselId) ? (
-              <div class="w-full bg-white md:rounded-lg p-6 min-h-[300px]">
-                <DutchieCarousel retailerId={carouselRetailerId} carouselId={carouselId} routeRoot={routeRoot} />
-              </div>
-            ) : dutchieStoreId ? (
-              <div class="w-full bg-white md:rounded-lg p-6 min-h-[300px]">
-                <DutchieEmbed storeId={dutchieStoreId} />
-              </div>
-            ) : (
-              <div class="w-full bg-white md:rounded-lg p-6 min-h-[300px] flex items-center justify-center">
-                <p class="text-gray-500 text-lg">Product menu not available for this location.</p>
-              </div>
-            )}
-          </div>
-
-        </div>
-
-        <!-- Sidebar -->
-        <div class="lg:col-span-1 space-y-6 px-4 md:px-0">
-
-          <!-- Contact Info Card -->
-          <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-6 border-2 border-green-500">
-            <h3 class="text-xl font-bold mb-4 flex items-center text-white">
-              <svg class="w-6 h-6 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-              </svg>
-              Contact
-            </h3>
+          <!-- Contact Info -->
+          <div class="mb-6">
             <div class="space-y-3">
               {storeAddress && (
                 <div class="flex items-start">
@@ -321,22 +263,24 @@ try {
               )}
             </div>
           </div>
+        </div>
 
-          <!-- Hours Card -->
-          {store?.hours && store.hours.length > 0 && (
-            <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-6 border-2 border-green-500">
-              <div class="mb-4">
-                <h3 class="text-xl font-bold flex items-center text-white">
-                  <svg class="w-6 h-6 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  Store Hours
-                </h3>
-                <div id="countdown-timer" class="text-sm text-green-300 mt-2 ml-8"></div>
-              </div>
-              <div class="space-y-2" id="store-hours-list">
+        <!-- Store Hours - Compact Right Column -->
+        {store?.hours && store.hours.length > 0 && (
+          <div class="lg:col-span-1">
+            <div class="sticky top-4">
+              <h3 class="text-lg font-bold flex items-center text-white mb-3">
+                <svg class="w-5 h-5 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Hours
+              </h3>
+              <div id="countdown-timer" class="text-xs text-green-300 mb-3"></div>
+              <div class="space-y-1" id="store-hours-list">
                 {store.hours.map((hour: any) => {
-                  const dayName = hour.dayOfWeek ? hour.dayOfWeek.charAt(0).toUpperCase() + hour.dayOfWeek.slice(1).toLowerCase() : 'Daily';
+                  const dayName = hour.dayOfWeek
+                    ? hour.dayOfWeek.charAt(0).toUpperCase() + hour.dayOfWeek.slice(1, 3).toLowerCase()
+                    : 'Day';
 
                   // Format time to 12-hour format with single letter (09:00:00 -> 9:00A, 21:00:00 -> 9:00P)
                   const formatTime = (time: string) => {
@@ -367,37 +311,67 @@ try {
 
                   return (
                     <div
-                      class="hour-row flex justify-between text-sm p-2 rounded transition-colors"
+                      class="hour-row flex justify-between text-xs py-1 transition-colors"
                       data-day={hour.dayOfWeek?.toLowerCase()}
                     >
                       <span class="day-name font-medium text-green-300">
                         {dayName}
-                        <span class="today-label ml-2 text-xs hidden"></span>
+                        <span class="today-label ml-1 text-xs hidden"></span>
                       </span>
                       <span class="time-display text-green-200">
-                        {hour.is_24hour ? '24 Hours' : hour.isClosed ? 'Closed' : `${openTime} - ${closeTime}`}
+                        {hour.is_24hour ? '24hrs' : hour.isClosed ? 'Closed' : `${openTime}-${closeTime}`}
                       </span>
                     </div>
                   );
                 })}
               </div>
             </div>
-          )}
-
-          <!-- About This Location Section -->
-          <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-6 border-2 border-green-500">
-            <h3 class="text-xl font-bold mb-4 flex items-center text-white">
-              <svg class="w-6 h-6 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              About This Location
-            </h3>
-            <p class="text-green-100 text-base leading-relaxed">
-              {storeLongDescription}
-            </p>
           </div>
+        )}
+      </div>
+    </div>
+  </section>
 
-        </div>
+  <!-- Main Content -->
+  <div class="bg-black py-16">
+    <div class="max-w-7xl mx-auto md:px-4 sm:px-6 lg:px-8">
+
+      <!-- Products Section - Full Width -->
+      <div class="md:bg-gradient-to-br md:from-green-900/40 md:to-black/60 md:rounded-lg md:shadow-xl md:p-8 mb-8">
+        <h2 class="text-3xl font-bold mb-6 flex items-center text-white px-4 md:px-0">
+          <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          Available Cannabis Items
+        </h2>
+
+        <!-- Dutchie Carousel Embed -->
+        {(carouselRetailerId && carouselId) ? (
+          <div class="w-full bg-white md:rounded-lg p-6 min-h-[300px]">
+            <DutchieCarousel retailerId={carouselRetailerId} carouselId={carouselId} routeRoot={routeRoot} />
+          </div>
+        ) : dutchieStoreId ? (
+          <div class="w-full bg-white md:rounded-lg p-6 min-h-[300px]">
+            <DutchieEmbed storeId={dutchieStoreId} />
+          </div>
+        ) : (
+          <div class="w-full bg-white md:rounded-lg p-6 min-h-[300px] flex items-center justify-center">
+            <p class="text-gray-500 text-lg">Product menu not available for this location.</p>
+          </div>
+        )}
+      </div>
+
+      <!-- About This Location Section - Full Width -->
+      <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-6 md:p-8 border border-green-500 mx-4 md:mx-0">
+        <h3 class="text-xl font-bold mb-4 flex items-center text-white">
+          <svg class="w-6 h-6 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          About This Location
+        </h3>
+        <p class="text-green-100 text-base leading-relaxed">
+          {storeLongDescription}
+        </p>
       </div>
 
       <!-- Back Link -->

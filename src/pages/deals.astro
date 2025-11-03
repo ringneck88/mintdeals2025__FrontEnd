@@ -89,6 +89,9 @@ try {
 }
 
 // Fetch discount products
+let productsByStore = {};
+let totalProductsCount = 0;
+
 try {
   console.log('🚀 Fetching discount products from API');
 
@@ -98,13 +101,45 @@ try {
     const data = await response.json();
 
     discountProducts = data.data || [];
-    storeInfo = {
-      count: data.count || discountProducts.length,
-      name: 'Mint Cannabis 75th Ave Phoenix', // Default store name from API
-      storeId: 2 // Store ID from API
-    };
 
-    console.log(`✅ Loaded ${discountProducts.length} products with discounts`);
+    // Group products by their storeId from the API response
+    discountProducts.forEach((product) => {
+      const storeId = product.storeId ? String(product.storeId) : 'unknown';
+      const storeName = product.storeName || 'Unknown Store';
+
+      // Find matching store from stores array by ID or name
+      let matchingStore = null;
+      for (const s of stores) {
+        if (String(s.id) === storeId || s.name === storeName) {
+          matchingStore = s;
+          break;
+        }
+      }
+
+      // Create store group if it doesn't exist
+      if (!productsByStore[storeId]) {
+        productsByStore[storeId] = {
+          storeId: storeId,
+          storeName: storeName,
+          store: matchingStore || { id: storeId, name: storeName, address: {} },
+          products: []
+        };
+      }
+
+      // Add product to this store's products array
+      productsByStore[storeId].products.push(product);
+    });
+
+    // Calculate total products (6 per store max)
+    totalProductsCount = Object.values(productsByStore).reduce((sum, storeGroup) => {
+      return sum + Math.min(storeGroup.products.length, 6);
+    }, 0);
+
+    const storeCount = Object.keys(productsByStore).length;
+    console.log(`✅ Loaded ${discountProducts.length} products from ${storeCount} stores`);
+    Object.values(productsByStore).forEach((store) => {
+      console.log('   📍 ' + store.storeName + ': ' + store.products.length + ' products');
+    });
   } else {
     const errorData = await response.text();
     console.error('❌ Discounts API Error:', errorData);
@@ -240,19 +275,19 @@ try {
     </div>
 
     <!-- Store Info Bar -->
-    {storeInfo && (
+    {Object.keys(productsByStore).length > 0 && (
       <div class="py-6 bg-black/90">
         <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
           <div class="grid grid-cols-1 gap-6 text-center md:grid-cols-3">
-            <div class="p-4 border-2 border-green-500 rounded-lg bg-green-900/20">
-              <div class="mb-2 text-3xl font-bold text-green-400">{storeInfo.count}</div>
+            <div class="p-4 border border-green-500 rounded-lg bg-green-900/20">
+              <div id="total-products-count" class="mb-2 text-3xl font-bold text-green-400">{totalProductsCount}</div>
               <div class="text-sm text-yellow-400 font-semibold uppercase">Products on Sale</div>
             </div>
-            <div class="p-4 border-2 border-green-500 rounded-lg bg-green-900/20">
-              <div class="mb-2 text-xl font-bold text-green-400">{storeInfo.name}</div>
-              <div class="text-sm text-yellow-400 font-semibold uppercase">Featured Store</div>
+            <div class="p-4 border border-green-500 rounded-lg bg-green-900/20">
+              <div class="mb-2 text-xl font-bold text-green-400">{Object.keys(productsByStore).length}</div>
+              <div class="text-sm text-yellow-400 font-semibold uppercase">{Object.keys(productsByStore).length === 1 ? 'Store with Deals' : 'Stores with Deals'}</div>
             </div>
-            <div class="p-4 border-2 border-green-500 rounded-lg bg-green-900/20">
+            <div class="p-4 border border-green-500 rounded-lg bg-green-900/20">
               <div class="mb-2 text-xl font-bold text-green-400">💰</div>
               <div class="text-sm text-yellow-400 font-semibold uppercase">Save Big Today</div>
             </div>
@@ -264,20 +299,6 @@ try {
     <!-- Main Content -->
     <div class="py-16">
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-
-        <!-- Location Status Bar -->
-        <div id="location-status" class="hidden p-4 mb-8 text-center border-2 border-green-500 rounded-lg bg-green-900/50">
-          <div id="location-loading" class="flex items-center justify-center gap-3">
-            <div class="w-5 h-5 border-b-2 border-yellow-400 rounded-full animate-spin"></div>
-            <span class="text-yellow-400">Finding closest stores with deals...</span>
-          </div>
-          <div id="location-success" class="hidden text-green-300">
-            📍 Showing deals from the 5 closest stores
-          </div>
-          <div id="location-error" class="hidden text-yellow-400">
-            📍 Showing all deals (location unavailable)
-          </div>
-        </div>
 
         {apiError ? (
           <div class="py-12 text-center">
@@ -295,7 +316,7 @@ try {
               </div>
             </div>
           </div>
-        ) : discountProducts.length === 0 ? (
+        ) : Object.keys(productsByStore).length === 0 ? (
           <div class="text-center py-16">
             <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
               <div class="mb-4 text-6xl">💸</div>
@@ -316,47 +337,71 @@ try {
             </div>
           </div>
         ) : (
-          <div>
-            <!-- Section Title -->
-            <div class="mb-8 text-center">
-              <h2 class="mb-3 text-3xl font-bold text-white uppercase">
-                Featured Deals
-              </h2>
-              <p class="text-green-300">
-                Limited time offers on premium cannabis products
-              </p>
-            </div>
+          <div id="stores-container">
+            {/* Loop through each store and display its products */}
+            {Object.values(productsByStore).map((storeGroup) => (
+              <div class="mb-16 store-section" data-store-id={storeGroup.storeId}>
+                {/* Store Header */}
+                <div class="mb-6 p-6 bg-gradient-to-r from-green-900/50 to-black border border-green-500 rounded-lg">
+                  <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                      <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">
+                        <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent uppercase">
+                          {storeGroup.storeName}
+                        </span>
+                      </h2>
+                      {storeGroup.store?.address && (
+                        <p class="text-green-300 flex items-center gap-2">
+                          <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          </svg>
+                          {(storeGroup.store.address.city && storeGroup.store.address.state)
+                            ? `${storeGroup.store.address.city}, ${storeGroup.store.address.state}`
+                            : 'Location Available'}
+                        </p>
+                      )}
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="px-4 py-2 bg-yellow-400/20 border border-yellow-400 rounded-full text-sm font-bold text-yellow-400">
+                        {Math.min(storeGroup.products.length, 6)} Deals
+                      </span>
+                      {storeGroup.store?.slug && (
+                        <a
+                          href={`/location/${storeGroup.store.slug}`}
+                          class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-transparent text-white rounded-lg font-semibold hover:from-yellow-500 hover:to-transparent transition-all shadow-xl text-sm"
+                        >
+                          Store Info
+                          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                          </svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-            <!-- Products Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {discountProducts.map(product => {
-                const primaryDiscount = product.discounts?.[0];
-                const badge = getDiscountBadge(primaryDiscount);
+                {/* Products Grid for this store */}
+                <div class="products-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                  {storeGroup.products.slice(0, 6).map((product, index) => {
+                    // Cycle through available discounts so each card shows a different one
+                    const discountIndex = product.discounts?.length > 0 ? index % product.discounts.length : 0;
+                    const primaryDiscount = product.discounts?.[discountIndex];
+                    const badge = getDiscountBadge(primaryDiscount);
 
-                return (
-                  <div class="product-card relative overflow-hidden bg-black border-2 border-green-500 rounded-xl shadow-lg hover:shadow-2xl hover:border-yellow-400 group">
+                    return (
+                      <div class="product-card relative overflow-hidden bg-black border border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 group" data-store-id={storeGroup.storeId}>
                     {/* Red Banner with Discount Name */}
                     {primaryDiscount && (
-                      <div class="w-full bg-gradient-to-r from-red-600 to-red-700 py-2 px-3">
-                        <div class="text-white font-bold text-xs text-center uppercase truncate">
+                      <div class="w-full bg-gradient-to-r from-red-600 to-red-700 py-1.5 px-2">
+                        <div class="text-white font-bold text-[10px] text-center uppercase truncate">
                           {primaryDiscount.discountName}
                         </div>
                       </div>
                     )}
 
-                    {/* Discount Badge */}
-                    {primaryDiscount && (
-                      <div class="absolute top-14 right-3 z-10">
-                        <div class={`bg-gradient-to-r ${badge.color} px-3 py-2 rounded-lg shadow-lg`}>
-                          <div class="text-white font-bold text-sm text-center">
-                            {badge.text}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
                     {/* Product Image */}
-                    <div class="relative h-64 bg-gradient-to-br from-gray-900 to-black overflow-hidden">
+                    <div class="relative h-40 bg-gradient-to-br from-gray-900 to-black overflow-hidden">
                       {product.productImageUrl ? (
                         <img
                           src={product.productImageUrl}
@@ -374,34 +419,34 @@ try {
                     </div>
 
                     {/* Product Info */}
-                    <div class="p-4">
+                    <div class="p-2">
                       {/* Brand */}
                       {product.productBrand && (
-                        <div class="mb-2">
-                          <span class="text-xs font-semibold text-green-400 uppercase">
+                        <div class="mb-1">
+                          <span class="text-[9px] font-semibold text-green-400 uppercase">
                             {product.productBrand}
                           </span>
                         </div>
                       )}
 
                       {/* Product Name */}
-                      <h3 class="text-white font-bold text-base mb-2 line-clamp-2 min-h-[2.5rem]">
+                      <h3 class="text-white font-bold text-xs mb-1 line-clamp-2 min-h-[2rem]">
                         {product.productName}
                       </h3>
 
                       {/* Category */}
                       {product.productCategory && (
-                        <div class="mb-3">
-                          <span class="inline-block px-2 py-1 text-xs font-medium text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 rounded">
+                        <div class="mb-2">
+                          <span class="inline-block px-1.5 py-0.5 text-[9px] font-medium text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 rounded">
                             {product.productCategory}
                           </span>
                         </div>
                       )}
 
                       {/* Price */}
-                      <div class="flex items-center justify-between mb-4">
+                      <div class="flex items-center justify-center mb-2">
                         <div>
-                          <span class="text-2xl font-bold text-green-400">
+                          <span class="text-lg font-bold text-green-400">
                             ${product.productPrice.toFixed(2)}
                           </span>
                         </div>
@@ -409,8 +454,8 @@ try {
 
                       {/* Discount Details */}
                       {primaryDiscount && primaryDiscount.validUntil && (
-                        <div class="mb-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
-                          <div class="text-xs text-yellow-400 text-center">
+                        <div class="mb-2 p-1.5 bg-green-900/20 border border-green-500/30 rounded">
+                          <div class="text-[9px] text-yellow-400 text-center">
                             ⏰ Valid until {formatDate(primaryDiscount.validUntil)}
                           </div>
                         </div>
@@ -419,28 +464,30 @@ try {
                       {/* Shop Now Button */}
                       <a
                         href="/stores"
-                        class="block w-full text-center px-4 py-3 bg-gradient-to-r from-yellow-400 to-transparent text-white rounded-lg font-semibold hover:from-yellow-500 hover:to-transparent transition-all transform hover:scale-105 shadow-xl"
+                        class="block w-full text-center px-2 py-2 bg-gradient-to-r from-yellow-400 to-transparent text-white rounded text-xs font-semibold hover:from-yellow-500 hover:to-transparent transition-all transform hover:scale-105 shadow-xl"
                       >
                         Shop Now
-                        <svg class="inline w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="inline w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                         </svg>
                       </a>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
 
             <!-- Call to Action -->
-            <div class="mt-16 bg-black border-2 border-yellow-400 rounded-lg p-8 text-center">
+            <div class="mt-16 bg-black border border-yellow-400 rounded-lg p-8 text-center">
               <h2 class="text-2xl font-bold mb-4">
                 <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent uppercase">
                   Don't Miss Out on These Amazing Deals!
                 </span>
               </h2>
               <p class="text-green-300 mb-6 max-w-2xl mx-auto">
-                Visit {storeInfo?.name || 'your nearest Mint Cannabis location'} to take advantage of these special offers. Limited time only!
+                Visit your nearest Mint Cannabis location to take advantage of these special offers. Limited time only!
               </p>
               <div class="flex flex-wrap justify-center gap-4">
                 <a
@@ -451,7 +498,7 @@ try {
                 </a>
                 <a
                   href="/categories"
-                  class="bg-black border-2 border-green-500 text-green-300 px-8 py-3 rounded-lg font-semibold hover:bg-green-900/20 hover:border-yellow-400 transition-colors"
+                  class="bg-black border border-green-500 text-green-300 px-8 py-3 rounded-lg font-semibold hover:bg-green-900/20 hover:border-yellow-400 transition-colors"
                 >
                   Shop by Category
                 </a>
@@ -462,4 +509,9 @@ try {
       </div>
     </div>
   </div>
+
+  <!-- Minimal script for deals page - geolocation removed for performance -->
+  <script>
+    console.log('📍 Deals page loaded - showing all stores');
+  </script>
 </Layout>
