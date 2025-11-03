@@ -76,6 +76,9 @@ try {
     const storesList = storesData?.data || [];
 
     stores = storesList.map(store => {
+      // Handle both Strapi v4 (store.attributes) and direct format
+      const storeData = store.attributes || store;
+
       // Extract address fields with type checking
       const getStringValue = (value, fallback = '') => {
         return typeof value === 'string' ? value : fallback;
@@ -85,59 +88,57 @@ try {
       let latitude = null;
       let longitude = null;
 
-      if (store.geo) {
-        if (typeof store.geo === 'object') {
-          latitude = store.geo.lat || store.geo.latitude || null;
-          longitude = store.geo.lng || store.geo.lon || store.geo.longitude || null;
-        } else if (typeof store.geo === 'string') {
+      if (storeData.geo) {
+        if (typeof storeData.geo === 'object') {
+          latitude = storeData.geo.lat || storeData.geo.latitude || null;
+          longitude = storeData.geo.lng || storeData.geo.lon || storeData.geo.longitude || null;
+        } else if (typeof storeData.geo === 'string') {
           try {
-            const geoObj = JSON.parse(store.geo);
+            const geoObj = JSON.parse(storeData.geo);
             latitude = geoObj.lat || geoObj.latitude || null;
             longitude = geoObj.lng || geoObj.lon || geoObj.longitude || null;
           } catch (e) {
-            console.error('Failed to parse geo string for store:', store.name);
+            console.error('Failed to parse geo string for store:', storeData.name);
           }
         }
       }
 
       // Check if store is 24 hours by examining hours array
-      const is24Hour = store.hours && Array.isArray(store.hours)
-        ? store.hours.some(day => day.is24hours === true)
+      const is24Hour = storeData.hours && Array.isArray(storeData.hours)
+        ? storeData.hours.some(day => day.is24hours === true)
         : false;
+
+      // Get hero_media URL (NOT using 'image' field which is used on home page)
+      const storeImageUrl = getImageUrl(storeData.hero_media);
 
       return {
         id: store.id,
         documentId: store.documentId,
-        Name: store.name || 'Unnamed Store',
-        slug: store.slug || store.documentId,
-        Description: store.description,
-        Address: getStringValue(store.address?.street) || getStringValue(store.street) || 'Address not available',
-        City: getStringValue(store.address?.city) || getStringValue(store.city) || 'Unknown City',
-        State: getStringValue(store.address?.state) || getStringValue(store.state) || 'Unknown State',
-        ZipCode: getStringValue(store.address?.zipCode) || getStringValue(store.zip_code),
-        Phone: store.phone,
-        Email: store.email,
-        Website: store.website,
+        Name: storeData.name || 'Unnamed Store',
+        slug: storeData.slug || store.documentId,
+        Description: storeData.description,
+        Address: getStringValue(storeData.address?.street) || getStringValue(storeData.street) || 'Address not available',
+        City: getStringValue(storeData.address?.city) || getStringValue(storeData.city) || 'Unknown City',
+        State: getStringValue(storeData.address?.state) || getStringValue(storeData.state) || 'Unknown State',
+        ZipCode: getStringValue(storeData.address?.zipCode) || getStringValue(storeData.zip_code),
+        Phone: storeData.phone,
+        Email: storeData.email,
+        Website: storeData.website,
         Latitude: latitude,
         Longitude: longitude,
-        Hours: store.hours,
+        Hours: storeData.hours,
         Is24Hour: is24Hour,
-        HasCafe: store.hasCafe || false,
-        StoreImage: store.store_image || store.hero_image ? {
-          url: (store.store_image?.url || store.hero_image?.url) ?
-            ((store.store_image?.url || store.hero_image?.url).startsWith('http') ?
-              (store.store_image?.url || store.hero_image?.url) :
-              `https://mintdealsbackend-production.up.railway.app${store.store_image?.url || store.hero_image?.url}`) : null
+        HasCafe: storeData.hasCafe || false,
+        StoreImage: storeImageUrl,
+        GalleryImages: storeData.gallery_images || [],
+        IsFeatured: storeData.is_featured || false,
+        IsActive: storeData.is_active !== false,
+        StoreManager: storeData.store_manager,
+        region: storeData.region ? {
+          id: typeof storeData.region === 'object' ? storeData.region.id : storeData.region,
+          Name: regions.find(r => r.id === (typeof storeData.region === 'object' ? storeData.region.id : storeData.region))?.Name || 'Unknown Region'
         } : null,
-        GalleryImages: store.gallery_images || [],
-        IsFeatured: store.is_featured || false,
-        IsActive: store.is_active !== false,
-        StoreManager: store.store_manager,
-        region: store.region ? {
-          id: typeof store.region === 'object' ? store.region.id : store.region,
-          Name: regions.find(r => r.id === (typeof store.region === 'object' ? store.region.id : store.region))?.Name || 'Unknown Region'
-        } : null,
-        dosage_products: store.products || []
+        dosage_products: storeData.products || []
       };
     }).filter(store => store.IsActive);
 
@@ -176,10 +177,11 @@ try {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(to top,  rgba(41, 163, 41, 0.35), rgba(51, 204, 51, 0.3), rgba(92, 214, 92, 0.25), rgba(133, 224, 133, 0.2), rgba(194, 240, 194, 0.15), rgba(235, 250, 235, 0.1), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    background-image: linear-gradient(to top, var(--theme-bg-start), var(--theme-bg-end));
     mix-blend-mode: color;
     pointer-events: none;
     z-index: 1;
+    transition: background-image 0.5s ease;
   }
   .video-background video {
     object-fit: cover;
@@ -234,47 +236,21 @@ try {
         </nav>
 
         <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
-            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-              Mint Cannabis Locations
-            </span>
+          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl text-white uppercase">
+            Mint Cannabis Locations
           </h1>
           <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
             Premium cannabis dispensaries across multiple states
           </p>
 
-          <!-- Navigation Buttons -->
-          <div class="relative z-10 flex flex-wrap justify-center gap-4 mt-6">
-            <a href="/categories" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
+          <!-- Navigation Links -->
+          <div class="flex flex-wrap justify-center gap-6 mt-6">
+            <a href="/categories" class="text-yellow-400 hover:text-yellow-300 underline">
               Browse Categories
             </a>
-            <a href="/regions" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
+            <a href="/regions" class="text-yellow-400 hover:text-yellow-300 underline">
               Browse Regions
             </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Stats Bar -->
-    <div class="py-4 bg-black bg-opacity-90">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-        <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{stores.length}</div>
-            <div class="text-sm text-yellow-400 font-semibold">Locations</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{regions.length}</div>
-            <div class="text-sm text-yellow-400 font-semibold">Regions</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">100%</div>
-            <div class="text-sm text-yellow-400 font-semibold">Fresh</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{Math.floor(Math.random() * (498 - 350 + 1)) + 350}</div>
-            <div class="text-sm text-yellow-400 font-semibold">Discounted Items</div>
           </div>
         </div>
       </div>
@@ -300,7 +276,7 @@ try {
     )}
 
     <!-- Enhanced Search & Filter Section -->
-    <div class="bg-gray-900 rounded-2xl shadow-lg border border-green-700 p-6 mb-12 hover:shadow-xl transition-shadow duration-300">
+    <div class="bg-gray-900 rounded-2xl shadow-lg p-6 mb-12 hover:shadow-xl transition-shadow duration-300">
       <div class="flex flex-col md:flex-row lg:flex-row gap-4 md:gap-6">
         <!-- Search Input with Enhanced Styling -->
         <div class="flex-1 group">
@@ -366,10 +342,8 @@ try {
     <!-- Stores Grid -->
     <div class="mb-16">
       <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold mb-4">
-          <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-            Our Store Locations
-          </span>
+        <h2 class="text-4xl font-bold mb-4 text-white uppercase">
+          Our Store Locations
         </h2>
         <p class="text-xl text-gray-300 max-w-3xl mx-auto">
           Visit any of our premium dispensary locations for expert guidance and the finest cannabis products
@@ -379,24 +353,22 @@ try {
       <div id="stores-grid" class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:gap-8">
         {stores.map((store, index) => (
           <div
-            class="store-card relative overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 hover:scale-105"
+            class="store-card relative overflow-hidden transition-all transform bg-black rounded-lg shadow-lg hover:shadow-2xl hover:scale-105"
             data-region-id={store.region?.id || ''}
             data-lat={store.Latitude || ''}
             data-lng={store.Longitude || ''}
           >
             {/* Store Name Header */}
-            <div class="bg-gradient-to-r from-green-900 to-black p-4 border-b-2 border-green-500">
-              <h3 class="text-xl font-bold text-center">
-                <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.25rem;">
-                  {store.Name}
-                </span>
+            <div class="bg-gradient-to-r from-green-900 to-black p-4">
+              <h3 class="text-xl font-bold text-center text-white uppercase">
+                {store.Name}
               </h3>
             </div>
 
             <div class="relative">
               {store.StoreImage ? (
                 <img
-                  src={store.StoreImage.url}
+                  src={store.StoreImage}
                   alt={store.Name}
                   class="object-cover w-full h-48"
                 />

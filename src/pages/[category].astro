@@ -908,11 +908,11 @@ const categoryIcon = categoryIcons[category] || '🌱';
             {seoTitle || categoryName}
           </h1>
 
-          <div class="flex flex-wrap justify-center gap-4">
-            <a href="/categories" class="px-6 py-2.5 text-base font-semibold text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105">
+          <div class="flex flex-wrap justify-center gap-6 mt-6">
+            <a href="/categories" class="text-yellow-400 hover:text-yellow-300 underline">
               All Categories
             </a>
-            <a href="/stores" class="px-6 py-2.5 text-base font-semibold text-yellow-400 transition-all transform border-2 border-yellow-400 rounded-lg shadow-lg hover:bg-yellow-400 hover:text-black hover:scale-105">
+            <a href="/stores" class="text-yellow-400 hover:text-yellow-300 underline">
               Find Locations
             </a>
           </div>
@@ -924,7 +924,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
     {categoryRichText && (
       <div class="py-12 bg-gradient-to-b from-black/80 to-green-900/40">
         <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-4xl">
-          <div class="p-6 bg-black border-2 border-green-500 rounded-lg md:p-8 overflow-hidden">
+          <div class="p-6 bg-black rounded-lg md:p-8 overflow-hidden">
             <div class="flex flex-col items-center mb-8 text-center gap-4">
               {categoryImage ? (
                 <img
@@ -969,7 +969,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
                   null;
 
                 return (
-                  <div class="relative overflow-hidden transition-all transform bg-black border-2 border-green-500 group rounded-xl hover:border-yellow-400 hover:scale-105">
+                  <div class="relative overflow-hidden transition-all transform bg-black group rounded-xl hover:scale-105">
                     {imageUrl ? (
                       <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50">
                         <img
@@ -1008,7 +1008,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
           </div>
         ) : (
           <div class="py-12 text-center">
-            <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
+            <div class="max-w-md p-8 mx-auto bg-black rounded-lg">
               <div class="mb-6 text-6xl">{categoryIcon}</div>
               <h3 class="mb-3 text-xl font-bold text-yellow-400" style="line-height: 1.4;">No Products Available</h3>
               <p class="text-base text-green-300" style="line-height: 1.6;">Check back soon for {categoryName.toLowerCase()} products!</p>
@@ -1032,7 +1032,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
 
         <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
           <!-- Feature 1 -->
-          <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
+          <div class="p-6 transition-all bg-black rounded-lg shadow-lg">
             <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">
               <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -1046,7 +1046,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
           </div>
 
           <!-- Feature 2 -->
-          <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
+          <div class="p-6 transition-all bg-black rounded-lg shadow-lg">
             <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">
               <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
@@ -1059,7 +1059,7 @@ const categoryIcon = categoryIcons[category] || '🌱';
           </div>
 
           <!-- Feature 3 -->
-          <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400">
+          <div class="p-6 transition-all bg-black rounded-lg shadow-lg">
             <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">
               <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -1076,12 +1076,9 @@ const categoryIcon = categoryIcons[category] || '🌱';
         <div class="mt-12 text-center">
           <a
             href="/categories"
-            class="inline-flex items-center px-6 py-3 font-medium text-black transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 hover:scale-105"
+            class="text-yellow-400 hover:text-yellow-300 underline"
           >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Browse All Categories
+            ← Browse All Categories
           </a>
         </div>
       </div>

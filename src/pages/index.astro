@@ -373,26 +373,63 @@ try {
           {/* Scattered Polaroid Cards */}
           <div id="polaroid-scatter" class="relative w-full h-full">
             {[
-              { img: "20251001_1034_Joyful Moment Together_simple_compose_01k6gdah5ef7n9mj7hyscbm439.png", title: "Share Joy", vibe: "Social", x: "3%", y: "5%", rotate: -8 },
-              { img: "20251001_1041_Serene Morning Ritual_simple_compose_01k6gdpzjeexe95stnx5nn3y9b.png", title: "Morning Zen", vibe: "Relaxation", x: "20%", y: "3%", rotate: 12 },
-              { img: "20251001_1106_Festival Sunset Vibes_simple_compose_01k6gf43hcednabq9xzx5rk5tj.png", title: "Festival Fun", vibe: "Adventure", x: "38%", y: "6%", rotate: -5 },
-              { img: "20251001_1118_Neon Night Stroll_simple_compose_01k6gftp4ae6r8g2b610xw1f4a.png", title: "Night Life", vibe: "Urban", x: "58%", y: "8%", rotate: 15 },
-              { img: "20251001_1159_Beach Bonfire Gathering_simple_compose_01k6gj5gj9fedrvpngg8yaekat.png", title: "Beach Vibes", vibe: "Nature", x: "78%", y: "5%", rotate: -10 },
-              { img: "20251001_1138_Jazz Club Vibes_simple_compose_01k6ggzbdeeefb6t68pprex49z.png", title: "Smooth Jazz", vibe: "Culture", x: "5%", y: "38%", rotate: 6 },
-              { img: "20251001_1132_Morning Coffee Relaxation_simple_compose_01k6ggma8mermb81awhar60bvb.png", title: "Coffee Time", vibe: "Calm", x: "23%", y: "35%", rotate: -12 },
-              { img: "20251001_1149_Backyard BBQ Gathering_simple_compose_01k6ghjj7ff7prsem7192hhz5f.png", title: "BBQ Party", vibe: "Social", x: "42%", y: "37%", rotate: 8 },
-              { img: "20251001_1151_Café Conversations_simple_compose_01k6ghq23rfhhazmw46r48359k.png", title: "Café Chat", vibe: "Social", x: "62%", y: "36%", rotate: -6 },
-              { img: "20251001_1128_Poolside Relaxation Scene_simple_compose_01k6ggdj0wep3tdxa7h4jvwad3.png", title: "Poolside", vibe: "Luxury", x: "80%", y: "40%", rotate: 14 },
-              { img: "20251001_1141_Sunny Park Gathering_simple_compose_01k6gh5v42fx4a4gkbdpe9rvsb.png", title: "Park Day", vibe: "Nature", x: "7%", y: "68%", rotate: -9 },
-              { img: "20251001_1134_Neon Festival Vibes_simple_compose_01k6ggrnptefd97cz55pkg4med.png", title: "Neon Nights", vibe: "Party", x: "25%", y: "67%", rotate: 11 },
-              { img: "20251001_1117_Elegant Outdoor Gathering_simple_compose_01k6gfry32ff0a54fh49mtqpkq.png", title: "Elegant Eve", vibe: "Luxury", x: "44%", y: "70%", rotate: -7 },
-              { img: "20251001_1130_Kitchen Gathering Joy_simple_compose_01k6ggh1vhe1gvqdd64sfj0web.png", title: "Kitchen Fun", vibe: "Home", x: "63%", y: "69%", rotate: 9 },
-              { img: "20251001_1159_Hikers Sharing Moments_simple_compose_01k6gj53j5fryt2pcwbxmy67r0.png", title: "Trail Time", vibe: "Adventure", x: "82%", y: "72%", rotate: -13 }
-            ].map((item, index) => (
+              { img: "20251001_1034_Joyful Moment Together_simple_compose_01k6gdah5ef7n9mj7hyscbm439.png", title: "Share Joy", vibe: "Social" },
+              { img: "20251001_1041_Serene Morning Ritual_simple_compose_01k6gdpzjeexe95stnx5nn3y9b.png", title: "Morning Zen", vibe: "Relaxation" },
+              { img: "20251001_1106_Festival Sunset Vibes_simple_compose_01k6gf43hcednabq9xzx5rk5tj.png", title: "Festival Fun", vibe: "Adventure" },
+              { img: "20251001_1118_Neon Night Stroll_simple_compose_01k6gftp4ae6r8g2b610xw1f4a.png", title: "Night Life", vibe: "Urban" },
+              { img: "20251001_1159_Beach Bonfire Gathering_simple_compose_01k6gj5gj9fedrvpngg8yaekat.png", title: "Beach Vibes", vibe: "Nature" },
+              { img: "20251001_1138_Jazz Club Vibes_simple_compose_01k6ggzbdeeefb6t68pprex49z.png", title: "Smooth Jazz", vibe: "Culture" },
+              { img: "20251001_1132_Morning Coffee Relaxation_simple_compose_01k6ggma8mermb81awhar60bvb.png", title: "Coffee Time", vibe: "Calm" },
+              { img: "20251001_1149_Backyard BBQ Gathering_simple_compose_01k6ghjj7ff7prsem7192hhz5f.png", title: "BBQ Party", vibe: "Social" },
+              { img: "20251001_1151_Café Conversations_simple_compose_01k6ghq23rfhhazmw46r48359k.png", title: "Café Chat", vibe: "Social" },
+              { img: "20251001_1128_Poolside Relaxation Scene_simple_compose_01k6ggdj0wep3tdxa7h4jvwad3.png", title: "Poolside", vibe: "Luxury" },
+              { img: "20251001_1042_Relaxing Bedtime Reading_simple_compose_01k6gdqc1nf3d97fhbx6b5348f.png", title: "Cozy Read", vibe: "Relaxation" },
+              { img: "20251001_1059_Backyard Barbecue Gathering_simple_compose_01k6gerfz3eqhr2v5xv0en5rdy.png", title: "Grill Time", vibe: "Social" },
+              { img: "20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png", title: "Festival Glow", vibe: "Party" },
+              { img: "20251001_1105_Rooftop Smoke and Sunsets_simple_compose_01k6gf359yeqpamm399y255bqt.png", title: "Rooftop Chill", vibe: "Urban" },
+              { img: "20251001_1106_Urban Night Vibes_simple_compose_01k6gf3hgbeshs48w1v30a15q4.png", title: "City Lights", vibe: "Urban" },
+              { img: "20251001_1124_Desert Highway Hangout_simple_compose_01k6gg6918ef5br5x494z7h7gy.png", title: "Desert Drive", vibe: "Adventure" },
+              { img: "20251001_1127_Morning Serenity Moment_simple_compose_01k6ggdyvcfhwtr97712pe392e.png", title: "Serene Start", vibe: "Calm" },
+              { img: "20251001_1128_Luxury Bath Relaxation_simple_compose_01k6gge3e9e5dr6r2j8qb3vxet.png", title: "Spa Day", vibe: "Luxury" },
+              { img: "20251001_1128_Night Festival Vibes_simple_compose_01k6ggck96fss9cyzxbezeav7w.png", title: "Night Party", vibe: "Party" },
+              { img: "20251001_1133_Luxurious Bath Relaxation_simple_compose_01k6ggngv8fgpv41zgv5ddz4m0.png", title: "Bath Time", vibe: "Luxury" },
+              { img: "20251001_1141_Sunny Park Gathering_simple_compose_01k6gh5v42fx4a4gkbdpe9rvsb.png", title: "Park Day", vibe: "Nature" },
+              { img: "20251001_1134_Neon Festival Vibes_simple_compose_01k6ggrnptefd97cz55pkg4med.png", title: "Neon Nights", vibe: "Party" },
+              { img: "20251001_1117_Elegant Outdoor Gathering_simple_compose_01k6gfry32ff0a54fh49mtqpkq.png", title: "Elegant Eve", vibe: "Luxury" },
+              { img: "20251001_1130_Kitchen Gathering Joy_simple_compose_01k6ggh1vhe1gvqdd64sfj0web.png", title: "Kitchen Fun", vibe: "Home" },
+              { img: "20251001_1159_Hikers Sharing Moments_simple_compose_01k6gj53j5fryt2pcwbxmy67r0.png", title: "Trail Time", vibe: "Adventure" },
+              { img: "20251001_1142_Friends Sharing Moments_simple_compose_01k6gh5bmre4f83x3x6fgs13a3.png", title: "Good Times", vibe: "Social" },
+              { img: "20251001_1042_Relaxing Bedtime Reading_simple_compose_01k6gdqc1pfv3t5znmk3bpywgr.png", title: "Night Read", vibe: "Calm" },
+              { img: "20251001_1106_Festival Sunset Vibes_simple_compose_01k6gf43hefgyrz99x3j8dg77d.png", title: "Sunset Party", vibe: "Party" },
+              { img: "20251001_1106_Urban Night Vibes_simple_compose_01k6gf3hgcf4gsbnqc5c1f3ccx.png", title: "Urban Beat", vibe: "Urban" },
+              { img: "20251001_1106_Urban Night Vibes_simple_compose_01k6gf3hgef7esjtqs0sn6kye6.png", title: "Street Life", vibe: "Urban" },
+              { img: "20251001_1124_Desert Highway Hangout_simple_compose_01k6gg691aesg9ky0ae76s6fcm.png", title: "Road Trip", vibe: "Adventure" },
+              { img: "20251001_1132_Morning Coffee Relaxation_simple_compose_01k6ggma8pe0y9y0p6a4ftd685.png", title: "Wake Up", vibe: "Morning" },
+              { img: "20251001_1138_Jazz Club Vibes_simple_compose_01k6ggzbdfe3ztjyjgk0mayhz6.png", title: "Live Music", vibe: "Culture" },
+              { img: "20251001_1151_Café Conversations_simple_compose_01k6ghq23se49r7py3f5se8z53.png", title: "Coffee Chat", vibe: "Social" },
+              { img: "20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww1f6tbd58yb1nxdtck.png", title: "Light Show", vibe: "Party" },
+              { img: "20190504_173158_HDR.jpg", title: "Outdoor Fun", vibe: "Nature" },
+              { img: "20190504_174107.jpg", title: "Adventure", vibe: "Explore" },
+              { img: "IMG_0911.JPG", title: "Great Times", vibe: "Social" },
+              { img: "IMG_8086.JPG", title: "Chill Vibes", vibe: "Relax" },
+              { img: "IMG_8112.JPG", title: "Good Life", vibe: "Lifestyle" },
+              { img: "IMG_9285.JPG", title: "Happy Days", vibe: "Joy" },
+              { img: "P1020030.jpg", title: "The Moment", vibe: "Memory" },
+              { img: "P1020639.jpg", title: "Experience", vibe: "Life" },
+              { img: "wedding photo mint 1.jpg", title: "Celebration", vibe: "Special" }
+            ].map((item, index) => {
+              // Generate dynamic positions in a grid-like pattern
+              const row = Math.floor(index / 5);
+              const col = index % 5;
+              const x = 2 + (col * 19) + (Math.random() * 3);
+              const y = 2 + (row * 11) + (Math.random() * 2);
+              const rotate = (Math.random() * 30) - 15;
+
+              return (
               <div
                 class="polaroid-scattered absolute bg-white rounded-lg shadow-2xl p-3 transition-all duration-700 hover:scale-110 hover:z-50 cursor-pointer"
                 data-index={index}
-                style={`left: ${item.x}; top: ${item.y}; transform: rotate(${item.rotate}deg); width: 280px; z-index: ${index + 1};`}
+                style={`left: ${x}%; top: ${y}%; transform: rotate(${rotate}deg); width: 280px; z-index: ${index + 1};`}
               >
                 <div class="w-full h-64 bg-gray-200 overflow-hidden rounded">
                   <img
@@ -407,7 +444,7 @@ try {
                   <p class="text-xs text-gray-600 italic">{item.vibe}</p>
                 </div>
               </div>
-            ))}
+            )})
           </div>
         </div>
       </div>
@@ -417,7 +454,7 @@ try {
   <!-- Product Categories Section -->
   <div class="py-8">
     <div class="mb-6 px-8 sm:px-12 lg:px-16 xl:px-20">
-      <h2 class="mb-3 text-3xl font-bold text-white text-center">
+      <h2 class="mb-3 text-3xl font-bold text-white text-center uppercase">
         Explore Product Categories
       </h2>
     </div>
@@ -476,7 +513,7 @@ try {
                 {/* Content */}
                 <div class="relative h-full flex flex-col justify-end p-6">
                   <div class="transform transition-transform duration-300 group-hover:translate-y-[-8px]">
-                    <h3 class="text-2xl font-bold text-white mb-2 drop-shadow-lg">
+                    <h3 class="text-2xl font-bold text-white mb-2 drop-shadow-lg uppercase">
                       {category.title}
                     </h3>
                     <p class="text-sm text-green-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
@@ -549,7 +586,7 @@ try {
   <div class="py-16">
     <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
       <div class="mb-8 text-right">
-        <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl">
+        <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl uppercase">
           Shop by State
         </h2>
       </div>
@@ -591,7 +628,7 @@ try {
                       <img
                         src={region.image}
                         alt={region.name}
-                        class="object-cover w-full h-full transition-opacity opacity-80 group-hover:opacity-100"
+                        class="object-cover w-full h-full transition-all opacity-80 group-hover:opacity-100 group-hover:grayscale"
                       />
                     </div>
                   ) : (
@@ -646,7 +683,7 @@ try {
   <div class="py-16">
     <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
       <div class="mb-8 text-center">
-        <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl">
+        <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl uppercase">
           Featured Locations
         </h2>
       </div>
@@ -692,10 +729,10 @@ try {
                       <img
                         src={store.image}
                         alt={store.name}
-                        class="object-cover w-full h-full"
+                        class="object-cover w-full h-full border border-black"
                       />
                     ) : (
-                      <div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-green-900/30 to-black/50">
+                      <div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-green-900/30 to-black/50 border border-black">
                         <span class="text-6xl">🏪</span>
                       </div>
                     )}
@@ -705,7 +742,7 @@ try {
 
                   {/* Text Section */}
                   <div class={`flex flex-col justify-center p-8 md:p-12 ${index % 2 === 1 ? 'md:order-1' : ''}`}>
-                    <h3 class="mb-4 text-2xl font-bold text-white md:text-3xl">
+                    <h3 class="mb-4 text-2xl font-bold text-white md:text-3xl uppercase">
                       {store.name}
                     </h3>
 
@@ -730,15 +767,20 @@ try {
                       </div>
                     )}
 
-                    <a
-                      href={`/location/${store.slug}`}
-                      class="inline-flex items-center px-6 py-3 text-base font-medium text-white transition-all transform rounded-lg shadow-lg w-fit bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"
-                    >
-                      View Details
-                      <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                      </svg>
-                    </a>
+                    <div class="flex gap-4 mt-4">
+                      <a
+                        href={`/location/${store.slug}`}
+                        class="text-yellow-400 hover:text-yellow-300 underline"
+                      >
+                        View Details
+                      </a>
+                      <a
+                        href={`/location/${store.slug}/menu`}
+                        class="text-yellow-400 hover:text-yellow-300 underline"
+                      >
+                        View Full Menu
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -766,7 +808,7 @@ try {
   <div class="py-16">
     <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
       <div class="mb-8 text-center">
-        <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl">
+        <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl uppercase">
           Why Choose Mint Deals
         </h2>
         <p class="text-lg text-green-300">
@@ -783,7 +825,7 @@ try {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-xl font-bold text-yellow-400 group-hover:text-yellow-300">Find Locations</h3>
+          <h3 class="mb-3 text-xl font-bold text-yellow-400 group-hover:text-yellow-300 uppercase">Find Locations</h3>
           <p class="text-green-300">
             Discover trusted dispensaries near you with detailed information and directions.
           </p>
@@ -802,7 +844,7 @@ try {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-xl font-bold text-yellow-400 group-hover:text-yellow-300">Browse Products</h3>
+          <h3 class="mb-3 text-xl font-bold text-yellow-400 group-hover:text-yellow-300 uppercase">Browse Products</h3>
           <p class="text-green-300">
             Explore comprehensive product information and educational resources.
           </p>
@@ -821,7 +863,7 @@ try {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
-          <h3 class="mb-3 text-xl font-bold text-yellow-400 group-hover:text-yellow-300">Find Deals</h3>
+          <h3 class="mb-3 text-xl font-bold text-yellow-400 group-hover:text-yellow-300 uppercase">Find Deals</h3>
           <p class="text-green-300">
             Discover the latest deals and promotions from dispensaries near you.
           </p>

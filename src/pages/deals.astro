@@ -1,155 +1,49 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
 import Layout from '../layouts/Layout.astro';
-import fs from 'fs';
-import path from 'path';
 
 // API Configuration
+const DISCOUNTS_API_URL = 'https://zealous-adaptation-production-ee61.up.railway.app/api/products/discounts';
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
-const DUTCHIE_DISCOUNTS_URL = 'https://api.pos.dutchie.com/discounts/v2/list?includeInactive=false';
-
-// Load stores-api.json for API key mapping
-const storesApiPath = path.join(process.cwd(), 'stores-api.json');
-const storesApiData = JSON.parse(fs.readFileSync(storesApiPath, 'utf-8'));
-
-// Create a flexible name matching function
-function findApiKey(storeName) {
-  // Direct match first
-  for (const store of storesApiData.stores) {
-    if (store.name === storeName) {
-      const api = store.apis.find(a => a.name === 'Internal' || a.name === 'Dutchie');
-      return api?.apiKey;
-    }
-  }
-
-  // Try partial matching - look for keywords
-  const keywords = storeName.toLowerCase().split(' ').filter(w => w.length > 2);
-
-  for (const store of storesApiData.stores) {
-    const apiStoreName = store.name.toLowerCase();
-    // Check if store name contains any of the keywords
-    const matches = keywords.filter(keyword => apiStoreName.includes(keyword));
-    if (matches.length >= 2) { // At least 2 keyword matches
-      const api = store.apis.find(a => a.name === 'Internal' || a.name === 'Dutchie');
-      if (api) return api.apiKey;
-    }
-  }
-
-  // Special mappings for known mismatches
-  const specialMappings = {
-    '75th Ave Phoenix': '75th Ave',
-    'Bell': 'Bell Rd',
-    'Mesa': 'Mesa',
-    'El Mirage': 'El Mirage',
-    'Scottsdale': 'Scottsdale',
-    'Tempe': 'Tempe',
-    'Buckeye': 'Buckeye',
-    'Monroe': 'Monroe',
-    'Kalamazoo': 'Kalamazoo',
-    'Coldwater': 'Coldwater',
-    'Portage': 'Portage',
-    'Roseville': 'Roseville',
-    'New Buffalo': 'New Buffalo',
-    'Paradise': 'Paradise',
-    'Spring Valley': 'Spring Valley',
-    'St. Peters': 'The Mint - St Peters'
-  };
-
-  for (const [key, value] of Object.entries(specialMappings)) {
-    if (storeName.includes(key)) {
-      for (const store of storesApiData.stores) {
-        if (store.name.includes(value)) {
-          const api = store.apis.find(a => a.name === 'Internal' || a.name === 'Dutchie');
-          if (api) return api.apiKey;
-        }
-      }
-    }
-  }
-
-  return null;
-}
 
 // Initialize data
+let discountProducts = [];
 let stores = [];
-let storeDeals = {};
+let storeInfo = null;
 let apiError = null;
-let totalDealsCount = 0;
 
-// Helper function to fetch discounts from Dutchie POS API
-async function fetchDiscounts(apiKey) {
-  const basicAuth = Buffer.from(`${apiKey}:`, 'utf8').toString('base64');
+// Helper function to get discount badge info
+function getDiscountBadge(discount) {
+  if (!discount) return { text: 'Special', color: 'from-yellow-500 to-orange-500' };
 
-  const response = await fetch(DUTCHIE_DISCOUNTS_URL, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Basic ${basicAuth}`,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Dutchie Discounts API Error: ${response.status}`);
+  if (discount.discountType === 'Percent') {
+    return {
+      text: `${discount.discountAmount}% OFF`,
+      color: 'from-green-500 to-emerald-500'
+    };
+  } else if (discount.discountType === 'Price To Amount - Total Amount' || discount.discountType === 'Price To Amount') {
+    return {
+      text: `$${discount.discountAmount.toFixed(2)}`,
+      color: 'from-yellow-500 to-orange-500'
+    };
   }
 
-  const data = await response.json();
-  return Array.isArray(data) ? data : [];
+  return { text: 'Special Deal', color: 'from-purple-500 to-pink-500' };
 }
 
-// Helper function to get discount badge color
-function getDiscountBadgeColor(discount) {
-  if (discount.isBundledDiscount) return 'from-purple-500 to-pink-500';
-  if (discount.reward?.calculationMethod === 'PERCENT_OFF') return 'from-green-500 to-emerald-500';
-  return 'from-yellow-500 to-orange-500';
+// Helper function to format date
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// Helper function to get discount value display
-function getDiscountValue(discount) {
-  const reward = discount.reward;
-  if (!reward) return 'Special Offer';
-
-  const method = reward.calculationMethod;
-  const value = reward.discountValue;
-
-  switch(method) {
-    case 'PERCENT_OFF':
-      return `${value}% OFF`;
-    case 'PRICE_TO_AMOUNT_TOTAL':
-      return `$${value.toFixed(2)} Total`;
-    case 'AMOUNT_OFF':
-      return `$${value.toFixed(2)} OFF`;
-    case 'FIXED_PRICE':
-      return `$${value.toFixed(2)} Each`;
-    default:
-      return 'Special Price';
-  }
-}
-
-// Helper function to get constraint description
-function getConstraintDescription(constraint) {
-  if (!constraint) return '';
-
-  const type = constraint.thresholdType;
-  const min = constraint.thresholdMin;
-
-  switch(type) {
-    case 'NUMBER_OF_ITEMS':
-      return `Buy ${min} items`;
-    case 'DOLLAR_AMOUNT':
-      return `Spend $${min.toFixed(2)}`;
-    case 'WEIGHT':
-      return `Purchase ${min}g`;
-    default:
-      return '';
-  }
-}
-
-// Step 1: Fetch stores data from backend API
+// Fetch stores with location data
 try {
-  console.log('🚀 Step 1: Fetching stores for deals page');
+  console.log('🚀 Fetching stores from API');
 
-  const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=500`);
+  const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
 
   if (storesResponse.ok) {
     const data = await storesResponse.json();
@@ -186,543 +80,41 @@ try {
         longitude: longitude,
         isActive: store.is_active !== false
       };
-    }).filter(store => store.isActive); // Only show active stores
+    }).filter(store => store.isActive && store.latitude && store.longitude);
 
-    console.log('✅ Stores loaded:', stores.length);
-  } else {
-    const errorData = await storesResponse.json();
-    console.error('❌ Stores API Error:', errorData);
-    apiError = errorData.error?.message || 'Failed to fetch stores';
+    console.log(`✅ Loaded ${stores.length} stores with coordinates`);
   }
 } catch (error) {
   console.error('❌ Error fetching stores:', error);
+}
+
+// Fetch discount products
+try {
+  console.log('🚀 Fetching discount products from API');
+
+  const response = await fetch(DISCOUNTS_API_URL);
+
+  if (response.ok) {
+    const data = await response.json();
+
+    discountProducts = data.data || [];
+    storeInfo = {
+      count: data.count || discountProducts.length,
+      name: 'Mint Cannabis 75th Ave Phoenix', // Default store name from API
+      storeId: 2 // Store ID from API
+    };
+
+    console.log(`✅ Loaded ${discountProducts.length} products with discounts`);
+  } else {
+    const errorData = await response.text();
+    console.error('❌ Discounts API Error:', errorData);
+    apiError = 'Failed to fetch discount products';
+  }
+} catch (error) {
+  console.error('❌ Error fetching discounts:', error);
   apiError = error.message;
 }
-
-// Step 2: Fetch discounts from Dutchie POS API for each store
-if (stores.length > 0) {
-  console.log('🚀 Step 2: Fetching discounts from Dutchie for each store');
-
-  for (const store of stores) {
-    // Find API key for this store using flexible matching
-    const apiKey = findApiKey(store.name);
-
-    if (!apiKey) {
-      console.log(`⚠️ No API key found for ${store.name}, skipping`);
-      continue;
-    }
-
-    console.log(`✓ Matched "${store.name}" to API key`);
-
-
-    try {
-      console.log(`🔍 Fetching discounts for ${store.name}`);
-
-      const discounts = await fetchDiscounts(apiKey);
-
-      // Filter active discounts only AND check date ranges
-      const now = new Date();
-      const activeDiscounts = discounts.filter(d => {
-        if (!d.isActive) return false;
-
-        // Check if discount is within valid date range
-        const validFrom = d.validDateFrom ? new Date(d.validDateFrom) : null;
-        const validTo = d.validDateTo ? new Date(d.validDateTo) : null;
-
-        // If validFrom exists and we're before that date, skip
-        if (validFrom && now < validFrom) return false;
-
-        // If validTo exists and we're after that date, skip
-        if (validTo && now > validTo) return false;
-
-        return true;
-      });
-
-      if (activeDiscounts.length > 0) {
-        storeDeals[store.id] = activeDiscounts.slice(0, 12); // Limit to 12 deals per store
-        totalDealsCount += activeDiscounts.length;
-        console.log(`✅ Found ${activeDiscounts.length} discounts for ${store.name}`);
-      } else {
-        console.log(`ℹ️ No active discounts found for ${store.name}`);
-        storeDeals[store.id] = [];
-      }
-    } catch (error) {
-      console.error(`❌ Error fetching discounts for ${store.name}:`, error.message);
-      storeDeals[store.id] = [];
-    }
-
-    // Add a small delay to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 200));
-  }
-
-  console.log(`✅ Total deals loaded: ${totalDealsCount} across ${stores.length} stores`);
-}
-
-// Filter out stores with no deals
-stores = stores.filter(store => storeDeals[store.id]?.length > 0);
 ---
-
-<Layout title="Deals - Cannabis Dispensary Specials | Mint Deals" description="Find the best cannabis deals and specials from Mint Cannabis dispensaries.">
-  <!-- Video Background -->
-  <div class="video-background">
-    <video autoplay loop muted playsinline>
-      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
-    </video>
-  </div>
-
-  <!-- Content Wrapper -->
-  <div class="content-wrapper">
-    <!-- Hero Section -->
-    <div class="text-white hero-section">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-        <!-- Breadcrumb -->
-        <nav class="mb-6 text-sm">
-          <div class="flex items-center justify-center space-x-2">
-            <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
-            <span class="text-green-300">/</span>
-            <span class="text-white">Deals</span>
-          </div>
-        </nav>
-
-        <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
-            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-              DEALS & SPECIALS
-            </span>
-          </h1>
-          <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
-            Discover the best cannabis deals and specials from Mint Cannabis dispensaries
-          </p>
-
-          <!-- Navigation Buttons -->
-          <div class="relative z-10 flex flex-wrap justify-center gap-4 mt-6">
-            <a href="/stores" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-              All Stores
-            </a>
-            <a href="/categories" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-              Browse Categories
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Stats Bar -->
-    <div class="py-4 bg-black bg-opacity-90">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-        <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-3">
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{stores.length}</div>
-            <div class="text-sm text-yellow-400 font-semibold">Stores with Deals</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{totalDealsCount}</div>
-            <div class="text-sm text-yellow-400 font-semibold">Total Specials</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">💰</div>
-            <div class="text-sm text-yellow-400 font-semibold">Save Today</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="bg-black py-12">
-      <div class="max-w-[90%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20">
-
-      <!-- Location Status Bar -->
-      <div id="location-status" class="hidden p-4 mb-8 text-center border-2 border-green-500 rounded-lg bg-gray-900">
-        <div id="location-loading" class="flex items-center justify-center gap-3">
-          <div class="w-5 h-5 border-b-2 border-green-500 rounded-full animate-spin"></div>
-          <span class="text-green-300">Getting your location to show nearest stores first...</span>
-        </div>
-        <div id="location-success" class="hidden text-green-300">
-          📍 Showing stores sorted by distance from you
-        </div>
-        <div id="location-error" class="hidden text-gray-300">
-          📍 Showing all stores (location unavailable)
-        </div>
-      </div>
-
-      {stores.length === 0 ? (
-        <div class="text-center py-16">
-          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
-            <div class="mb-4 text-6xl">💸</div>
-            <h3 class="mt-2 text-lg font-medium">
-              <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-                No deals available
-              </span>
-            </h3>
-            <p class="mt-1 text-sm text-green-300">
-              {apiError ? `Error: ${apiError}` : 'No deals are currently available. Check back soon!'}
-            </p>
-            <div class="mt-6">
-              <a
-                href="/stores"
-                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-transparent text-white rounded-lg font-semibold hover:from-yellow-500 hover:to-transparent transition-all transform hover:scale-105 shadow-xl"
-              >
-                Browse Locations
-              </a>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div>
-
-          <!-- Stores with Deals -->
-          <div id="stores-container" class="space-y-12">
-            {stores.map(store => {
-              const deals = storeDeals[store.id] || [];
-              return (
-              <div
-                class="store-section bg-black rounded-lg border-2 border-green-500 shadow-lg overflow-hidden hover:shadow-2xl hover:border-yellow-400 transition-all"
-                data-store-id={store.id}
-                data-lat={store.latitude || ''}
-                data-lng={store.longitude || ''}
-                data-name={store.name}
-              >
-                {/* Store Header */}
-                <div class="bg-gradient-to-r from-green-900 to-black text-white p-6 border-b-2 border-green-500">
-                  <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex-1">
-                      <div class="flex items-center gap-3 mb-2 flex-wrap">
-                        <h2 class="text-2xl md:text-3xl font-bold">
-                          <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-                            {store.name}
-                          </span>
-                        </h2>
-                        <span class="store-distance hidden px-3 py-1 bg-green-900/90 border border-green-500 rounded-full text-xs font-bold text-green-300"></span>
-                        <span class="px-3 py-1 bg-yellow-400/20 border border-yellow-400 rounded-full text-xs font-bold text-yellow-400">
-                          {deals.length} Deals
-                        </span>
-                      </div>
-                      {store.address && (
-                        <p class="text-green-300 flex items-center gap-2">
-                          <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                          </svg>
-                          {store.address.city && store.address.state ? `${store.address.city}, ${store.address.state}` : 'Location Available'}
-                        </p>
-                      )}
-                    </div>
-                    <div class="text-right">
-                      <a
-                        href={`/location/${store.slug}`}
-                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-transparent text-white rounded-lg font-semibold hover:from-yellow-500 hover:to-transparent transition-all shadow-xl"
-                      >
-                        Store Info
-                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Deals Grid */}
-                <div class="p-6 bg-gray-900">
-                  <div class="mb-6">
-                    <h3 class="text-xl font-bold text-white mb-2">
-                      <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-                        Current Specials
-                      </span>
-                    </h3>
-                    <p class="text-green-300 text-sm">Limited time offers - visit store for details</p>
-                  </div>
-
-                  {deals.length > 0 ? (
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                      {deals.map(discount => {
-                        const badgeColor = getDiscountBadgeColor(discount);
-                        const discountValue = getDiscountValue(discount);
-                        const constraint = discount.constraints?.[0];
-                        const constraintDesc = constraint ? getConstraintDescription(constraint) : '';
-
-                        return (
-                          <div class="bg-gray-800 rounded-lg overflow-hidden border border-green-600 hover:border-yellow-400 transition-all hover:scale-105 shadow-lg">
-                            {/* Discount Image from menuDisplayImageUrl */}
-                            <div class="relative bg-gradient-to-br from-gray-900 to-black h-48 flex items-center justify-center p-4">
-                              <img
-                                src={discount.menuDisplay?.menuDisplayImageUrl || 'https://res.cloudinary.com/dcltaajwj/image/upload/v1759532498/mintdeals/20250930_1524_Floating_Cannabis_Blossoms_simple_compose_01k6ebk5p8fxqbn44jgtfy0mhg_73ce40d66f.png'}
-                                alt={discount.menuDisplay?.menuDisplayName || discount.onlineName || 'Discount'}
-                                class="max-h-full max-w-full object-contain"
-                                loading="lazy"
-                              />
-                              {discount.isBundledDiscount && (
-                                <div class="absolute top-2 right-2 bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                                  BUNDLE
-                                </div>
-                              )}
-                            </div>
-
-                            {/* DEBUG: Show entire discount object */}
-                            <div class="bg-red-900/50 border border-red-500 p-2 text-xs">
-                              <div class="text-red-300 font-bold mb-1">DEBUG - Full Discount Object:</div>
-                              <pre class="text-gray-300 font-mono text-xs overflow-auto max-h-60 bg-black/50 p-2 rounded">
-                                {JSON.stringify(discount, null, 2)}
-                              </pre>
-                            </div>
-
-                            {/* Call to Action - onlineName */}
-                            <div class="bg-gradient-to-r from-yellow-400 to-orange-500 p-3">
-                              <h4 class="text-white font-bold text-sm text-center line-clamp-2 min-h-[2.5rem] flex items-center justify-center">
-                                {discount.onlineName || discount.menuDisplay?.menuDisplayName || discount.discountDescription}
-                              </h4>
-                            </div>
-
-                            {/* Discount Details */}
-                            <div class="p-4">
-                              {/* Constraint Info */}
-                              {constraintDesc && (
-                                <div class="bg-green-900/30 border border-green-700 rounded-lg p-2 mb-3">
-                                  <div class="text-xs text-green-300 font-medium text-center">
-                                    📦 {constraintDesc}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Description from menuDisplayDescription */}
-                              {discount.menuDisplay?.menuDisplayDescription && (
-                                <p class="text-gray-400 text-xs mb-3 line-clamp-2 text-center">
-                                  {discount.menuDisplay.menuDisplayDescription}
-                                </p>
-                              )}
-
-                              {/* Shop Now Button */}
-                              <div class="flex items-center justify-center">
-                                <a
-                                  href={`/location/${store.slug}/menu`}
-                                  class="shop-now-btn inline-flex items-center px-6 py-2 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
-                                >
-                                  Shop Now
-                                  <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                  </svg>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div class="text-center py-8 text-gray-400">
-                      <p>No deals currently available at this location.</p>
-                    </div>
-                  )}
-
-                  {/* Additional Info */}
-                  <div class="mt-6 flex flex-wrap gap-3">
-                    {store.phone && (
-                      <a
-                        href={`tel:${store.phone}`}
-                        class="inline-flex items-center px-4 py-2 bg-gray-800 border border-green-600 text-green-300 rounded-lg hover:bg-gray-700 transition-colors"
-                      >
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                        </svg>
-                        {store.phone}
-                      </a>
-                    )}
-                    <a
-                      href={`/location/${store.slug}/menu`}
-                      class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-transparent text-white rounded-lg hover:from-yellow-500 hover:to-transparent transition-all font-medium shadow-xl"
-                    >
-                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                      </svg>
-                      View Full Menu
-                    </a>
-                  </div>
-                </div>
-              </div>
-            )})}
-          </div>
-
-          <!-- Call to Action -->
-          <div class="mt-16 bg-black border-2 border-yellow-400 rounded-lg p-8 text-center">
-            <h2 class="text-2xl font-bold mb-4">
-              <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-                🎉 Don't Miss Out on Great Deals!
-              </span>
-            </h2>
-            <p class="text-green-300 mb-6 max-w-2xl mx-auto">
-              Visit your nearest Mint Cannabis location to take advantage of these amazing deals. Offers may vary by location.
-            </p>
-            <div class="flex flex-wrap justify-center gap-4">
-              <a
-                href="/stores"
-                class="bg-gradient-to-r from-yellow-400 to-transparent text-white px-6 py-3 rounded-lg font-semibold hover:from-yellow-500 hover:to-transparent transition-all transform hover:scale-105 shadow-xl"
-              >
-                Find a Location
-              </a>
-              <a
-                href="/categories"
-                class="bg-gray-800 border border-green-600 text-green-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
-              >
-                Shop by Category
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-      </div>
-    </div>
-  </div>
-</Layout>
-
-<script>
-  // Haversine formula to calculate distance between two coordinates
-  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 3958.756; // Earth's radius in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-
-    return distance;
-  }
-
-  // Format distance display
-  function formatDistance(distance: number): string {
-    if (distance < 1) {
-      return `${(distance * 5280).toFixed(0)} ft`;
-    } else {
-      return `${distance.toFixed(1)} mi`;
-    }
-  }
-
-  // Sort stores by distance and update display
-  function sortStoresByDistance(userLat: number, userLon: number) {
-    const storeElements = Array.from(document.querySelectorAll('.store-section'));
-    const container = document.getElementById('stores-container');
-
-    if (!container) return;
-
-    // Calculate distances and store in array
-    const storesWithDistance = storeElements.map(element => {
-      const lat = parseFloat(element.getAttribute('data-lat') || '');
-      const lng = parseFloat(element.getAttribute('data-lng') || '');
-
-      let distance = Infinity;
-      if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-        distance = calculateDistance(userLat, userLon, lat, lng);
-      }
-
-      return {
-        element: element as HTMLElement,
-        distance: distance,
-        name: element.getAttribute('data-name') || ''
-      };
-    });
-
-    // Sort by distance (closest first)
-    storesWithDistance.sort((a, b) => a.distance - b.distance);
-
-    // Update DOM order and add distance labels
-    storesWithDistance.forEach((store) => {
-      // Update distance display
-      const distanceElement = store.element.querySelector('.store-distance');
-      if (distanceElement && store.distance !== Infinity) {
-        distanceElement.textContent = formatDistance(store.distance);
-        distanceElement.classList.remove('hidden');
-      }
-
-      // Re-append to change order
-      container.appendChild(store.element);
-    });
-
-    console.log('🏪 Stores sorted by distance:', storesWithDistance.map(s => ({
-      name: s.name,
-      distance: s.distance !== Infinity ? formatDistance(s.distance) : 'Unknown'
-    })));
-  }
-
-  // Main geolocation function
-  function setupLocationSorting() {
-    const locationStatus = document.getElementById('location-status');
-    const locationLoading = document.getElementById('location-loading');
-    const locationSuccess = document.getElementById('location-success');
-    const locationError = document.getElementById('location-error');
-
-    if (!locationStatus || !locationLoading || !locationSuccess || !locationError) return;
-
-    // Show status bar
-    locationStatus.classList.remove('hidden');
-
-    // Check if geolocation is supported
-    if (!navigator.geolocation) {
-      console.log('📍 Geolocation not supported');
-      locationLoading.classList.add('hidden');
-      locationError.classList.remove('hidden');
-      return;
-    }
-
-    // Get user's location
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userLat = position.coords.latitude;
-        const userLon = position.coords.longitude;
-
-        console.log('📍 User location obtained:', { lat: userLat, lon: userLon });
-
-        // Update UI
-        locationLoading.classList.add('hidden');
-        locationSuccess.classList.remove('hidden');
-
-        // Sort stores by distance
-        sortStoresByDistance(userLat, userLon);
-
-        // Hide status after 3 seconds
-        setTimeout(() => {
-          locationStatus.style.transition = 'opacity 0.5s ease-out';
-          locationStatus.style.opacity = '0';
-          setTimeout(() => {
-            locationStatus.classList.add('hidden');
-            locationStatus.style.opacity = '1';
-          }, 500);
-        }, 3000);
-      },
-      (error) => {
-        console.log('📍 Geolocation error:', error.message);
-
-        // Update UI for error
-        locationLoading.classList.add('hidden');
-        locationError.classList.remove('hidden');
-
-        // Hide status after 3 seconds
-        setTimeout(() => {
-          locationStatus.style.transition = 'opacity 0.5s ease-out';
-          locationStatus.style.opacity = '0';
-          setTimeout(() => {
-            locationStatus.classList.add('hidden');
-            locationStatus.style.opacity = '1';
-          }, 500);
-        }, 3000);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
-      }
-    );
-  }
-
-  // Initialize when DOM is loaded
-  document.addEventListener('DOMContentLoaded', () => {
-    // Only run if we have stores on the page
-    if (document.querySelectorAll('.store-section').length > 0) {
-      setupLocationSorting();
-    }
-  });
-</script>
 
 <style>
   body {
@@ -745,10 +137,11 @@ stores = stores.filter(store => storeDeals[store.id]?.length > 0);
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(to top,  rgba(41, 163, 41, 0.35), rgba(51, 204, 51, 0.3), rgba(92, 214, 92, 0.25), rgba(133, 224, 133, 0.2), rgba(194, 240, 194, 0.15), rgba(235, 250, 235, 0.1), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+    background-image: linear-gradient(to top, var(--theme-bg-start), var(--theme-bg-end));
     mix-blend-mode: color;
     pointer-events: none;
     z-index: 1;
+    transition: background-image 0.5s ease;
   }
   .video-background video {
     object-fit: cover;
@@ -779,20 +172,6 @@ stores = stores.filter(store => storeDeals[store.id]?.length > 0);
     }
   }
 
-  /* Dutchie carousel styling */
-  .dutchie-carousel-container {
-    min-height: 400px;
-  }
-
-  /* Print-friendly styling */
-  @media print {
-    .bg-black {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-  }
-
-  /* Line clamp utilities */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -800,27 +179,287 @@ stores = stores.filter(store => storeDeals[store.id]?.length > 0);
     overflow: hidden;
   }
 
-  /* Moving gradient animation for Shop Now button */
-  @keyframes gradient-shift {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .shop-now-btn {
-    background: linear-gradient(90deg, #10b981, #059669, #34d399, #10b981, #059669);
-    background-size: 200% 100%;
-    animation: gradient-shift 3s ease infinite;
+  /* Product card hover effects */
+  .product-card {
+    transition: all 0.3s ease;
   }
 
-  .shop-now-btn:hover {
-    animation: gradient-shift 1.5s ease infinite;
-    box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+  .product-card:hover {
+    transform: translateY(-8px);
+  }
+
+  .product-card img {
+    transition: transform 0.5s ease;
+  }
+
+  .product-card:hover img {
+    transform: scale(1.1);
   }
 </style>
+
+<Layout title="Deals & Specials - Cannabis Dispensary Promotions | Mint Deals" description="Discover the best cannabis deals and specials. Save on premium cannabis products at Mint Cannabis dispensaries.">
+  <!-- Video Background -->
+  <div class="video-background">
+    <video autoplay loop muted playsinline>
+      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+    <!-- Hero Section -->
+    <div class="text-white hero-section">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+        <!-- Breadcrumb -->
+        <nav class="mb-6 text-sm">
+          <div class="flex items-center justify-center space-x-2">
+            <a href="/" class="text-yellow-400 hover:text-yellow-300 transition-colors">Home</a>
+            <span class="text-green-300">/</span>
+            <span class="text-white">Deals</span>
+          </div>
+        </nav>
+
+        <div class="text-center">
+          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
+            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent uppercase">
+              DEALS & SPECIALS
+            </span>
+          </h1>
+          <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
+            Discover the best cannabis deals and save on premium products
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Store Info Bar -->
+    {storeInfo && (
+      <div class="py-6 bg-black/90">
+        <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+          <div class="grid grid-cols-1 gap-6 text-center md:grid-cols-3">
+            <div class="p-4 border-2 border-green-500 rounded-lg bg-green-900/20">
+              <div class="mb-2 text-3xl font-bold text-green-400">{storeInfo.count}</div>
+              <div class="text-sm text-yellow-400 font-semibold uppercase">Products on Sale</div>
+            </div>
+            <div class="p-4 border-2 border-green-500 rounded-lg bg-green-900/20">
+              <div class="mb-2 text-xl font-bold text-green-400">{storeInfo.name}</div>
+              <div class="text-sm text-yellow-400 font-semibold uppercase">Featured Store</div>
+            </div>
+            <div class="p-4 border-2 border-green-500 rounded-lg bg-green-900/20">
+              <div class="mb-2 text-xl font-bold text-green-400">💰</div>
+              <div class="text-sm text-yellow-400 font-semibold uppercase">Save Big Today</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    <!-- Main Content -->
+    <div class="py-16">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+
+        <!-- Location Status Bar -->
+        <div id="location-status" class="hidden p-4 mb-8 text-center border-2 border-green-500 rounded-lg bg-green-900/50">
+          <div id="location-loading" class="flex items-center justify-center gap-3">
+            <div class="w-5 h-5 border-b-2 border-yellow-400 rounded-full animate-spin"></div>
+            <span class="text-yellow-400">Finding closest stores with deals...</span>
+          </div>
+          <div id="location-success" class="hidden text-green-300">
+            📍 Showing deals from the 5 closest stores
+          </div>
+          <div id="location-error" class="hidden text-yellow-400">
+            📍 Showing all deals (location unavailable)
+          </div>
+        </div>
+
+        {apiError ? (
+          <div class="py-12 text-center">
+            <div class="max-w-md p-8 mx-auto bg-red-900 rounded-lg bg-opacity-80">
+              <div class="mb-4 text-6xl text-red-400">⚠️</div>
+              <h3 class="mb-2 text-lg font-medium text-red-200">API Error</h3>
+              <p class="text-sm text-red-300">{apiError}</p>
+              <div class="mt-6">
+                <a
+                  href="/stores"
+                  class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-transparent text-white rounded-lg font-semibold hover:from-yellow-500 hover:to-transparent transition-all transform hover:scale-105 shadow-xl"
+                >
+                  Browse Locations
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : discountProducts.length === 0 ? (
+          <div class="text-center py-16">
+            <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
+              <div class="mb-4 text-6xl">💸</div>
+              <h3 class="mt-2 text-lg font-medium text-yellow-400">
+                No deals available right now
+              </h3>
+              <p class="mt-2 text-sm text-green-300">
+                Check back soon for amazing deals and specials!
+              </p>
+              <div class="mt-6">
+                <a
+                  href="/stores"
+                  class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-transparent text-white rounded-lg font-semibold hover:from-yellow-500 hover:to-transparent transition-all transform hover:scale-105 shadow-xl"
+                >
+                  Browse Locations
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <!-- Section Title -->
+            <div class="mb-8 text-center">
+              <h2 class="mb-3 text-3xl font-bold text-white uppercase">
+                Featured Deals
+              </h2>
+              <p class="text-green-300">
+                Limited time offers on premium cannabis products
+              </p>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {discountProducts.map(product => {
+                const primaryDiscount = product.discounts?.[0];
+                const badge = getDiscountBadge(primaryDiscount);
+
+                return (
+                  <div class="product-card relative overflow-hidden bg-black border-2 border-green-500 rounded-xl shadow-lg hover:shadow-2xl hover:border-yellow-400 group">
+                    {/* Red Banner with Discount Name */}
+                    {primaryDiscount && (
+                      <div class="w-full bg-gradient-to-r from-red-600 to-red-700 py-2 px-3">
+                        <div class="text-white font-bold text-xs text-center uppercase truncate">
+                          {primaryDiscount.discountName}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Discount Badge */}
+                    {primaryDiscount && (
+                      <div class="absolute top-14 right-3 z-10">
+                        <div class={`bg-gradient-to-r ${badge.color} px-3 py-2 rounded-lg shadow-lg`}>
+                          <div class="text-white font-bold text-sm text-center">
+                            {badge.text}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Product Image */}
+                    <div class="relative h-64 bg-gradient-to-br from-gray-900 to-black overflow-hidden">
+                      {product.productImageUrl ? (
+                        <img
+                          src={product.productImageUrl}
+                          alt={product.productName}
+                          class="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div class="flex items-center justify-center w-full h-full">
+                          <span class="text-6xl opacity-30">🌿</span>
+                        </div>
+                      )}
+                      {/* Overlay gradient */}
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    </div>
+
+                    {/* Product Info */}
+                    <div class="p-4">
+                      {/* Brand */}
+                      {product.productBrand && (
+                        <div class="mb-2">
+                          <span class="text-xs font-semibold text-green-400 uppercase">
+                            {product.productBrand}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Product Name */}
+                      <h3 class="text-white font-bold text-base mb-2 line-clamp-2 min-h-[2.5rem]">
+                        {product.productName}
+                      </h3>
+
+                      {/* Category */}
+                      {product.productCategory && (
+                        <div class="mb-3">
+                          <span class="inline-block px-2 py-1 text-xs font-medium text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 rounded">
+                            {product.productCategory}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Price */}
+                      <div class="flex items-center justify-between mb-4">
+                        <div>
+                          <span class="text-2xl font-bold text-green-400">
+                            ${product.productPrice.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Discount Details */}
+                      {primaryDiscount && primaryDiscount.validUntil && (
+                        <div class="mb-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
+                          <div class="text-xs text-yellow-400 text-center">
+                            ⏰ Valid until {formatDate(primaryDiscount.validUntil)}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Shop Now Button */}
+                      <a
+                        href="/stores"
+                        class="block w-full text-center px-4 py-3 bg-gradient-to-r from-yellow-400 to-transparent text-white rounded-lg font-semibold hover:from-yellow-500 hover:to-transparent transition-all transform hover:scale-105 shadow-xl"
+                      >
+                        Shop Now
+                        <svg class="inline w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <!-- Call to Action -->
+            <div class="mt-16 bg-black border-2 border-yellow-400 rounded-lg p-8 text-center">
+              <h2 class="text-2xl font-bold mb-4">
+                <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent uppercase">
+                  Don't Miss Out on These Amazing Deals!
+                </span>
+              </h2>
+              <p class="text-green-300 mb-6 max-w-2xl mx-auto">
+                Visit {storeInfo?.name || 'your nearest Mint Cannabis location'} to take advantage of these special offers. Limited time only!
+              </p>
+              <div class="flex flex-wrap justify-center gap-4">
+                <a
+                  href="/stores"
+                  class="bg-gradient-to-r from-yellow-400 to-transparent text-white px-8 py-3 rounded-lg font-semibold hover:from-yellow-500 hover:to-transparent transition-all transform hover:scale-105 shadow-xl"
+                >
+                  Find a Location
+                </a>
+                <a
+                  href="/categories"
+                  class="bg-black border-2 border-green-500 text-green-300 px-8 py-3 rounded-lg font-semibold hover:bg-green-900/20 hover:border-yellow-400 transition-colors"
+                >
+                  Shop by Category
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</Layout>
