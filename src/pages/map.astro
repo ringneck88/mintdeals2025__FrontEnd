@@ -366,22 +366,42 @@ const polaroidsWithPositions = selectedPolaroids.map((polaroid, index) => {
 
   <!-- Map initialization script -->
   <script is:inline define:vars={{ center: mapCenter, apiBase: API_BASE }}>
+    // Global flag to prevent duplicate initialization
+    window.mapInitialized = window.mapInitialized || false;
+
     // Wait for ALL libraries to load before initializing
     function waitForLibraries() {
       return new Promise((resolve) => {
-        if (typeof L !== 'undefined' && typeof L.markerClusterGroup !== 'undefined') {
+        const checkInterval = setInterval(() => {
+          if (typeof L !== 'undefined' && typeof L.markerClusterGroup !== 'undefined') {
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 100);
+
+        // Timeout after 10 seconds
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          console.error('❌ Timeout waiting for Leaflet libraries');
           resolve();
-        } else {
-          setTimeout(() => waitForLibraries().then(resolve), 50);
-        }
+        }, 10000);
       });
     }
 
     // Initialize everything
-    (async function() {
+    async function initializeMap() {
+      // Prevent duplicate initialization
+      if (window.mapInitialized) {
+        console.log('⏭️ Map already initialized, skipping');
+        return;
+      }
+
       // Wait for libraries
       await waitForLibraries();
       console.log('✅ Leaflet and MarkerCluster loaded');
+
+      // Mark as initialized
+      window.mapInitialized = true;
 
       let map;
       let stores = [];
@@ -640,7 +660,24 @@ const polaroidsWithPositions = selectedPolaroids.map((polaroid, index) => {
 
       // Start fetching stores
       await fetchStores();
-    })(); // End of async IIFE
+    } // End of initializeMap
+
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeMap);
+    } else {
+      // DOM already ready, check if we need to initialize
+      if (!window.mapInitialized) {
+        initializeMap();
+      }
+    }
+
+    // Also handle Astro view transitions
+    document.addEventListener('astro:page-load', () => {
+      // Reset flag for view transitions to allow re-initialization
+      window.mapInitialized = false;
+      initializeMap();
+    });
   </script>
 
   <script is:inline>
