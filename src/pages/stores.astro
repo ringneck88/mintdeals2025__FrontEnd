@@ -9,6 +9,54 @@ let error = null;
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
+// Available lifestyle polaroid images
+const lifestyleImages = [
+  { img: "20251001_1034_Joyful Moment Together_simple_compose_01k6gdah5ef7n9mj7hyscbm439.png", title: "Share Joy", vibe: "Social" },
+  { img: "20251001_1041_Serene Morning Ritual_simple_compose_01k6gdpzjeexe95stnx5nn3y9b.png", title: "Morning Zen", vibe: "Relaxation" },
+  { img: "20251001_1106_Festival Sunset Vibes_simple_compose_01k6gf43hcednabq9xzx5rk5tj.png", title: "Festival Fun", vibe: "Adventure" },
+  { img: "20251001_1118_Neon Night Stroll_simple_compose_01k6gftp4ae6r8g2b610xw1f4a.png", title: "Night Life", vibe: "Urban" },
+  { img: "20251001_1124_Desert Highway Hangout_simple_compose_01k6gg6918ef5br5x494z7h7gy.png", title: "Desert Vibes", vibe: "Adventure" },
+  { img: "20251001_1127_Morning Serenity Moment_simple_compose_01k6ggdyvcfhwtr97712pe392e.png", title: "Serenity", vibe: "Relaxation" },
+  { img: "20251001_1130_Kitchen Gathering Joy_simple_compose_01k6ggh1vhe1gvqdd64sfj0web.png", title: "Kitchen Joy", vibe: "Social" },
+  { img: "20251001_1138_Jazz Club Vibes_simple_compose_01k6ggzbdeeefb6t68pprex49z.png", title: "Jazz Club", vibe: "Urban" },
+  { img: "20251001_1141_Sunny Park Gathering_simple_compose_01k6gh5v42fx4a4gkbdpe9rvsb.png", title: "Park Day", vibe: "Outdoor" },
+  { img: "20251001_1149_Backyard BBQ Gathering_simple_compose_01k6ghjj7ff7prsem7192hhz5f.png", title: "BBQ Time", vibe: "Social" },
+];
+
+// Randomly select 2-6 polaroids for the hero
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Random count between 2 and 6
+const polaroidCount = Math.floor(Math.random() * 5) + 2;
+const selectedPolaroids = shuffleArray(lifestyleImages).slice(0, polaroidCount);
+
+// Generate random positions spread across entire hero section
+const polaroidsWithPositions = selectedPolaroids.map((polaroid, index) => {
+  // Positions closer to center but avoiding text area
+  const positions = [
+    { top: '8%', left: '15%' },
+    { top: '10%', right: '18%' },
+    { top: '28%', left: '12%' },
+    { top: '32%', right: '15%' },
+    { top: '55%', left: '18%' },
+    { top: '58%', right: '20%' },
+    { bottom: '18%', left: '14%' },
+    { bottom: '15%', right: '16%' },
+    { top: '20%', left: '30%' },
+    { top: '68%', right: '28%' },
+  ];
+  const position = positions[index % positions.length];
+  const rotation = Math.random() * 20 - 10; // Random rotation between -10 and 10 degrees
+  return { ...polaroid, ...position, rotation };
+});
+
 try {
   console.log('🚀 Fetching stores and regions from API');
 
@@ -211,6 +259,13 @@ try {
       padding: 1rem 0;
     }
   }
+
+  @media (min-width: 1024px) {
+    .hero-section {
+      min-height: 40vh;
+      padding: 2rem 0;
+    }
+  }
 </style>
 
 <Layout title="Store Locations - Mint Cannabis">
@@ -224,8 +279,34 @@ try {
   <!-- Content Wrapper -->
   <div class="content-wrapper">
     <!-- Hero Section -->
-    <div class="text-white hero-section">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+    <div class="text-white hero-section relative">
+      <!-- Floating Polaroids with Mouse Tracking -->
+      {polaroidsWithPositions.map((polaroid, index) => {
+        const positionStyle = Object.entries(polaroid)
+          .filter(([key]) => ['top', 'bottom', 'left', 'right'].includes(key))
+          .map(([key, value]) => `${key}: ${value}`)
+          .join('; ');
+
+        return (
+          <div
+            class="hidden lg:block absolute polaroid-float"
+            style={`${positionStyle}; width: 140px; z-index: 1;`}
+            data-speed={0.02 + (index * 0.01)}
+          >
+            <div class="bg-white rounded-lg shadow-2xl p-1.5" style={`transform: rotate(${polaroid.rotation}deg);`}>
+              <div class="relative w-full h-20 bg-gray-200 overflow-hidden rounded">
+                <img src={`/assets/lifestyleimages/${polaroid.img}`} alt={polaroid.title} class="w-full h-full object-cover" />
+              </div>
+              <img src="/favicon.png" alt="Mint" class="absolute left-2 w-8 h-8 rounded-full shadow-lg" style="bottom: 18px; z-index: 20;" />
+              <div class="relative mt-1.5 text-center pt-3">
+                <p class="text-xs font-bold text-gray-800" style="font-family: 'Permanent Marker', cursive;">{polaroid.title}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%] relative z-10">
         <!-- Breadcrumb -->
         <nav class="mb-6 text-sm">
           <div class="flex items-center space-x-2">
@@ -746,6 +827,31 @@ try {
         card.style.transform = 'translateY(20px)';
         card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         observer.observe(card);
+      });
+    });
+  </script>
+
+  <script>
+    // Mouse tracking for polaroid movement
+    document.addEventListener('DOMContentLoaded', () => {
+      const polaroids = document.querySelectorAll('.polaroid-float');
+
+      document.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+
+        polaroids.forEach((polaroid) => {
+          const speed = parseFloat(polaroid.getAttribute('data-speed') || '0.02');
+          const x = (mouseX - 0.5) * 100 * speed;
+          const y = (mouseY - 0.5) * 100 * speed;
+
+          // Get the inner div with rotation
+          const innerDiv = polaroid.querySelector('.bg-white');
+          if (innerDiv) {
+            const currentRotation = innerDiv.style.transform.match(/rotate\(([^)]+)\)/)?.[1] || '0deg';
+            innerDiv.style.transform = `rotate(${currentRotation}) translate(${x}px, ${y}px)`;
+          }
+        });
       });
     });
   </script>

@@ -39,6 +39,54 @@ function getCategoryColor(index) {
   return colors[index % colors.length];
 }
 
+// Available lifestyle polaroid images
+const lifestyleImages = [
+  { img: "20251001_1034_Joyful Moment Together_simple_compose_01k6gdah5ef7n9mj7hyscbm439.png", title: "Share Joy", vibe: "Social" },
+  { img: "20251001_1041_Serene Morning Ritual_simple_compose_01k6gdpzjeexe95stnx5nn3y9b.png", title: "Morning Zen", vibe: "Relaxation" },
+  { img: "20251001_1106_Festival Sunset Vibes_simple_compose_01k6gf43hcednabq9xzx5rk5tj.png", title: "Festival Fun", vibe: "Adventure" },
+  { img: "20251001_1118_Neon Night Stroll_simple_compose_01k6gftp4ae6r8g2b610xw1f4a.png", title: "Night Life", vibe: "Urban" },
+  { img: "20251001_1124_Desert Highway Hangout_simple_compose_01k6gg6918ef5br5x494z7h7gy.png", title: "Desert Vibes", vibe: "Adventure" },
+  { img: "20251001_1127_Morning Serenity Moment_simple_compose_01k6ggdyvcfhwtr97712pe392e.png", title: "Serenity", vibe: "Relaxation" },
+  { img: "20251001_1130_Kitchen Gathering Joy_simple_compose_01k6ggh1vhe1gvqdd64sfj0web.png", title: "Kitchen Joy", vibe: "Social" },
+  { img: "20251001_1138_Jazz Club Vibes_simple_compose_01k6ggzbdeeefb6t68pprex49z.png", title: "Jazz Club", vibe: "Urban" },
+  { img: "20251001_1141_Sunny Park Gathering_simple_compose_01k6gh5v42fx4a4gkbdpe9rvsb.png", title: "Park Day", vibe: "Outdoor" },
+  { img: "20251001_1149_Backyard BBQ Gathering_simple_compose_01k6ghjj7ff7prsem7192hhz5f.png", title: "BBQ Time", vibe: "Social" },
+];
+
+// Randomly select 2-6 polaroids for the hero
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Random count between 2 and 6
+const polaroidCount = Math.floor(Math.random() * 5) + 2;
+const selectedPolaroids = shuffleArray(lifestyleImages).slice(0, polaroidCount);
+
+// Generate random positions spread across entire hero section
+const polaroidsWithPositions = selectedPolaroids.map((polaroid, index) => {
+  // Positions closer to center but avoiding text area
+  const positions = [
+    { top: '8%', left: '15%' },
+    { top: '10%', right: '18%' },
+    { top: '28%', left: '12%' },
+    { top: '32%', right: '15%' },
+    { top: '55%', left: '18%' },
+    { top: '58%', right: '20%' },
+    { bottom: '18%', left: '14%' },
+    { bottom: '15%', right: '16%' },
+    { top: '20%', left: '30%' },
+    { top: '68%', right: '28%' },
+  ];
+  const position = positions[index % positions.length];
+  const rotation = Math.random() * 20 - 10; // Random rotation between -10 and 10 degrees
+  return { ...polaroid, ...position, rotation };
+});
+
 try {
   console.log('🚀 Fetching product categories from Railway API');
 
@@ -180,6 +228,13 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
     .hero-section {
       min-height: 30vh;
       padding: 1rem 0;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-section {
+      min-height: 40vh;
+      padding: 2rem 0;
     }
   }
   .line-clamp-2 {
@@ -325,10 +380,36 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
   <!-- Content Wrapper -->
   <div class="content-wrapper">
     <!-- Hero Section -->
-    <div class="text-white hero-section">
+    <div class="text-white hero-section relative">
+      <!-- Floating Polaroids with Mouse Tracking -->
+      {polaroidsWithPositions.map((polaroid, index) => {
+        const positionStyle = Object.entries(polaroid)
+          .filter(([key]) => ['top', 'bottom', 'left', 'right'].includes(key))
+          .map(([key, value]) => `${key}: ${value}`)
+          .join('; ');
+
+        return (
+          <div
+            class="hidden lg:block absolute polaroid-float"
+            style={`${positionStyle}; width: 140px; z-index: 1;`}
+            data-speed={0.02 + (index * 0.01)}
+          >
+            <div class="bg-white rounded-lg shadow-2xl p-1.5" style={`transform: rotate(${polaroid.rotation}deg);`}>
+              <div class="relative w-full h-20 bg-gray-200 overflow-hidden rounded">
+                <img src={`/assets/lifestyleimages/${polaroid.img}`} alt={polaroid.title} class="w-full h-full object-cover" />
+              </div>
+              <img src="/favicon.png" alt="Mint" class="absolute left-2 w-8 h-8 rounded-full shadow-lg" style="bottom: 18px; z-index: 20;" />
+              <div class="relative mt-1.5 text-center pt-3">
+                <p class="text-xs font-bold text-gray-800" style="font-family: 'Permanent Marker', cursive;">{polaroid.title}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         <!-- Breadcrumb -->
-        <nav class="mb-6 text-sm">
+        <nav class="mb-6 text-sm relative z-10">
           <div class="flex items-center justify-center space-x-2">
             <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
             <span class="text-green-300">/</span>
@@ -336,16 +417,19 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
           </div>
         </nav>
 
-        <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold text-white uppercase md:text-6xl drop-shadow-2xl" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);">
-            CATEGORIES
-          </h1>
-          <p class="max-w-2xl mx-auto mb-6 text-lg text-green-500 pb-1 leading-snug md:text-xl drop-shadow-lg">
-            Explore our comprehensive range of premium cannabis products
-          </p>
-          <a href="/stores" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
-            Find Locations →
-          </a>
+        <div class="text-center relative">
+          <!-- Center Content -->
+          <div class="relative z-10">
+            <h1 class="mb-4 text-4xl font-bold text-white uppercase md:text-6xl drop-shadow-2xl" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);">
+              CATEGORIES
+            </h1>
+            <p class="max-w-2xl mx-auto mb-6 text-lg text-green-500 pb-1 leading-snug md:text-xl drop-shadow-lg">
+              Explore our comprehensive range of premium cannabis products
+            </p>
+            <a href="/stores" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+              Find Locations →
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -357,9 +441,6 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
           <h2 class="mb-3 text-2xl font-bold text-white uppercase md:text-3xl">
             BROWSE ALL CATEGORIES
           </h2>
-          <p class="text-lg text-green-500">
-            Click on any category to explore products
-          </p>
         </div>
 
         {apiError ? (
@@ -370,45 +451,63 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
             </div>
           </div>
         ) : categories.length > 0 ? (
-          <div class="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:gap-8">
-            {categories.map((category, index) => (
-              <a
-                href={`/${category.slug}`}
-                class="relative overflow-hidden transition-all transform bg-gradient-to-br from-green-900/20 to-black/60 group rounded-xl hover:shadow-lg hover:shadow-yellow-400/30 hover:scale-105 hover:-translate-y-1"
-              >
-                {/* Category Image or Icon */}
-                {category.image ? (
-                  <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50 border border-black">
-                    <img
-                      src={category.image}
-                      alt={category.name}
-                      class="object-cover w-full h-full transition-opacity opacity-80 group-hover:opacity-100"
-                    />
-                  </div>
-                ) : (
-                  <div class={`h-40 bg-gradient-to-br ${category.colorGradient} flex items-center justify-center border border-black`}>
-                    <span class="text-5xl">{category.icon}</span>
-                  </div>
-                )}
+          <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-1 auto-rows-[180px]">
+            {categories.map((category, index) => {
+              // Define bento grid sizes - some span more cells
+              const bentoSizes = [
+                'md:col-span-2 md:row-span-2', // 0: Large featured
+                'md:col-span-2 md:row-span-2', // 1: Large featured
+                'md:col-span-2 md:row-span-1', // 2: Wide
+                'md:col-span-2 md:row-span-2', // 3: Large featured
+                'md:col-span-2 md:row-span-1', // 4: Wide
+                'md:col-span-2 md:row-span-1', // 5: Wide
+                'md:col-span-3 md:row-span-1', // 6: Extra wide
+                'md:col-span-3 md:row-span-1', // 7: Extra wide
+                'md:col-span-2 md:row-span-1', // 8: Regular
+                'md:col-span-4 md:row-span-1', // 9: Full width
+              ];
 
-                {/* Category Content */}
-                <div class="p-4">
-                  <h3 class="mb-2 text-lg font-bold text-white uppercase">
-                    {category.name}
-                  </h3>
-                  {category.description && (
-                    <p class="mb-2 text-xs text-green-500 line-clamp-2">
-                      {category.description}
-                    </p>
-                  )}
-                  <div class="flex items-center justify-end">
-                    <span class="text-yellow-400 transition-transform group-hover:translate-x-1">
-                      →
-                    </span>
+              return (
+                <a
+                  href={`/${category.slug}`}
+                  class={`bento-card group relative overflow-hidden rounded-sm shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.01] ${bentoSizes[index % bentoSizes.length] || 'md:col-span-2'}`}
+                >
+                  <div class="absolute inset-0">
+                    {category.image ? (
+                      <img
+                        src={category.image}
+                        alt={category.name}
+                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div class={`w-full h-full bg-gradient-to-br ${category.colorGradient}`}>
+                        <div class="absolute inset-0 flex items-center justify-center opacity-20">
+                          <span class="text-9xl">{category.icon}</span>
+                        </div>
+                      </div>
+                    )}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
                   </div>
-                </div>
-              </a>
-            ))}
+
+                  <div class="relative h-full flex flex-col justify-end p-6">
+                    <div class="transform transition-transform duration-300 group-hover:translate-y-[-8px]">
+                      <h3 class="text-2xl font-bold text-white mb-2 drop-shadow-lg uppercase">
+                        {category.name}
+                      </h3>
+                      <p class="text-sm text-green-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
+                        {category.description || `Explore our ${category.name.toLowerCase()} collection`}
+                      </p>
+                      <div class="mt-3 flex items-center text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span class="text-sm font-medium">Explore</span>
+                        <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         ) : (
           <div class="py-12 text-center">
@@ -475,3 +574,28 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
     </div>
   </div>
 </Layout>
+
+<script>
+  // Mouse tracking for polaroid movement
+  document.addEventListener('DOMContentLoaded', () => {
+    const polaroids = document.querySelectorAll('.polaroid-float');
+
+    document.addEventListener('mousemove', (e) => {
+      const mouseX = e.clientX / window.innerWidth;
+      const mouseY = e.clientY / window.innerHeight;
+
+      polaroids.forEach((polaroid) => {
+        const speed = parseFloat(polaroid.getAttribute('data-speed') || '0.02');
+        const x = (mouseX - 0.5) * 100 * speed;
+        const y = (mouseY - 0.5) * 100 * speed;
+
+        // Get the inner div with rotation
+        const innerDiv = polaroid.querySelector('.bg-white');
+        if (innerDiv) {
+          const currentRotation = innerDiv.style.transform.match(/rotate\(([^)]+)\)/)?.[1] || '0deg';
+          innerDiv.style.transform = `rotate(${currentRotation}) translate(${x}px, ${y}px)`;
+        }
+      });
+    });
+  });
+</script>

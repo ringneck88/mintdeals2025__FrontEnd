@@ -5,11 +5,14 @@
 <!-- Inline script to prevent flash - runs immediately before page renders -->
 <script is:inline>
   (function() {
-    // Hide age gate by default if already verified
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('ageVerified') === 'true') {
-      document.documentElement.style.setProperty('--age-gate-display', 'none');
-    } else {
-      document.documentElement.style.setProperty('--age-gate-display', 'flex');
+    // Check localStorage immediately and set display before render
+    const isVerified = typeof localStorage !== 'undefined' && localStorage.getItem('ageVerified') === 'true';
+
+    if (isVerified) {
+      // Add style to head to hide immediately
+      const style = document.createElement('style');
+      style.textContent = '#ageGate { display: none !important; }';
+      document.head.appendChild(style);
     }
   })();
 </script>
@@ -258,7 +261,7 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-    display: var(--age-gate-display, flex);
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 99999;
