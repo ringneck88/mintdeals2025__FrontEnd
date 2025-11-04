@@ -993,10 +993,17 @@ try {
 
   <!-- Polaroid Scatter Animation Script -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    let polaroidInterval = null;
+
+    function initPolaroidAnimation() {
       const polaroidCards = document.querySelectorAll('.polaroid-scattered');
 
       if (polaroidCards.length === 0) return;
+
+      // Clear any existing interval
+      if (polaroidInterval) {
+        clearInterval(polaroidInterval);
+      }
 
       // Store original positions for each card
       const originalPositions = Array.from(polaroidCards).map(card => ({
@@ -1024,7 +1031,7 @@ try {
       }
 
       // Shuffle every 5 seconds
-      setInterval(shufflePolaroids, 5000);
+      polaroidInterval = setInterval(shufflePolaroids, 5000);
 
       // Click to bring to front
       polaroidCards.forEach((card) => {
@@ -1047,12 +1054,18 @@ try {
         const currentRotation = parseInt(card.style.transform.match(/rotate\((-?\d+)deg\)/)?.[1] || 0);
         card.style.setProperty('--rotation', `${currentRotation}deg`);
       });
-    });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initPolaroidAnimation);
+
+    // Re-initialize after Astro View Transitions
+    document.addEventListener('astro:page-load', initPolaroidAnimation);
   </script>
 
   <!-- Regions carousel script -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    function initRegionsCarousel() {
       const carousel = document.getElementById('regions-carousel');
       const prevBtn = document.getElementById('regions-prev');
       const nextBtn = document.getElementById('regions-next');
@@ -1109,7 +1122,13 @@ try {
 
         updateButtons();
       });
-    });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initRegionsCarousel);
+
+    // Re-initialize after Astro View Transitions
+    document.addEventListener('astro:page-load', initRegionsCarousel);
   </script>
 
   <!-- Location-based sorting script -->

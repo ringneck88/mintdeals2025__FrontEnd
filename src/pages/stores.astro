@@ -236,7 +236,7 @@ try {
         </nav>
 
         <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl text-white uppercase">
+          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl text-white uppercase" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);">
             Mint Cannabis Locations
           </h1>
           <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
@@ -357,6 +357,9 @@ try {
             data-region-id={store.region?.id || ''}
             data-lat={store.Latitude || ''}
             data-lng={store.Longitude || ''}
+            data-name={store.Name || ''}
+            data-city={store.City || ''}
+            data-state={store.State || ''}
           >
             {/* Store Name Header */}
             <div class="bg-gradient-to-r from-green-900 to-black p-4">
@@ -674,65 +677,8 @@ try {
 
       // Map view functionality
       function showMapView() {
-        const stores = [
-          { name: 'FL Mint Miami Beach', lat: 25.7617, lng: -80.1918, city: 'Miami Beach' },
-          { name: 'FL Mint Orlando Downtown', lat: 28.5383, lng: -81.3792, city: 'Orlando' },
-          { name: 'FL Mint Tampa', lat: 27.9506, lng: -82.4572, city: 'Tampa' },
-          { name: 'FL Mint Jacksonville', lat: 30.3322, lng: -81.6557, city: 'Jacksonville' }
-        ];
-
-        // Create Google Maps URL with all store locations
-        const markers = stores.map(store => `${store.lat},${store.lng}`).join('|');
-        const mapUrl = `https://www.google.com/maps?q=${markers}`;
-        
-        // Create a modal or new window with map
-        const mapModal = document.createElement('div');
-        mapModal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4';
-        mapModal.innerHTML = `
-          <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Store Locations Map</h3>
-              <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" onclick="this.closest('.fixed').remove()">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              ${stores.map(store => `
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-                  <h4 class="font-semibold text-gray-900 dark:text-white mb-2">${store.name}</h4>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">${store.city}, Florida</p>
-                  <button 
-                    onclick="window.open('https://maps.google.com/?q=${store.lat},${store.lng}', '_blank')"
-                    class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                  >
-                    View on Google Maps
-                  </button>
-                </div>
-              `).join('')}
-            </div>
-            
-            <div class="text-center">
-              <button
-                onclick="window.open('${mapUrl}', '_blank')"
-                class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-colors font-semibold shadow-lg"
-              >
-                View All Locations on Google Maps
-              </button>
-            </div>
-          </div>
-        `;
-        
-        document.body.appendChild(mapModal);
-        
-        // Close modal when clicking outside
-        mapModal.addEventListener('click', function(e) {
-          if (e.target === this) {
-            this.remove();
-          }
-        });
+        // Redirect to the internal map page which has all locations
+        window.location.href = '/map';
       }
 
       // Enhanced search with debouncing

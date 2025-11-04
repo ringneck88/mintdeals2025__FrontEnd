@@ -197,21 +197,19 @@ const regionImageUrl = getImageUrl(region?.image)
               <img
                 src={regionImageUrl}
                 alt={regionName}
-                class="w-full h-64 lg:h-80 object-cover rounded-lg shadow-xl border-4 border-yellow-400"
+                class="w-full h-64 lg:h-80 object-cover rounded-lg shadow-xl border border-black"
               />
             ) : (
-              <div class="w-full h-64 lg:h-80 bg-gradient-to-br from-green-900 to-green-800 rounded-lg shadow-xl border-4 border-yellow-400 flex items-center justify-center">
-                <span class="text-8xl">📍</span>
+              <div class="w-full h-64 lg:h-80 bg-gradient-to-br from-green-900 to-green-800 rounded-lg shadow-xl border border-black flex items-center justify-center">
+                <span class="text-8xl text-white"></span>
               </div>
             )}
           </div>
 
           <!-- Region Info -->
           <div class="lg:col-span-2">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">
-              <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-                📍 {regionName}
-              </span>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white uppercase">
+              {regionName}
             </h1>
 
             {regionDescription && (
@@ -221,14 +219,8 @@ const regionImageUrl = getImageUrl(region?.image)
             )}
 
             <div class="flex flex-wrap gap-4">
-              <a href="#stores-section" class="inline-flex items-center px-6 py-3 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                </svg>
-                View {stores.length} Location{stores.length !== 1 ? 's' : ''}
-                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
+              <a href="#stores-section" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+                View {stores.length} Location{stores.length !== 1 ? 's' : ''} →
               </a>
             </div>
           </div>
@@ -242,12 +234,12 @@ const regionImageUrl = getImageUrl(region?.image)
 
         <!-- About This Region Section -->
         {regionDescription && (
-          <div class="mb-12 bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-8 border-2 border-green-500">
-            <h2 class="text-3xl font-bold mb-6 flex items-center">
+          <div class="mb-12 bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-8">
+            <h2 class="text-3xl font-bold mb-6 flex items-center text-white uppercase">
               <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.35rem;">About {regionName}</span>
+              About {regionName}
             </h2>
             <p class="text-green-100 text-lg leading-relaxed">
               {regionDescription}
@@ -259,13 +251,11 @@ const regionImageUrl = getImageUrl(region?.image)
         {stores.length > 0 ? (
           <div id="stores-section">
             <div class="mb-8">
-              <h2 class="text-3xl font-bold flex items-center">
+              <h2 class="text-3xl font-bold flex items-center text-white uppercase">
                 <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
-                <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.35rem;">
-                  {stores.length} Location{stores.length !== 1 ? 's' : ''} in {regionName}
-                </span>
+                {stores.length} Location{stores.length !== 1 ? 's' : ''} in {regionName}
               </h2>
             </div>
 
@@ -273,19 +263,17 @@ const regionImageUrl = getImageUrl(region?.image)
               {stores.map((store: any) => {
                 const storeImage = getImageUrl(store.StoreImage) || getImageUrl(store.Image) || getImageUrl(store.image);
                 return (
-                  <a href={`/location/${store.slug}`} class="block overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 hover:scale-105 hover:-translate-y-1 cursor-pointer">
+                  <a href={`/location/${store.slug}`} class="block overflow-hidden transition-all transform bg-black rounded-lg shadow-lg hover:shadow-2xl hover:scale-105 hover:-translate-y-1 cursor-pointer">
                     {storeImage && (
                       <img
                         src={storeImage}
                         alt={store.Name || store.name}
-                        class="object-cover w-full h-48"
+                        class="object-cover w-full h-48 border border-black"
                       />
                     )}
                     <div class="p-6">
-                      <h3 class="mb-2 text-xl font-bold">
-                        <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.25rem;">
-                          {store.Name || store.name}
-                        </span>
+                      <h3 class="mb-2 text-xl font-bold text-white uppercase">
+                        {store.Name || store.name}
                       </h3>
                       {(store.Address || store.address) && (
                         <p class="flex items-start mb-4 text-green-300">
@@ -318,9 +306,8 @@ const regionImageUrl = getImageUrl(region?.image)
           </div>
         ) : (
           <div class="py-12 text-center">
-            <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
-              <div class="mb-4 text-6xl">📍</div>
-              <h3 class="mb-2 text-lg font-medium text-yellow-400">No Locations Found</h3>
+            <div class="max-w-md p-8 mx-auto bg-black rounded-lg">
+              <h3 class="mb-2 text-lg font-medium text-white uppercase">No Locations Found</h3>
               <p class="text-green-300">No stores found in this region yet.</p>
             </div>
           </div>
@@ -328,11 +315,8 @@ const regionImageUrl = getImageUrl(region?.image)
 
         <!-- Back Button -->
         <div class="mt-12 text-center">
-          <a href="/regions" class="inline-flex items-center px-6 py-3 font-medium text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-            Back to All Regions
+          <a href="/regions" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+            ← Back to All Regions
           </a>
         </div>
       </div>

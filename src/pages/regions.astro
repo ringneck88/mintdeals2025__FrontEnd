@@ -239,43 +239,21 @@ try {
         </nav>
 
         <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
-            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-              Explore Our Regions
-            </span>
+          <h1 class="mb-4 text-4xl font-bold md:text-6xl text-white uppercase drop-shadow-2xl" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);">
+            EXPLORE MINT LOCATIONS
           </h1>
-          <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
+          <p class="max-w-2xl mx-auto mb-6 text-lg text-green-100 md:text-xl drop-shadow-lg">
             Discover premium cannabis dispensaries across multiple states
           </p>
 
-          <!-- Navigation Buttons -->
-          <div class="relative z-10 flex flex-wrap justify-center gap-4 mt-6">
-            <a href="/stores" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-              All Stores
+          <!-- Navigation Links -->
+          <div class="relative z-10 flex flex-wrap justify-center gap-6 mt-6">
+            <a href="/stores" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+              All Stores →
             </a>
-            <a href="/categories" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-              Browse Categories
+            <a href="/categories" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+              Browse Categories →
             </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Stats Bar -->
-    <div class="py-4 bg-black bg-opacity-90">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-        <div class="grid grid-cols-2 gap-8 text-center md:grid-cols-3">
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{regionsData.length}</div>
-            <div class="text-sm text-yellow-400 font-semibold">Regions</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{regionsData.reduce((sum, r) => sum + r.totalLocations, 0)}</div>
-            <div class="text-sm text-yellow-400 font-semibold">Locations</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{regionsData.reduce((sum, r) => sum + r.cities.length, 0)}</div>
-            <div class="text-sm text-yellow-400 font-semibold">Cities</div>
           </div>
         </div>
       </div>
@@ -286,9 +264,8 @@ try {
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         {regionsData.length === 0 ? (
           <div class="py-16 text-center">
-            <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
-              <div class="mb-4 text-6xl">🗺️</div>
-              <h3 class="mb-2 pb-1 text-lg font-medium gradient-heading leading-snug">No Regions Available</h3>
+            <div class="max-w-md p-8 mx-auto bg-black rounded-lg">
+              <h3 class="mb-2 pb-1 text-lg font-medium text-white uppercase leading-snug">No Regions Available</h3>
               <p class="text-green-300">
                 {apiError ? `Error: ${apiError}` : 'No regions are available at this time.'}
               </p>
@@ -298,7 +275,7 @@ try {
           <div class="space-y-12">
             <!-- Region Cards -->
             {regionsData.map(region => (
-              <div class="p-6 bg-black border-2 border-green-500 rounded-lg md:p-8">
+              <div class="p-6 bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl md:p-8">
                 {/* Region Header */}
                 <div class="flex flex-col items-start justify-between mb-6 md:flex-row md:items-center">
                   <div class="flex items-center gap-4">
@@ -307,19 +284,17 @@ try {
                       <img
                         src={region.imageUrl}
                         alt={region.name}
-                        class="w-16 h-16 object-cover rounded-lg border-2 border-yellow-400 flex-shrink-0"
+                        class="w-16 h-16 object-cover rounded-lg border border-black flex-shrink-0"
                       />
                     ) : (
-                      <div class="w-16 h-16 bg-gradient-to-br from-green-900 to-green-800 rounded-lg border-2 border-yellow-400 flex items-center justify-center flex-shrink-0">
-                        <span class="text-2xl">📍</span>
+                      <div class="w-16 h-16 bg-gradient-to-br from-green-900 to-green-800 rounded-lg border border-black flex items-center justify-center flex-shrink-0">
+                        <span class="text-2xl"></span>
                       </div>
                     )}
 
                     <div>
-                      <h2 class="mb-2 text-3xl font-bold">
-                        <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.35rem;">
-                          {region.name}
-                        </span>
+                      <h2 class="mb-2 text-3xl font-bold text-white uppercase">
+                        {region.name}
                       </h2>
                       <div class="flex gap-4 text-sm text-green-300">
                         <span>{region.totalLocations} dispensar{region.totalLocations !== 1 ? 'ies' : 'y'}</span>
@@ -330,20 +305,17 @@ try {
                   </div>
                   <a
                     href={`/region/${region.slug}`}
-                    class="inline-flex items-center px-6 py-3 mt-4 font-medium text-white transition-all transform rounded-lg shadow-lg md:mt-0 bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105"
+                    class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors mt-4 md:mt-0"
                   >
-                    View All Locations
-                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
+                    View All Locations →
                   </a>
                 </div>
 
                 {/* Stores Grid */}
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:gap-5">
                   {region.locations.map(store => {
-                    // Get store image URL
-                    const storeImageUrl = getImageUrl(store.StoreImage);
+                    // Get store image URL - prioritize hero_media, then StoreImage, then image
+                    const storeImageUrl = getImageUrl(store.hero_media) || getImageUrl(store.StoreImage) || getImageUrl(store.image);
 
                     // Get store details with fallbacks
                     const storeName = store.Name || store.name || 'Store Location';
@@ -365,14 +337,33 @@ try {
                     const storeZip = store.Zip || store.zip || store.Address?.zip || store.address?.zip || '';
                     const storePhone = store.Phone || store.phone || store.Address?.phone || store.address?.phone || null;
 
+                    // Extract coordinates from geo field
+                    let latitude = store.Latitude || store.latitude || null;
+                    let longitude = store.Longitude || store.longitude || null;
+
+                    if (!latitude || !longitude) {
+                      if (store.geo) {
+                        if (typeof store.geo === 'object') {
+                          latitude = store.geo.lat || store.geo.latitude || null;
+                          longitude = store.geo.lng || store.geo.lon || store.geo.longitude || null;
+                        } else if (typeof store.geo === 'string') {
+                          try {
+                            const geoObj = JSON.parse(store.geo);
+                            latitude = geoObj.lat || geoObj.latitude || null;
+                            longitude = geoObj.lng || geoObj.lon || geoObj.longitude || null;
+                          } catch (e) {
+                            // Ignore parse errors
+                          }
+                        }
+                      }
+                    }
+
                     return (
-                      <div class="store-card relative overflow-hidden transition-all transform bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-2xl hover:border-yellow-400 hover:scale-105">
+                      <div class="store-card relative overflow-hidden transition-all transform bg-black rounded-lg shadow-lg hover:shadow-2xl hover:scale-105">
                         {/* Store Name Header */}
-                        <div class="bg-gradient-to-r from-green-900 to-black p-3 border-b-2 border-green-500">
-                          <h3 class="text-lg font-bold text-center">
-                            <span class="inline-block pb-1 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.25rem;">
-                              {storeName}
-                            </span>
+                        <div class="bg-gradient-to-r from-green-900 to-black p-3">
+                          <h3 class="text-lg font-bold text-center text-white uppercase">
+                            {storeName}
                           </h3>
                         </div>
 
@@ -430,14 +421,14 @@ try {
                                   <span>{storeCity}{storeState ? `, ${storeState}` : ''} {storeZip}</span>
                                 </p>
                               )}
-                              {(store.Latitude && store.Longitude) && (
+                              {(latitude && longitude) && (
                                 <a
-                                  href={`https://www.google.com/maps/dir/?api=1&destination=${store.Latitude},${store.Longitude}`}
+                                  href={`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   class="text-yellow-400 hover:text-yellow-300 text-xs ml-5.5 inline-block mt-0.5"
                                 >
-                                  Get Directions →
+                                  Get Driving Directions →
                                 </a>
                               )}
                             </div>

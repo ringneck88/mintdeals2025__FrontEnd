@@ -6,7 +6,7 @@
 <script is:inline>
   (function() {
     // Hide age gate by default if already verified
-    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('ageVerified') === 'true') {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('ageVerified') === 'true') {
       document.documentElement.style.setProperty('--age-gate-display', 'none');
     } else {
       document.documentElement.style.setProperty('--age-gate-display', 'flex');
@@ -84,9 +84,9 @@
 </div>
 
 <script>
-  // Check if user has already verified their age this session
+  // Check if user has already verified their age
   function checkAgeVerification() {
-    return sessionStorage.getItem('ageVerified') === 'true';
+    return localStorage.getItem('ageVerified') === 'true';
   }
 
   // Show or hide the age gate
@@ -136,7 +136,7 @@
 
         // Wait for animation, then hide gate
         setTimeout(() => {
-          sessionStorage.setItem('ageVerified', 'true');
+          localStorage.setItem('ageVerified', 'true');
           ageGate.style.display = 'none';
         }, 2000);
       });
@@ -242,6 +242,12 @@
     initAgeGate();
     randomRotation();
   }
+
+  // Support for Astro View Transitions
+  document.addEventListener('astro:page-load', () => {
+    initAgeGate();
+    randomRotation();
+  });
 </script>
 
 <style>

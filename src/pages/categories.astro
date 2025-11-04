@@ -12,18 +12,18 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 // Category icon mapping
 function getCategoryIcon(slug) {
   const icons = {
-    'flower': '🌿',
-    'pre-rolls': '🚬',
-    'vaporizers': '💨',
-    'concentrates': '🍯',
-    'edibles': '🍭',
-    'topicals': '🧴',
-    'cartridges': '🖊️',
-    'tinctures': '💧',
-    'accessories': '🔧',
-    'cbd': '🌱'
+    'flower': '',
+    'pre-rolls': '',
+    'vaporizers': '',
+    'concentrates': '',
+    'edibles': '',
+    'topicals': '',
+    'cartridges': '',
+    'tinctures': '',
+    'accessories': '',
+    'cbd': ''
   };
-  return icons[slug] || '🌿';
+  return icons[slug] || '';
 }
 
 // Category color mapping for variety
@@ -337,43 +337,15 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
         </nav>
 
         <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
-            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-              Product Categories
-            </span>
+          <h1 class="mb-4 text-4xl font-bold text-white uppercase md:text-6xl drop-shadow-2xl" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);">
+            CATEGORIES
           </h1>
-          <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 pb-1 leading-snug md:text-xl drop-shadow-lg">
+          <p class="max-w-2xl mx-auto mb-6 text-lg text-green-500 pb-1 leading-snug md:text-xl drop-shadow-lg">
             Explore our comprehensive range of premium cannabis products
           </p>
-          <div class="flex flex-wrap justify-center gap-4">
-            <a href="/stores" class="px-6 py-2.5 text-base font-semibold text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-              Find Locations
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Stats Section -->
-    <div class="py-4 bg-black bg-opacity-90">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-        <div class="grid grid-cols-2 gap-12 text-center md:grid-cols-4">
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{totalCategories}+</div>
-            <div class="text-sm text-yellow-400 font-semibold">Categories</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">{totalProducts}+</div>
-            <div class="text-sm text-yellow-400 font-semibold">Products</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">100%</div>
-            <div class="text-sm text-yellow-400 font-semibold">Legal</div>
-          </div>
-          <div>
-            <div class="mb-1 text-2xl font-bold text-green-500">24/7</div>
-            <div class="text-sm text-yellow-400 font-semibold">Available</div>
-          </div>
+          <a href="/stores" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+            Find Locations →
+          </a>
         </div>
       </div>
     </div>
@@ -382,12 +354,10 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
     <div class="py-16 bg-black">
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         <div class="mb-12 text-center">
-          <h2 class="mb-3 text-2xl font-bold md:text-3xl">
-            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-              Browse All Categories
-            </span>
+          <h2 class="mb-3 text-2xl font-bold text-white uppercase md:text-3xl">
+            BROWSE ALL CATEGORIES
           </h2>
-          <p class="text-lg text-green-300">
+          <p class="text-lg text-green-500">
             Click on any category to explore products
           </p>
         </div>
@@ -395,8 +365,7 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
         {apiError ? (
           <div class="py-12 text-center">
             <div class="max-w-md p-8 mx-auto bg-red-900 rounded-lg bg-opacity-80">
-              <div class="mb-4 text-6xl text-red-400">⚠️</div>
-              <h3 class="mb-2 text-lg font-medium gradient-heading pb-1 leading-snug">API Error</h3>
+              <h3 class="mb-2 text-lg font-medium text-white uppercase">API ERROR</h3>
               <p class="text-sm text-red-300">{apiError}</p>
             </div>
           </div>
@@ -405,11 +374,11 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
             {categories.map((category, index) => (
               <a
                 href={`/${category.slug}`}
-                class="relative overflow-hidden transition-all transform bg-black border-2 border-green-500 group rounded-xl hover:shadow-lg hover:shadow-yellow-400/30 hover:scale-105 hover:-translate-y-1"
+                class="relative overflow-hidden transition-all transform bg-gradient-to-br from-green-900/20 to-black/60 group rounded-xl hover:shadow-lg hover:shadow-yellow-400/30 hover:scale-105 hover:-translate-y-1"
               >
                 {/* Category Image or Icon */}
                 {category.image ? (
-                  <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50">
+                  <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50 border border-black">
                     <img
                       src={category.image}
                       alt={category.name}
@@ -417,25 +386,22 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
                     />
                   </div>
                 ) : (
-                  <div class={`h-40 bg-gradient-to-br ${category.colorGradient} flex items-center justify-center`}>
+                  <div class={`h-40 bg-gradient-to-br ${category.colorGradient} flex items-center justify-center border border-black`}>
                     <span class="text-5xl">{category.icon}</span>
                   </div>
                 )}
 
                 {/* Category Content */}
                 <div class="p-4">
-                  <h3 class="mb-1 text-lg font-bold gradient-heading pb-1 leading-snug">
+                  <h3 class="mb-2 text-lg font-bold text-white uppercase">
                     {category.name}
                   </h3>
                   {category.description && (
-                    <p class="mb-2 text-xs text-green-300 line-clamp-2">
+                    <p class="mb-2 text-xs text-green-500 line-clamp-2">
                       {category.description}
                     </p>
                   )}
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs text-green-400">
-                      {category.productCount || 0} products
-                    </span>
+                  <div class="flex items-center justify-end">
                     <span class="text-yellow-400 transition-transform group-hover:translate-x-1">
                       →
                     </span>
@@ -446,10 +412,9 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
           </div>
         ) : (
           <div class="py-12 text-center">
-            <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
-              <div class="mb-4 text-6xl">🌿</div>
-              <h3 class="mb-2 text-lg font-medium gradient-heading pb-1 leading-snug">Categories Coming Soon</h3>
-              <p class="text-green-300">Product categories will be available here.</p>
+            <div class="max-w-md p-8 mx-auto bg-gradient-to-br from-green-900/20 to-black/60 rounded-lg">
+              <h3 class="mb-2 text-lg font-medium text-white uppercase">CATEGORIES COMING SOON</h3>
+              <p class="text-green-500">Product categories will be available here.</p>
             </div>
           </div>
         )}
@@ -460,53 +425,48 @@ const totalProducts = categories.reduce((sum, cat) => sum + cat.productCount, 0)
     <div class="py-16 bg-gradient-to-b from-green-900/40 to-black/60">
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         <div class="mb-12 text-center">
-          <h2 class="mb-3 text-2xl font-bold md:text-3xl">
-            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-              Why Choose Mint Deals
-            </span>
+          <h2 class="mb-3 text-2xl font-bold text-white uppercase md:text-3xl">
+            WHY CHOOSE MINT DEALS
           </h2>
-          <p class="text-lg text-green-300">
-            Your trusted partner in cannabis discovery
-          </p>
         </div>
 
         <div class="grid grid-cols-1 gap-8 md:grid-cols-3 xl:gap-12">
           <!-- Feature 1 -->
-          <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-yellow-400/20">
+          <div class="p-6 transition-all bg-gradient-to-br from-green-900/20 to-black/60 rounded-lg shadow-lg hover:shadow-yellow-400/20">
             <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500">
               <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
             </div>
-            <h3 class="mb-3 text-xl font-bold gradient-heading pb-1 leading-snug">Find Locations</h3>
-            <p class="text-green-300">
+            <h3 class="mb-3 text-xl font-bold text-white uppercase">FIND LOCATIONS</h3>
+            <p class="text-green-500">
               Discover trusted dispensaries near you with detailed information and directions.
             </p>
           </div>
 
           <!-- Feature 2 -->
-          <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-yellow-400/20">
+          <div class="p-6 transition-all bg-gradient-to-br from-green-900/20 to-black/60 rounded-lg shadow-lg hover:shadow-yellow-400/20">
             <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500">
               <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
               </svg>
             </div>
-            <h3 class="mb-3 text-xl font-bold gradient-heading pb-1 leading-snug">Browse Products</h3>
-            <p class="text-green-300">
+            <h3 class="mb-3 text-xl font-bold text-white uppercase">BROWSE PRODUCTS</h3>
+            <p class="text-green-500">
               Explore comprehensive product information and educational resources.
             </p>
           </div>
 
           <!-- Feature 3 -->
-          <div class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:shadow-yellow-400/20">
+          <div class="p-6 transition-all bg-gradient-to-br from-green-900/20 to-black/60 rounded-lg shadow-lg hover:shadow-yellow-400/20">
             <div class="flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500">
               <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
-            <h3 class="mb-3 text-xl font-bold gradient-heading pb-1 leading-snug">Trusted Information</h3>
-            <p class="text-green-300">
+            <h3 class="mb-3 text-xl font-bold text-white uppercase">TRUSTED INFORMATION</h3>
+            <p class="text-green-500">
               Access reliable, up-to-date information from verified sources and experts.
             </p>
           </div>

@@ -850,37 +850,122 @@ const categoryIcon = categoryIcons[category] || '🌱';
   <!-- Background - Different videos/animations for different categories -->
   <div class="video-background">
     {category === 'cannabis-capsules-and-tablets' ? (
-      <>
-        <!-- Pills using CSS capsules -->
-        <div class="pill-image"></div>
-        <div class="pill-image"></div>
-        <div class="pill-image"></div>
-        <div class="pill-image"></div>
-        <div class="pill-image"></div>
-        <div class="pill-image"></div>
-        <div class="pill-image"></div>
-        <div class="pill-image"></div>
-        <div class="pill-image"></div>
-        <div class="pill-image"></div>
-
-        <!-- Tablets using CSS shapes -->
-        <div class="tablet-image"></div>
-        <div class="tablet-image"></div>
-        <div class="tablet-image"></div>
-        <div class="tablet-image"></div>
-        <div class="tablet-image"></div>
-        <div class="tablet-image"></div>
-        <div class="tablet-image"></div>
-        <div class="tablet-image"></div>
-      </>
-    ) : category === 'topicals' ? (
-      <video autoplay loop muted playsinline>
-        {/* TODO: Replace with your athletic video (weightlifting, hurdles, aerobics) */}
-        {/* Place your video file in /public/videos/ folder and update the path below */}
-        <source src="/videos/athletic-activities.mp4" type="video/mp4">
-        {/* Fallback to stock video if custom video not available */}
-        <source src="https://static.videezy.com/system/resources/previews/000/005/529/original/Athlete_Weights_11.mp4" type="video/mp4">
-      </video>
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/capsules-background1.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+      "></div>
+    ) : category === 'indica' ? (
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/indica-plant-background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+      "></div>
+    ) : category === 'hybrid' || category === 'hybrids' || category === 'cannabis-hybrid' ? (
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/hybrid-joint-background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+      "></div>
+    ) : category === 'concentrates' || category === 'concentrate' || category === 'cannabis-concentrates' ? (
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/concentrates-oil-background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+      "></div>
+    ) : category === 'edibles' || category === 'edible' || category === 'cannabis-edibles' || category.includes('edible') ? (
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/babs-gorniak-hvNXL_15WwQ-unsplash.jpg?v=1');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+      "></div>
+    ) : category === 'vapes' || category === 'vape' || category === 'vaporizers' || category.includes('vape') ? (
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/christopher-ott-CIJjOXyRVjQ-unsplash.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+      "></div>
+    ) : category === 'flower' || category === 'flowers' || category === 'cannabis-flower' || category.includes('flower') ? (
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/flower-bud-background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+      "></div>
+    ) : category === 'tinctures' || category === 'tincture' || category === 'cannabis-tinctures' || category.includes('tincture') ? (
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/kai-dahms-Blssp8dekk8-unsplash.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+      "></div>
+    ) : category === 'topicals' || category === 'topical' || category.includes('topical') ? (
+      <div style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/assets/topicals-fitness-background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+      "></div>
     ) : (
       <video autoplay loop muted playsinline>
         <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
@@ -904,8 +989,8 @@ const categoryIcon = categoryIcons[category] || '🌱';
             <div class="text-6xl md:text-8xl mb-6">{categoryIcon}</div>
           )}
 
-          <h1 class="mb-6 text-4xl font-bold text-white md:text-6xl drop-shadow-2xl">
-            {seoTitle || categoryName}
+          <h1 class="mb-6 text-4xl font-bold text-white uppercase md:text-6xl drop-shadow-2xl" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);">
+            {categoryName}
           </h1>
 
           <div class="flex flex-wrap justify-center gap-6 mt-6">

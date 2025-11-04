@@ -14,6 +14,11 @@ export default defineConfig({
     //imageService: "cloudflare"
   }),
 
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport'
+  },
+
   vite: {
     plugins: [tailwindcss()]
   }

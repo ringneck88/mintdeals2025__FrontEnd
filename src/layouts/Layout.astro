@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import AgeGate from '../components/AgeGate.astro';
 import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import { ViewTransitions } from 'astro:transitions';
 
 export interface Props {
   title: string;
@@ -154,6 +155,7 @@ function getCategoryIcon(slug: string) {
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <ViewTransitions />
 
     <!-- Theme initialization (prevent FOUC) -->
     <script is:inline>
@@ -205,14 +207,13 @@ function getCategoryIcon(slug: string) {
                   {categories.map(category => (
                     <a
                       href={`/${category.slug}`}
-                      class="block px-4 py-3 text-sm text-gray-200 hover:bg-emerald-900 hover:text-emerald-400 transition-colors border-b border-gray-800 last:border-b-0"
+                      class="block px-4 py-3 text-sm text-gray-200 hover:bg-gradient-to-r hover:from-emerald-900 hover:to-transparent hover:text-emerald-400 transition-all border-b border-gray-800 last:border-b-0"
                     >
-                      <span class="text-lg mr-2">{category.icon}</span>
                       <span class="font-medium">{category.name}</span>
                     </a>
                   ))}
-                  <a href="/categories" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-emerald-800 bg-gradient-to-r from-yellow-400 to-transparent text-white hover:from-yellow-500 hover:to-transparent transition-all">
-                    📋 View All Categories →
+                  <a href="/categories" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-emerald-800 bg-gradient-to-r from-green-500 to-transparent text-white hover:from-green-600 hover:to-transparent transition-all">
+                    View All Categories →
                   </a>
                 </div>
               </div>
@@ -220,7 +221,7 @@ function getCategoryIcon(slug: string) {
 
             <!-- States Dropdown -->
             <div class="relative" id="regionsDropdown">
-              <a href="/regions" class="text-gray-200 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
+              <a href="/regions" class="text-gray-200 hover:text-green-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
                 States
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -228,23 +229,22 @@ function getCategoryIcon(slug: string) {
               </a>
 
               <!-- Dropdown Menu -->
-              <div id="regionsMenu" class="absolute left-0 mt-1 w-64 bg-black border-2 border-blue-600 rounded-lg shadow-2xl hidden z-50">
+              <div id="regionsMenu" class="absolute left-0 mt-1 w-64 bg-black border-2 border-green-600 rounded-lg shadow-2xl hidden z-50">
                 <div class="py-2 max-h-96 overflow-y-auto">
-                  <div class="px-4 py-3 border-b-2 border-blue-800 bg-gradient-to-r from-blue-900 to-blue-800">
+                  <div class="px-4 py-3 border-b-2 border-green-800 bg-gradient-to-r from-green-900 to-green-800">
                     <p class="text-yellow-400 font-bold text-sm pb-1 leading-snug">Browse by State</p>
                   </div>
                   {navRegions.map(region => (
                     <a
                       href={`/region/${region.slug}`}
-                      class="block px-4 py-3 text-sm text-gray-200 hover:bg-blue-900 hover:text-blue-400 transition-colors border-b border-gray-800 last:border-b-0"
+                      class="block px-4 py-3 text-sm text-gray-200 hover:bg-gradient-to-r hover:from-green-900 hover:to-transparent hover:text-green-400 transition-all border-b border-gray-800 last:border-b-0"
                     >
-                      <span class="text-lg mr-2">📍</span>
                       <span class="font-medium">{region.name}</span>
                       {region.code && <span class="text-xs text-gray-400 ml-2">({region.code})</span>}
                     </a>
                   ))}
-                  <a href="/regions" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-blue-800 bg-gradient-to-r from-yellow-400 to-transparent text-white hover:from-yellow-500 hover:to-transparent transition-all">
-                    🗺️ View All States →
+                  <a href="/regions" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-green-800 bg-gradient-to-r from-green-500 to-transparent text-white hover:from-green-600 hover:to-transparent transition-all">
+                    View All States →
                   </a>
                 </div>
               </div>
@@ -277,17 +277,16 @@ function getCategoryIcon(slug: string) {
                         {storesByRegion[regionName].map((store: any) => (
                           <a
                             href={`/location/${store.slug}`}
-                            class="block px-4 py-2 pl-6 text-sm text-gray-300 hover:bg-green-900 hover:text-green-300 transition-colors"
+                            class="block px-4 py-2 pl-6 text-sm text-gray-300 hover:bg-gradient-to-r hover:from-green-900 hover:to-transparent hover:text-green-300 transition-all"
                           >
-                            <span class="text-base mr-2">{store.is24Hour ? '🏪' : '🏣'}</span>
                             <span>{store.name}</span>
                           </a>
                         ))}
                       </div>
                     </div>
                   ))}
-                  <a href="/stores" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-green-800 bg-gradient-to-r from-yellow-400 to-transparent text-white hover:from-yellow-500 hover:to-transparent transition-all">
-                    🏬 View All Locations →
+                  <a href="/stores" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-green-800 bg-gradient-to-r from-green-500 to-transparent text-white hover:from-green-600 hover:to-transparent transition-all">
+                    View All Locations →
                   </a>
                 </div>
               </div>
@@ -419,116 +418,125 @@ function getCategoryIcon(slug: string) {
     </script>
 
     <script>
-      // Categories dropdown functionality
-      const categoriesDropdown = document.getElementById('categoriesDropdown');
-      const categoriesMenu = document.getElementById('categoriesMenu');
+      // Initialize all dropdowns
+      function initializeDropdowns() {
+        // Categories dropdown functionality
+        const categoriesDropdown = document.getElementById('categoriesDropdown');
+        const categoriesMenu = document.getElementById('categoriesMenu');
 
-      if (categoriesDropdown && categoriesMenu) {
-        let isOpen = false;
-        let closeTimeout: NodeJS.Timeout | null = null;
+        if (categoriesDropdown && categoriesMenu) {
+          let isOpen = false;
+          let closeTimeout: NodeJS.Timeout | null = null;
 
-        // Open dropdown on mouseenter
-        categoriesDropdown.addEventListener('mouseenter', () => {
-          if (closeTimeout) clearTimeout(closeTimeout);
-          categoriesMenu.classList.remove('hidden');
-          isOpen = true;
-        });
+          // Open dropdown on mouseenter
+          categoriesDropdown.addEventListener('mouseenter', () => {
+            if (closeTimeout) clearTimeout(closeTimeout);
+            categoriesMenu.classList.remove('hidden');
+            isOpen = true;
+          });
 
-        // Keep open when hovering over menu
-        categoriesMenu.addEventListener('mouseenter', () => {
-          if (closeTimeout) clearTimeout(closeTimeout);
-          isOpen = true;
-        });
+          // Keep open when hovering over menu
+          categoriesMenu.addEventListener('mouseenter', () => {
+            if (closeTimeout) clearTimeout(closeTimeout);
+            isOpen = true;
+          });
 
-        // Close dropdown with delay on mouseleave
-        categoriesDropdown.addEventListener('mouseleave', () => {
-          closeTimeout = setTimeout(() => {
-            categoriesMenu.classList.add('hidden');
-            isOpen = false;
-          }, 200);
-        });
+          // Close dropdown with delay on mouseleave
+          categoriesDropdown.addEventListener('mouseleave', () => {
+            closeTimeout = setTimeout(() => {
+              categoriesMenu.classList.add('hidden');
+              isOpen = false;
+            }, 200);
+          });
 
-        categoriesMenu.addEventListener('mouseleave', () => {
-          closeTimeout = setTimeout(() => {
-            categoriesMenu.classList.add('hidden');
-            isOpen = false;
-          }, 200);
-        });
+          categoriesMenu.addEventListener('mouseleave', () => {
+            closeTimeout = setTimeout(() => {
+              categoriesMenu.classList.add('hidden');
+              isOpen = false;
+            }, 200);
+          });
+        }
+
+        // Regions dropdown functionality
+        const regionsDropdown = document.getElementById('regionsDropdown');
+        const regionsMenu = document.getElementById('regionsMenu');
+
+        if (regionsDropdown && regionsMenu) {
+          let isOpen = false;
+          let closeTimeout: NodeJS.Timeout | null = null;
+
+          // Open dropdown on mouseenter
+          regionsDropdown.addEventListener('mouseenter', () => {
+            if (closeTimeout) clearTimeout(closeTimeout);
+            regionsMenu.classList.remove('hidden');
+            isOpen = true;
+          });
+
+          // Keep open when hovering over menu
+          regionsMenu.addEventListener('mouseenter', () => {
+            if (closeTimeout) clearTimeout(closeTimeout);
+            isOpen = true;
+          });
+
+          // Close dropdown with delay on mouseleave
+          regionsDropdown.addEventListener('mouseleave', () => {
+            closeTimeout = setTimeout(() => {
+              regionsMenu.classList.add('hidden');
+              isOpen = false;
+            }, 200);
+          });
+
+          regionsMenu.addEventListener('mouseleave', () => {
+            closeTimeout = setTimeout(() => {
+              regionsMenu.classList.add('hidden');
+              isOpen = false;
+            }, 200);
+          });
+        }
+
+        // Locations dropdown functionality
+        const locationsDropdown = document.getElementById('locationsDropdown');
+        const locationsMenu = document.getElementById('locationsMenu');
+
+        if (locationsDropdown && locationsMenu) {
+          let isOpen = false;
+          let closeTimeout: NodeJS.Timeout | null = null;
+
+          // Open dropdown on mouseenter
+          locationsDropdown.addEventListener('mouseenter', () => {
+            if (closeTimeout) clearTimeout(closeTimeout);
+            locationsMenu.classList.remove('hidden');
+            isOpen = true;
+          });
+
+          // Keep open when hovering over menu
+          locationsMenu.addEventListener('mouseenter', () => {
+            if (closeTimeout) clearTimeout(closeTimeout);
+            isOpen = true;
+          });
+
+          // Close dropdown with delay on mouseleave
+          locationsDropdown.addEventListener('mouseleave', () => {
+            closeTimeout = setTimeout(() => {
+              locationsMenu.classList.add('hidden');
+              isOpen = false;
+            }, 200);
+          });
+
+          locationsMenu.addEventListener('mouseleave', () => {
+            closeTimeout = setTimeout(() => {
+              locationsMenu.classList.add('hidden');
+              isOpen = false;
+            }, 200);
+          });
+        }
       }
 
-      // Regions dropdown functionality
-      const regionsDropdown = document.getElementById('regionsDropdown');
-      const regionsMenu = document.getElementById('regionsMenu');
+      // Initialize on page load
+      initializeDropdowns();
 
-      if (regionsDropdown && regionsMenu) {
-        let isOpen = false;
-        let closeTimeout: NodeJS.Timeout | null = null;
-
-        // Open dropdown on mouseenter
-        regionsDropdown.addEventListener('mouseenter', () => {
-          if (closeTimeout) clearTimeout(closeTimeout);
-          regionsMenu.classList.remove('hidden');
-          isOpen = true;
-        });
-
-        // Keep open when hovering over menu
-        regionsMenu.addEventListener('mouseenter', () => {
-          if (closeTimeout) clearTimeout(closeTimeout);
-          isOpen = true;
-        });
-
-        // Close dropdown with delay on mouseleave
-        regionsDropdown.addEventListener('mouseleave', () => {
-          closeTimeout = setTimeout(() => {
-            regionsMenu.classList.add('hidden');
-            isOpen = false;
-          }, 200);
-        });
-
-        regionsMenu.addEventListener('mouseleave', () => {
-          closeTimeout = setTimeout(() => {
-            regionsMenu.classList.add('hidden');
-            isOpen = false;
-          }, 200);
-        });
-      }
-
-      // Locations dropdown functionality
-      const locationsDropdown = document.getElementById('locationsDropdown');
-      const locationsMenu = document.getElementById('locationsMenu');
-
-      if (locationsDropdown && locationsMenu) {
-        let isOpen = false;
-        let closeTimeout: NodeJS.Timeout | null = null;
-
-        // Open dropdown on mouseenter
-        locationsDropdown.addEventListener('mouseenter', () => {
-          if (closeTimeout) clearTimeout(closeTimeout);
-          locationsMenu.classList.remove('hidden');
-          isOpen = true;
-        });
-
-        // Keep open when hovering over menu
-        locationsMenu.addEventListener('mouseenter', () => {
-          if (closeTimeout) clearTimeout(closeTimeout);
-          isOpen = true;
-        });
-
-        // Close dropdown with delay on mouseleave
-        locationsDropdown.addEventListener('mouseleave', () => {
-          closeTimeout = setTimeout(() => {
-            locationsMenu.classList.add('hidden');
-            isOpen = false;
-          }, 200);
-        });
-
-        locationsMenu.addEventListener('mouseleave', () => {
-          closeTimeout = setTimeout(() => {
-            locationsMenu.classList.add('hidden');
-            isOpen = false;
-          }, 200);
-        });
-      }
+      // Re-initialize after Astro View Transitions
+      document.addEventListener('astro:page-load', initializeDropdowns);
     </script>
 
     <!-- Theme Switcher Component -->

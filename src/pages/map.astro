@@ -61,7 +61,7 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
     width: 100%;
     height: 70vh;
     border-radius: 0.5rem;
-    border: 2px solid rgb(34, 197, 94);
+    border: 1px solid black;
     z-index: 1;
   }
 
@@ -69,32 +69,24 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
     position: relative;
   }
 
-  .map-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .stat-card {
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid rgb(34, 197, 94);
+  .map-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     border-radius: 0.5rem;
-    padding: 1rem;
-    text-align: center;
-  }
-
-  .stat-value {
-    font-size: 2rem;
-    font-weight: bold;
-    color: rgb(34, 197, 94);
-    margin-bottom: 0.25rem;
-  }
-
-  .stat-label {
-    font-size: 0.875rem;
-    color: rgb(251, 191, 36);
-    font-weight: 600;
+    background: radial-gradient(ellipse at center,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0) 40%,
+      rgba(0, 0, 0, 0.3) 52%,
+      rgba(0, 0, 0, 0.7) 65%,
+      rgba(0, 0, 0, 0.9) 77%,
+      rgba(0, 0, 0, 0.98) 87%,
+      rgba(0, 0, 0, 1) 95%);
+    pointer-events: none;
+    z-index: 2;
   }
 
   .loading-overlay {
@@ -238,12 +230,10 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
         </nav>
 
         <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl">
-            <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.5rem;">
-              Find Your Nearest Location
-            </span>
+          <h1 class="mb-4 text-4xl font-bold text-white uppercase md:text-6xl drop-shadow-2xl" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);">
+            LOCATIONS TO FIT YOUR LIFESTYLE
           </h1>
-          <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg" id="storeCount">
+          <p class="max-w-2xl mx-auto mb-6 text-lg text-green-500 md:text-xl drop-shadow-lg" id="storeCount">
             Loading store locations...
           </p>
         </div>
@@ -253,26 +243,6 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
     <!-- Main Content -->
     <div class="py-8 bg-black bg-opacity-90">
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[95%]">
-        <!-- Stats Cards -->
-        <div class="map-stats" id="statsContainer" style="display: none;">
-          <div class="stat-card">
-            <div class="stat-value" id="totalLocations">0</div>
-            <div class="stat-label">Total Locations</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="totalStates">0</div>
-            <div class="stat-label">States</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="total24Hour">0</div>
-            <div class="stat-label">24-Hour Stores</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="totalRegions">0</div>
-            <div class="stat-label">Regions</div>
-          </div>
-        </div>
-
         <!-- Map Container -->
         <div class="map-container">
           <div id="map"></div>
@@ -281,16 +251,26 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
           </div>
         </div>
 
-        <!-- Navigation Buttons -->
-        <div class="flex flex-wrap justify-center gap-4 mt-8">
-          <a href="/stores" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-            View Store List
+        <!-- Store List by State -->
+        <div class="mt-12" id="storeList">
+          <h2 class="mb-6 text-2xl font-bold text-center text-white uppercase md:text-3xl">
+            BY STATE
+          </h2>
+          <div id="storeListContent" class="space-y-8">
+            <!-- Will be populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="flex flex-wrap justify-center gap-6 mt-12">
+          <a href="/stores" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+            View Store List →
           </a>
-          <a href="/regions" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-            Browse by Region
+          <a href="/regions" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+            Browse by Region →
           </a>
-          <a href="/categories" class="px-8 py-3 text-lg font-bold text-white transition-all transform rounded-lg shadow-xl bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-            Shop by Category
+          <a href="/categories" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
+            Shop by Category →
           </a>
         </div>
       </div>
@@ -370,13 +350,11 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
         console.log(`✅ ${stores.length} stores have coordinates`);
 
-        // Update stats
+        // Update store count text
         document.getElementById('storeCount').textContent = `Explore all ${stores.length} Mint Cannabis dispensaries across the USA`;
-        document.getElementById('totalLocations').textContent = stores.length;
-        document.getElementById('totalStates').textContent = [...new Set(stores.map(s => s.state))].length;
-        document.getElementById('total24Hour').textContent = stores.filter(s => s.is24Hour).length;
-        document.getElementById('totalRegions').textContent = [...new Set(stores.map(s => s.region))].filter(r => r).length;
-        document.getElementById('statsContainer').style.display = 'grid';
+
+        // Populate store list by state
+        populateStoreList();
 
         // Initialize map with stores
         initMap();
@@ -392,9 +370,64 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
       }
     }
 
+    function populateStoreList() {
+      // Group stores by state
+      const storesByState = {};
+      stores.forEach(store => {
+        if (!storesByState[store.state]) {
+          storesByState[store.state] = [];
+        }
+        storesByState[store.state].push(store);
+      });
+
+      // Sort states alphabetically
+      const sortedStates = Object.keys(storesByState).sort();
+
+      // Build HTML
+      let html = '';
+      sortedStates.forEach(state => {
+        const stateStores = storesByState[state];
+
+        html += `
+          <div class="p-6 rounded-lg bg-gradient-to-br from-green-900/20 to-black/60">
+            <h3 class="mb-4 text-xl font-bold text-white uppercase">${state}</h3>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              ${stateStores.map(store => `
+                <div class="p-4 transition-all bg-black rounded-lg hover:bg-green-900/30">
+                  <div class="flex items-start justify-between mb-2">
+                    <h4 class="font-bold text-yellow-400">${store.name}</h4>
+                    ${store.is24Hour ? '<span class="px-2 py-1 text-xs font-bold text-white bg-green-500 rounded">24H</span>' : ''}
+                  </div>
+                  <p class="mb-1 text-sm text-green-300">
+                    ${store.street}
+                  </p>
+                  <p class="mb-3 text-sm text-green-300">
+                    ${store.city}, ${store.state} ${store.zip}
+                  </p>
+                  <div class="flex gap-2">
+                    <a href="/location/${store.slug}" class="text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
+                      View Store →
+                    </a>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="text-sm text-green-400 hover:text-green-300 transition-colors">
+                      Directions →
+                    </a>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('storeListContent').innerHTML = html;
+    }
+
     function initMap() {
       // Create map centered on USA
-      map = L.map('map').setView([center.lat, center.lng], 4);
+      map = L.map('map').setView([center.lat, center.lng], 3.5);
 
       // Add OpenStreetMap tiles with dark theme
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -406,8 +439,8 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
       // Create custom icon function
       function createCustomIcon(is24Hour) {
         const iconHtml = is24Hour
-          ? '<div class="custom-marker marker-24hour">🏪</div>'
-          : '<div class="custom-marker marker-regular">🏣</div>';
+          ? '<div class="custom-marker marker-24hour"><img src="/favicon.png" alt="Mint" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;" /></div>'
+          : '<div class="custom-marker marker-regular"><img src="/favicon.png" alt="Mint" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;" /></div>';
 
         return L.divIcon({
           html: iconHtml,
@@ -461,11 +494,11 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
       // Fit map to show all markers if there are stores
       if (stores.length > 0) {
         const group = L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.1));
+        map.fitBounds(group.getBounds().pad(0.15));
 
         // Ensure zoom level doesn't get too close
-        if (map.getZoom() > 15) {
-          map.setZoom(15);
+        if (map.getZoom() > 12) {
+          map.setZoom(12);
         }
       }
 
