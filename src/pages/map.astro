@@ -11,6 +11,10 @@ const mapCenter = {
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
+// SEO and resource hints
+const seoTitle = "Store Locations Map | Mint Cannabis Dispensaries";
+const seoDescription = "Find Mint Cannabis dispensaries near you with our interactive map. Locate stores across multiple states.";
+
 // Available lifestyle polaroid images
 const lifestyleImages = [
   { img: "20251001_1034_Joyful Moment Together_simple_compose_01k6gdah5ef7n9mj7hyscbm439.png", title: "Share Joy", vibe: "Social" },
@@ -253,8 +257,19 @@ const polaroidsWithPositions = selectedPolaroids.map((polaroid, index) => {
 </style>
 
 <Layout title="Store Locations Map - Mint Cannabis" description="Interactive map showing all Mint Cannabis dispensary locations across the USA">
+  <!-- DNS Prefetch and Preconnect for faster CDN loading -->
+  <link slot="head" rel="dns-prefetch" href="https://unpkg.com" />
+  <link slot="head" rel="preconnect" href="https://unpkg.com" crossorigin />
+
+  <!-- Preload critical map resources -->
+  <link slot="head" rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" />
+  <link slot="head" rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin />
+  <link slot="head" rel="preload" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" as="script" />
+
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link slot="head" rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link slot="head" rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link slot="head" rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
   <!-- Video Background -->
   <div class="video-background">
@@ -351,14 +366,7 @@ const polaroidsWithPositions = selectedPolaroids.map((polaroid, index) => {
     </div>
   </div>
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-
-  <!-- Leaflet MarkerCluster CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-
-  <!-- Leaflet JS -->
+  <!-- Leaflet JS - Load after DOM content -->
   <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Leaflet MarkerCluster JS -->
