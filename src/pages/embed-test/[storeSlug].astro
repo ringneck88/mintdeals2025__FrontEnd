@@ -1,9 +1,11 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 
-const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+export const prerender = true;
 
 export async function getStaticPaths() {
+  const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
   try {
     const response = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
     const data = await response.json();
@@ -22,7 +24,8 @@ export async function getStaticPaths() {
           props: {
             storeName: name,
             dutchieStoreId: dutchieStoreId,
-            slug: slug
+            slug: slug,
+            storeId: store.documentId || store.id
           }
         };
       });
@@ -34,16 +37,39 @@ export async function getStaticPaths() {
   return [];
 }
 
-const { storeName, dutchieStoreId, slug } = Astro.props;
+const { storeName, dutchieStoreId, slug, storeId } = Astro.props;
 
 // Debug: Log what props we received
 console.log(`🎯 Page Props for ${storeName}:`);
 console.log(`   - dutchieStoreId: ${dutchieStoreId}`);
 console.log(`   - slug: ${slug}`);
+console.log(`   - storeId: ${storeId}`);
 
 // If no Dutchie store ID is available, show an error
 const hasValidDutchieId = dutchieStoreId && dutchieStoreId !== '';
 console.log(`   - hasValidDutchieId: ${hasValidDutchieId}`);
+
+// Fetch carousels for this store
+let carousels = [];
+if (hasValidDutchieId && storeId) {
+  try {
+    const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+    const carouselsResponse = await fetch(`${API_BASE}/store-carousels?filters[store][documentId][$eq]=${storeId}&filters[is_active][$eq]=true&sort=order:asc&populate=*`);
+    const carouselsData = await carouselsResponse.json();
+
+    if (carouselsData?.data && Array.isArray(carouselsData.data)) {
+      carousels = carouselsData.data.map((carousel: any) => ({
+        name: carousel.name || carousel.Name || 'Carousel',
+        dutchie_carousel_id: carousel.dutchie_carousel_id || carousel.dutchieCarouselId,
+        order: carousel.order || 0
+      })).filter(c => c.dutchie_carousel_id); // Only include carousels with valid IDs
+
+      console.log(`🎠 Found ${carousels.length} active carousels for ${storeName}`);
+    }
+  } catch (error) {
+    console.error('Error fetching carousels:', error);
+  }
+}
 ---
 
 <Layout
@@ -76,71 +102,65 @@ console.log(`   - hasValidDutchieId: ${hasValidDutchieId}`);
 
     {hasValidDutchieId ? (
       <>
-        <!-- First Embed Section -->
-        <section class="py-16 bg-gray-900">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-white mb-8 uppercase text-center">
-              Featured Products Carousel
-            </h2>
-            <div class="bg-black rounded-lg p-4">
-              <div set:html={`<script async="" id="dutchie--carousel-embed-7a1195b9-adb8-4b7b-91e5-23fdc8df8c12__script" src="https://dutchie.com/api/v3/embedded-menu/${dutchieStoreId}/carousels/7a1195b9-adb8-4b7b-91e5-23fdc8df8c12.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fembed-test%2F${slug}%2F"></script>`}></div>
-            </div>
-          </div>
-        </section>
+        {carousels.length > 0 ? (
+          carousels.map((carousel, index) => (
+            <>
+              <!-- Carousel Section -->
+              <section class="py-16 bg-gray-900">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <h2 class="text-3xl font-bold text-white mb-8 uppercase text-center">
+                    {carousel.name}
+                  </h2>
+                  <div class="bg-black rounded-lg p-4">
+                    <div set:html={`<script async="" id="dutchie--carousel-embed-${carousel.dutchie_carousel_id}__script" src="https://dutchie.com/api/v3/embedded-menu/${dutchieStoreId}/carousels/${carousel.dutchie_carousel_id}.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fembed-test%2F${slug}%2F"></script>`}></div>
+                  </div>
+                </div>
+              </section>
 
-        <!-- Banner Section 1 -->
-        <section class="py-16 bg-black">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="relative overflow-hidden rounded-lg bg-gradient-to-r from-green-600 to-green-800 p-12 text-center">
-              <div class="relative z-10">
-                <h3 class="text-4xl font-bold text-white mb-4">Special Offers Available</h3>
-                <p class="text-xl text-white mb-6">Check out our latest deals and promotions</p>
-                <a href="/deals" class="inline-block bg-white text-green-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors duration-300">
-                  View Deals
+              <!-- Banner Section (shown between carousels, but not after the last one) -->
+              {index < carousels.length - 1 && (
+                <section class="py-16 bg-black">
+                  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class={`relative overflow-hidden rounded-lg bg-gradient-to-r ${index % 2 === 0 ? 'from-green-600 to-green-800' : 'from-yellow-500 to-yellow-600'} p-12 text-center`}>
+                      <div class="relative z-10">
+                        <h3 class="text-4xl font-bold text-white mb-4">
+                          {index % 2 === 0 ? 'Special Offers Available' : 'New Arrivals'}
+                        </h3>
+                        <p class="text-xl text-white mb-6">
+                          {index % 2 === 0 ? 'Check out our latest deals and promotions' : 'Discover our latest premium products'}
+                        </p>
+                        <a
+                          href={index % 2 === 0 ? '/deals' : '/categories'}
+                          class={`inline-block bg-white ${index % 2 === 0 ? 'text-green-600' : 'text-yellow-600'} font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors duration-300`}
+                        >
+                          {index % 2 === 0 ? 'View Deals' : 'Browse Categories'}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
+            </>
+          ))
+        ) : (
+          <!-- No Carousels Configured -->
+          <section class="py-16 bg-gray-900">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div class="bg-yellow-900/40 rounded-lg p-8 text-center">
+                <svg class="w-16 h-16 mx-auto mb-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="text-2xl font-bold text-white mb-4">No Carousels Configured</h3>
+                <p class="text-yellow-200 mb-6">
+                  This store has a Dutchie Store ID but no carousels have been added yet. Add carousels in the Strapi admin panel to display product showcases here.
+                </p>
+                <a href="/stores" class="inline-block bg-white text-yellow-600 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors duration-300">
+                  View All Stores
                 </a>
               </div>
             </div>
-          </div>
-        </section>
-
-        <!-- Second Embed Section -->
-        <section class="py-16 bg-gray-900">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-white mb-8 uppercase text-center">
-              Popular Products
-            </h2>
-            <div class="bg-black rounded-lg p-4">
-              <div set:html={`<script async="" id="dutchie--carousel-embed-da803f8d-df11-4da4-8076-1cef920dda6a__script" src="https://dutchie.com/api/v3/embedded-menu/${dutchieStoreId}/carousels/da803f8d-df11-4da4-8076-1cef920dda6a.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fembed-test%2F${slug}%2F"></script>`}></div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Banner Section 2 -->
-        <section class="py-16 bg-black">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="relative overflow-hidden rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 p-12 text-center">
-              <div class="relative z-10">
-                <h3 class="text-4xl font-bold text-white mb-4">New Arrivals</h3>
-                <p class="text-xl text-white mb-6">Discover our latest premium products</p>
-                <a href="/categories" class="inline-block bg-white text-yellow-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors duration-300">
-                  Browse Categories
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Third Embed Section -->
-        <section class="py-16 bg-gray-900">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-white mb-8 uppercase text-center">
-              Customer Favorites
-            </h2>
-            <div class="bg-black rounded-lg p-4">
-              <div set:html={`<script async="" id="dutchie--carousel-embed-b23a4f74-4248-46b8-982d-57369fae63c4__script" src="https://dutchie.com/api/v3/embedded-menu/${dutchieStoreId}/carousels/b23a4f74-4248-46b8-982d-57369fae63c4.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fembed-test%2F${slug}%2F"></script>`}></div>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </>
     ) : (
       <section class="py-16 bg-gray-900">
@@ -182,9 +202,21 @@ console.log(`   - hasValidDutchieId: ${hasValidDutchieId}`);
   </div>
 </Layout>
 
-<script>
-  // Ensure scripts load properly
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('Dutchie embed test page loaded');
-  });
+<script is:inline>
+  // Force reload Dutchie scripts if they haven't loaded after 2 seconds
+  setTimeout(() => {
+    const scripts = document.querySelectorAll('script[id^="dutchie--carousel-embed"]');
+    console.log(`Found ${scripts.length} Dutchie scripts`);
+
+    scripts.forEach((script, index) => {
+      const src = script.getAttribute('src');
+      if (src) {
+        console.log(`Dutchie script ${index + 1}: ${src.substring(0, 80)}...`);
+      }
+    });
+
+    // Check if Dutchie widgets have loaded
+    const widgets = document.querySelectorAll('[id^="dutchie--carousel-embed"]');
+    console.log(`Found ${widgets.length} Dutchie widget containers`);
+  }, 2000);
 </script>
