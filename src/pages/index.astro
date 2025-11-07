@@ -272,1135 +272,673 @@ try {
   apiError = error instanceof Error ? error.message : 'Unknown error';
 }
 ---
----
-
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-  }
-  .video-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    overflow: hidden;
-  }
-  .video-background::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: linear-gradient(to top, var(--theme-bg-start), var(--theme-bg-end));
-    mix-blend-mode: color;
-    pointer-events: none;
-    z-index: 1;
-    transition: background-image 0.5s ease;
-  }
-  .video-background video {
-    object-fit: cover;
-    height: 100%;
-    width: 100%;
-  }
-  .content-wrapper {
-    position: relative;
-    z-index: 1;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
-  }
-  .hero-section {
-    min-height: 7.5vh; /* Half of original 15vh */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 0;
-  }
-
-  .hero-section h1 {
-    line-height: 1.2;
-  }
-
-  @media (min-width: 768px) {
-    .hero-section {
-      min-height: 30vh; /* Half of original 60vh */
-      padding: 1rem 0;
-    }
-  }
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-</style>
 
 <Layout title="Mint Deals - Cannabis Dispensaries & Products" description="Find cannabis dispensaries, products, and deals. Your trusted source for premium cannabis products and information.">
-  <!-- Video Background -->
-  <div class="video-background">
-    <video autoplay loop muted playsinline>
-      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
-    </video>
-  </div>
+  <!-- Hero Section -->
+  <section class="relative bg-black py-16 md:py-24 overflow-hidden">
+    <!-- Video Background -->
+    <div class="absolute inset-0 w-full h-full">
+      <video
+        autoplay
+        loop
+        muted
+        playsinline
+        class="w-full h-full object-cover"
+      >
+        <source src="/videos/Untitled design (2).mp4" type="video/mp4">
+      </video>
+      <!-- Dark overlay for better text visibility -->
+      <div class="absolute inset-0 bg-black/50"></div>
+    </div>
 
-  <!-- Content Wrapper -->
-  <div class="content-wrapper">
-    <!-- Hero Section -->
-    <div class="text-white hero-section">
-    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+    <!-- Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
-        <div class="flex justify-center mb-6">
-          <img
-            src="/assets/Mint_Full_Logo.png"
-            alt="Mint Deals Logo"
-            class="w-full max-w-md md:max-w-2xl drop-shadow-2xl"
-          />
-        </div>
-        <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
-          Your trusted source for premium cannabis products and information
-        </p>
-      </div>
-    </div>
-    </div>
-
-  <!-- Lifestyle Polaroid Section -->
-  <div class="py-4 md:py-8">
-    <div class="px-8 sm:px-12 lg:px-16 xl:px-20">
-      <div class="flex justify-center">
-        <div class="relative w-full max-w-7xl h-[900px]">
-          {/* Scattered Polaroid Cards */}
-          <div id="polaroid-scatter" class="relative w-full h-full">
-            {[
-              { img: "20251001_1034_Joyful Moment Together_simple_compose_01k6gdah5ef7n9mj7hyscbm439.png", title: "Share Joy", vibe: "Social" },
-              { img: "20251001_1041_Serene Morning Ritual_simple_compose_01k6gdpzjeexe95stnx5nn3y9b.png", title: "Morning Zen", vibe: "Relaxation" },
-              { img: "20251001_1106_Festival Sunset Vibes_simple_compose_01k6gf43hcednabq9xzx5rk5tj.png", title: "Festival Fun", vibe: "Adventure" },
-              { img: "20251001_1118_Neon Night Stroll_simple_compose_01k6gftp4ae6r8g2b610xw1f4a.png", title: "Night Life", vibe: "Urban" },
-              { img: "20251001_1159_Beach Bonfire Gathering_simple_compose_01k6gj5gj9fedrvpngg8yaekat.png", title: "Beach Vibes", vibe: "Nature" },
-              { img: "20251001_1138_Jazz Club Vibes_simple_compose_01k6ggzbdeeefb6t68pprex49z.png", title: "Smooth Jazz", vibe: "Culture" },
-              { img: "20251001_1132_Morning Coffee Relaxation_simple_compose_01k6ggma8mermb81awhar60bvb.png", title: "Coffee Time", vibe: "Calm" },
-              { img: "20251001_1149_Backyard BBQ Gathering_simple_compose_01k6ghjj7ff7prsem7192hhz5f.png", title: "BBQ Party", vibe: "Social" },
-              { img: "20251001_1151_Café Conversations_simple_compose_01k6ghq23rfhhazmw46r48359k.png", title: "Café Chat", vibe: "Social" },
-              { img: "20251001_1128_Poolside Relaxation Scene_simple_compose_01k6ggdj0wep3tdxa7h4jvwad3.png", title: "Poolside", vibe: "Luxury" },
-              { img: "20251001_1042_Relaxing Bedtime Reading_simple_compose_01k6gdqc1nf3d97fhbx6b5348f.png", title: "Cozy Read", vibe: "Relaxation" },
-              { img: "20251001_1059_Backyard Barbecue Gathering_simple_compose_01k6gerfz3eqhr2v5xv0en5rdy.png", title: "Grill Time", vibe: "Social" },
-              { img: "20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww0ehr854ydafdc81ja.png", title: "Festival Glow", vibe: "Party" },
-              { img: "20251001_1105_Rooftop Smoke and Sunsets_simple_compose_01k6gf359yeqpamm399y255bqt.png", title: "Rooftop Chill", vibe: "Urban" },
-              { img: "20251001_1106_Urban Night Vibes_simple_compose_01k6gf3hgbeshs48w1v30a15q4.png", title: "City Lights", vibe: "Urban" },
-              { img: "20251001_1124_Desert Highway Hangout_simple_compose_01k6gg6918ef5br5x494z7h7gy.png", title: "Desert Drive", vibe: "Adventure" },
-              { img: "20251001_1127_Morning Serenity Moment_simple_compose_01k6ggdyvcfhwtr97712pe392e.png", title: "Serene Start", vibe: "Calm" },
-              { img: "20251001_1128_Luxury Bath Relaxation_simple_compose_01k6gge3e9e5dr6r2j8qb3vxet.png", title: "Spa Day", vibe: "Luxury" },
-              { img: "20251001_1128_Night Festival Vibes_simple_compose_01k6ggck96fss9cyzxbezeav7w.png", title: "Night Party", vibe: "Party" },
-              { img: "20251001_1133_Luxurious Bath Relaxation_simple_compose_01k6ggngv8fgpv41zgv5ddz4m0.png", title: "Bath Time", vibe: "Luxury" },
-              { img: "20251001_1141_Sunny Park Gathering_simple_compose_01k6gh5v42fx4a4gkbdpe9rvsb.png", title: "Park Day", vibe: "Nature" },
-              { img: "20251001_1134_Neon Festival Vibes_simple_compose_01k6ggrnptefd97cz55pkg4med.png", title: "Neon Nights", vibe: "Party" },
-              { img: "20251001_1117_Elegant Outdoor Gathering_simple_compose_01k6gfry32ff0a54fh49mtqpkq.png", title: "Elegant Eve", vibe: "Luxury" },
-              { img: "20251001_1130_Kitchen Gathering Joy_simple_compose_01k6ggh1vhe1gvqdd64sfj0web.png", title: "Kitchen Fun", vibe: "Home" },
-              { img: "20251001_1159_Hikers Sharing Moments_simple_compose_01k6gj53j5fryt2pcwbxmy67r0.png", title: "Trail Time", vibe: "Adventure" },
-              { img: "20251001_1142_Friends Sharing Moments_simple_compose_01k6gh5bmre4f83x3x6fgs13a3.png", title: "Good Times", vibe: "Social" },
-              { img: "20251001_1042_Relaxing Bedtime Reading_simple_compose_01k6gdqc1pfv3t5znmk3bpywgr.png", title: "Night Read", vibe: "Calm" },
-              { img: "20251001_1106_Festival Sunset Vibes_simple_compose_01k6gf43hefgyrz99x3j8dg77d.png", title: "Sunset Party", vibe: "Party" },
-              { img: "20251001_1106_Urban Night Vibes_simple_compose_01k6gf3hgcf4gsbnqc5c1f3ccx.png", title: "Urban Beat", vibe: "Urban" },
-              { img: "20251001_1106_Urban Night Vibes_simple_compose_01k6gf3hgef7esjtqs0sn6kye6.png", title: "Street Life", vibe: "Urban" },
-              { img: "20251001_1124_Desert Highway Hangout_simple_compose_01k6gg691aesg9ky0ae76s6fcm.png", title: "Road Trip", vibe: "Adventure" },
-              { img: "20251001_1132_Morning Coffee Relaxation_simple_compose_01k6ggma8pe0y9y0p6a4ftd685.png", title: "Wake Up", vibe: "Morning" },
-              { img: "20251001_1138_Jazz Club Vibes_simple_compose_01k6ggzbdfe3ztjyjgk0mayhz6.png", title: "Live Music", vibe: "Culture" },
-              { img: "20251001_1151_Café Conversations_simple_compose_01k6ghq23se49r7py3f5se8z53.png", title: "Coffee Chat", vibe: "Social" },
-              { img: "20251001_1059_Vibrant Festival Atmosphere_simple_compose_01k6gerww1f6tbd58yb1nxdtck.png", title: "Light Show", vibe: "Party" },
-              { img: "20190504_173158_HDR.jpg", title: "Outdoor Fun", vibe: "Nature" },
-              { img: "20190504_174107.jpg", title: "Adventure", vibe: "Explore" },
-              { img: "IMG_0911.JPG", title: "Great Times", vibe: "Social" },
-              { img: "IMG_8086.JPG", title: "Chill Vibes", vibe: "Relax" },
-              { img: "IMG_8112.JPG", title: "Good Life", vibe: "Lifestyle" },
-              { img: "IMG_9285.JPG", title: "Happy Days", vibe: "Joy" },
-              { img: "P1020030.jpg", title: "The Moment", vibe: "Memory" },
-              { img: "P1020639.jpg", title: "Experience", vibe: "Life" },
-              { img: "wedding photo mint 1.jpg", title: "Celebration", vibe: "Special" }
-            ].map((item, index) => {
-              // Generate dynamic positions in a grid-like pattern
-              const row = Math.floor(index / 5);
-              const col = index % 5;
-              const x = 2 + (col * 19) + (Math.random() * 3);
-              const y = 2 + (row * 11) + (Math.random() * 2);
-              const rotate = (Math.random() * 30) - 15;
-
-              return (
-              <div
-                class="polaroid-scattered absolute bg-white rounded-lg shadow-2xl p-3 transition-all duration-700 hover:scale-110 hover:z-50 cursor-pointer"
-                data-index={index}
-                style={`left: ${x}%; top: ${y}%; transform: rotate(${rotate}deg); width: 280px; z-index: ${index + 1};`}
-              >
-                <div class="relative w-full h-64 bg-gray-200 overflow-hidden rounded">
-                  <img
-                    src={`/assets/lifestyleimages/${item.img}`}
-                    alt={item.title}
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-                {/* Mint Coin Logo overlapping photo and title space */}
-                <img
-                  src="/favicon.png"
-                  alt="Mint"
-                  class="absolute left-4 w-20 h-20 rounded-full shadow-lg"
-                  style="bottom: 52px; z-index: 20;"
-                />
-                <div class="relative mt-3 text-center pt-6">
-                  <p class="text-lg font-bold text-gray-800" style="font-family: 'Permanent Marker', cursive;">{item.title}</p>
-                  <p class="text-xs text-gray-600 italic">{item.vibe}</p>
-                </div>
-              </div>
-            )})
-          </div>
+        <img
+          src="/assets/Mint_Full_Logo.png"
+          alt="Mint Deals Logo"
+          class="w-full max-w-md md:max-w-xl mx-auto mb-8"
+        />
+        <div class="flex flex-col items-center gap-4 mt-8">
+          <a
+            href="/map"
+            class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-12 text-lg rounded-full transition-all duration-300 hover:scale-105 shadow-lg"
+          >
+            Shop Local
+          </a>
+          <a
+            href="https://apps.apple.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-block bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 px-12 text-lg rounded-full transition-all duration-300 hover:scale-105 shadow-lg"
+          >
+            Get Our App
+          </a>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Product Categories Section -->
-  <div class="py-8">
-    <div class="mb-6 px-8 sm:px-12 lg:px-16 xl:px-20">
-      <h2 class="mb-3 text-3xl font-bold text-white text-center uppercase">
-        Explore Product Categories
-      </h2>
-    </div>
-
-    {apiError ? (
-      <div class="py-12 text-center">
-        <div class="max-w-md p-8 mx-auto bg-red-900 rounded-lg bg-opacity-80">
-          <div class="mb-4 text-6xl text-red-400">⚠️</div>
-          <h3 class="mb-2 text-lg font-medium text-red-200">API Error</h3>
-          <p class="text-sm text-red-300">{apiError}</p>
-        </div>
-      </div>
-    ) : categories.length > 0 ? (
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-        {/* Bento Grid Layout */}
-        <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-1 auto-rows-[180px]">
-          {categories.slice(0, 10).map((category, index) => {
-            // Define bento grid sizes - some span more cells
-            const bentoSizes = [
-              'md:col-span-2 md:row-span-2', // 0: Large featured
-              'md:col-span-2 md:row-span-2', // 1: Large featured (Indica)
-              'md:col-span-2 md:row-span-1', // 2: Wide
-              'md:col-span-2 md:row-span-2', // 3: Large featured
-              'md:col-span-2 md:row-span-1', // 4: Wide
-              'md:col-span-2 md:row-span-1', // 5: Wide
-              'md:col-span-3 md:row-span-1', // 6: Extra wide
-              'md:col-span-3 md:row-span-1', // 7: Extra wide
-              'md:col-span-2 md:row-span-1', // 8: Regular
-              'md:col-span-4 md:row-span-1', // 9: Full width
-            ];
-
-            return (
-              <a
-                href={`/${category.slug}`}
-                class={`bento-card group relative overflow-hidden rounded-sm shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.01] ${bentoSizes[index] || 'md:col-span-2'}`}
-              >
-                {/* Background Image */}
-                <div class="absolute inset-0">
-                  {category.image ? (
-                    <img
-                      src={category.image}
-                      alt={category.title}
-                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                  ) : (
-                    <div class={`w-full h-full bg-gradient-to-br ${category.colorGradient}`}>
-                      <div class="absolute inset-0 flex items-center justify-center opacity-20">
-                        <span class="text-9xl">{category.icon}</span>
-                      </div>
-                    </div>
-                  )}
-                  {/* Gradient Overlay */}
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
-                </div>
-
-                {/* Content */}
-                <div class="relative h-full flex flex-col justify-end p-6">
-                  <div class="transform transition-transform duration-300 group-hover:translate-y-[-8px]">
-                    <h3 class="text-2xl font-bold text-white mb-2 drop-shadow-lg uppercase">
-                      {category.title}
-                    </h3>
-                    <p class="text-sm text-green-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
-                      {category.description || `Explore our ${category.title.toLowerCase()} collection`}
-                    </p>
-                    <div class="mt-3 flex items-center text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span class="text-sm font-medium">Explore</span>
-                      <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            );
-          })}
-        </div>
-
-        {/* View All Link */}
-        <div id="category-detail-panel" class="hidden">
-            <div class="flex flex-col sm:flex-row items-start justify-between mb-4 md:mb-6 gap-4">
-              <div class="flex items-center gap-3 md:gap-4 w-full sm:w-auto">
-                <div id="detail-image-container" class="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden rounded-lg">
-                  <img id="detail-image" src="" alt="" class="object-cover w-full h-full hidden" />
-                  <div id="detail-icon-fallback" class="flex items-center justify-center w-full h-full bg-gradient-to-br from-green-500 to-green-600">
-                    <span id="detail-icon" class="text-3xl md:text-4xl"></span>
-                  </div>
-                </div>
-                <div class="flex-1">
-                  <h3 id="detail-title" class="text-xl md:text-3xl font-bold text-white"></h3>
-                  <p id="detail-count" class="text-sm md:text-lg text-green-400"></p>
-                </div>
-              </div>
-              <button id="close-detail" class="p-2 transition-colors rounded-full hover:bg-green-900/20 self-start sm:self-auto">
-                <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </button>
-            </div>
-
-            <p id="detail-description" class="mb-4 md:mb-6 text-sm md:text-lg leading-relaxed text-green-300"></p>
-
-            <a id="detail-link" href="#" class="inline-flex items-center px-4 md:px-6 py-2 md:py-3 text-sm md:text-base font-medium text-white transition-all transform rounded-lg shadow-lg bg-gradient-to-r from-yellow-400 to-transparent hover:from-yellow-500 hover:to-transparent hover:scale-105">
-              View Products
-              <svg class="w-4 h-4 md:w-5 md:h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
-            </a>
-          </div>
-        </div>
-      ) : (
-        <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
-            <div class="mb-4 text-6xl">🌿</div>
-            <h3 class="mb-2 text-lg font-medium text-yellow-400">Categories Coming Soon</h3>
-            <p class="text-green-300">Product categories will be available here.</p>
-          </div>
-        </div>
-      )}
-
-      <div class="mt-12 text-right">
-        <a href="/categories" class="text-yellow-400 hover:text-yellow-300 transition-colors underline">
-          View All Categories →
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- States Section -->
-  <div class="py-16">
-    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-      <div class="mb-8 text-right">
-        <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl uppercase">
-          Shop by State
-        </h2>
-      </div>
-
+  <!-- Shop by State Carousel -->
+  <section class="bg-black">
+    <div class="w-full">
       {regions.length > 0 ? (
-        <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-1 auto-rows-[180px]">
-          {regions.map((region, index) => {
-            const bentoSizes = [
-              'md:col-span-2 md:row-span-2',
-              'md:col-span-2 md:row-span-2',
-              'md:col-span-2 md:row-span-1',
-              'md:col-span-2 md:row-span-2',
-              'md:col-span-2 md:row-span-1',
-              'md:col-span-2 md:row-span-1',
-              'md:col-span-3 md:row-span-1',
-              'md:col-span-3 md:row-span-1',
-              'md:col-span-2 md:row-span-1',
-              'md:col-span-4 md:row-span-1',
-            ];
-
-            return (
-              <a
-                href={`/region/${region.slug}`}
-                class={`bento-card group relative overflow-hidden rounded-sm shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.01] ${bentoSizes[index % bentoSizes.length] || 'md:col-span-2'}`}
-              >
-                <div class="absolute inset-0">
-                  {region.image ? (
-                    <img
-                      src={region.image}
-                      alt={region.name}
-                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                  ) : (
-                    <div class="w-full h-full bg-gradient-to-br from-green-600 to-green-700">
-                      <div class="absolute inset-0 flex items-center justify-center opacity-20">
-                        <span class="text-9xl">📍</span>
-                      </div>
-                    </div>
-                  )}
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
-                </div>
-
-                <div class="relative h-full flex flex-col justify-end p-6">
-                  <div class="transform transition-transform duration-300 group-hover:translate-y-[-8px]">
-                    <h3 class="text-2xl font-bold text-white mb-2 drop-shadow-lg uppercase">
-                      {region.name}
-                    </h3>
-                    <p class="text-sm text-green-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
-                      {region.description || `Explore stores in ${region.name}`}
-                    </p>
-                    <div class="mt-3 flex items-center text-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span class="text-sm font-medium">View Stores</span>
-                      <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            );
-          })}
-        </div>
-      ) : (
-        <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
-            <div class="mb-4 text-6xl">📍</div>
-            <h3 class="mb-2 text-lg font-medium text-yellow-400">States Coming Soon</h3>
-            <p class="text-green-300">State information will be available here.</p>
-          </div>
-        </div>
-      )}
-
-      <div class="mt-12 text-right">
-        <a href="/regions" class="text-yellow-400 hover:text-yellow-300 transition-colors underline">
-          View All States →
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Featured Locations Section -->
-  <div class="py-16">
-    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-      <div class="mb-8 text-center">
-        <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl uppercase">
-          Featured Locations
-        </h2>
-      </div>
-
-      {apiError ? (
-        <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto rounded-lg bg-red-50 dark:bg-red-900">
-            <div class="mb-4 text-6xl text-red-600 dark:text-red-400">⚠️</div>
-            <h3 class="mb-2 text-lg font-medium text-red-800 dark:text-red-200">API Error</h3>
-            <p class="text-sm text-red-600 dark:text-red-300">{apiError}</p>
-          </div>
-        </div>
-      ) : stores.length > 0 ? (
-        <div>
-          <!-- Location Status Bar -->
-          <div id="location-status" class="hidden p-4 mb-6 text-center border border-green-500 rounded-lg bg-green-900/50">
-            <div id="location-loading" class="flex items-center justify-center gap-3">
-              <div class="w-5 h-5 border-b-2 border-yellow-400 rounded-full animate-spin"></div>
-              <span class="text-yellow-400">Getting your location to show nearest stores...</span>
-            </div>
-            <div id="location-success" class="hidden text-green-300">
-              📍 Showing stores near you
-            </div>
-            <div id="location-error" class="hidden text-yellow-400">
-              📍 Location unavailable - showing all stores
-            </div>
-          </div>
-
-          <div id="stores-list" class="space-y-12">
-            {stores.map((store, index) => (
-              <div
-                class="store-card overflow-hidden bg-black rounded-xl shadow-xl"
-                data-store-id={store.id}
-                data-lat={store.address?.latitude || ''}
-                data-lng={store.address?.longitude || ''}
-                data-name={store.name}
-              >
-                {/* Alternating layout: even index = image left, odd index = image right */}
-                <div class={`grid grid-cols-1 md:grid-cols-2 gap-0 ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
-                  {/* Image Section */}
-                  <div class={`relative h-64 md:h-auto ${index % 2 === 1 ? 'md:order-2' : ''}`}>
-                    {store.image ? (
+        <div class="relative">
+          <!-- Carousel Container -->
+          <div class="overflow-hidden">
+            <div id="states-carousel" class="flex transition-transform duration-500 ease-out">
+              {regions.map((region) => (
+                <a
+                  href={`/region/${region.slug}`}
+                  class="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 xl:w-1/4 group relative overflow-hidden border border-black"
+                >
+                  <div class="aspect-[16/9] relative overflow-hidden">
+                    {region.image ? (
                       <img
-                        src={store.image}
-                        alt={store.name}
-                        class="object-cover w-full h-full border border-black"
+                        src={region.image}
+                        alt={region.name}
+                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 border border-black"
                       />
                     ) : (
-                      <div class="flex items-center justify-center w-full h-full bg-gradient-to-br from-green-900/30 to-black/50 border border-black">
-                        <span class="text-6xl">🏪</span>
+                      <div class="w-full h-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
+                        <span class="text-6xl">📍</span>
                       </div>
                     )}
-                    {/* Distance Badge */}
-                    <span class="store-distance hidden absolute top-4 right-4 px-3 py-1.5 text-sm font-medium text-white bg-green-900/90 rounded-lg backdrop-blur-sm"></span>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
                   </div>
-
-                  {/* Text Section */}
-                  <div class={`flex flex-col justify-center p-8 md:p-12 ${index % 2 === 1 ? 'md:order-1' : ''}`}>
-                    <h3 class="mb-4 text-2xl font-bold text-white md:text-3xl uppercase">
-                      {store.name}
-                    </h3>
-
-                    {store.address && (
-                      <div class="flex items-start mb-4 text-green-300">
-                        <svg class="w-6 h-6 mr-3 mt-0.5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        <div>
-                          <p class="text-lg">{store.address.city}, {store.address.state}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {store.phone && (
-                      <div class="flex items-center mb-6 text-green-300">
-                        <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                        </svg>
-                        <p class="text-lg">{store.phone}</p>
-                      </div>
-                    )}
-
-                    <div class="flex gap-4 mt-4">
-                      <a
-                        href={`/location/${store.slug}`}
-                        class="text-yellow-400 hover:text-yellow-300 underline"
-                      >
-                        View Details
-                      </a>
-                      <a
-                        href={`/location/${store.slug}/menu`}
-                        class="text-yellow-400 hover:text-yellow-300 underline"
-                      >
-                        View Full Menu
-                      </a>
-                    </div>
+                  <div class="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 class="text-2xl font-bold text-white mb-2">{region.name}</h3>
+                    <p class="text-sm text-gray-300 line-clamp-2">
+                      {region.description || `Explore dispensaries in ${region.name}`}
+                    </p>
                   </div>
-                </div>
-              </div>
-            ))}
+                </a>
+              ))}
+            </div>
           </div>
+
+          <!-- Navigation Buttons -->
+          <button
+            id="states-prev"
+            class="absolute left-4 top-1/2 -translate-y-1/2 bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 z-10"
+            aria-label="Previous states"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+          </button>
+          <button
+            id="states-next"
+            class="absolute right-4 top-1/2 -translate-y-1/2 bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 z-10"
+            aria-label="Next states"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
         </div>
       ) : (
-        <div class="py-12 text-center">
-          <div class="max-w-md p-8 mx-auto bg-black border-2 border-green-500 rounded-lg">
-            <h3 class="mb-2 text-lg font-medium text-yellow-400">No Locations Available</h3>
-            <p class="text-green-300">Location information will be displayed here.</p>
+        <div class="text-center py-12">
+          <div class="inline-block bg-gray-800 rounded-lg p-8">
+            <div class="text-6xl mb-4">📍</div>
+            <h3 class="text-xl font-medium text-white mb-2">States Coming Soon</h3>
+            <p class="text-gray-400">Check back soon for state information</p>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Store Locations Section -->
+  <section class="relative py-16 bg-gray-900 bg-cover bg-center bg-no-repeat" style="background-image: url('/assets/Mint-Wallpaper-Smoke-3840x2400.jpg');">
+    <div class="absolute inset-0" style="background: radial-gradient(circle, rgba(0, 0, 0, 0.9) 0%, rgba(17, 24, 39, 0.85) 50%, rgba(31, 41, 55, 0.8) 100%);"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-right mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 uppercase">
+          Our Locations
+        </h2>
+      </div>
+
+      {stores.length > 0 ? (
+        <div id="stores-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stores.slice(0, 8).map((store) => (
+            <a
+              href={`/location/${store.slug}`}
+              class="store-card group relative bg-gray-800 rounded-lg overflow-hidden hover:transform hover:scale-105 transition-all duration-300"
+              data-lat={store.latitude}
+              data-lng={store.longitude}
+              data-name={store.name}
+            >
+              <div class="aspect-[4/3] relative overflow-hidden">
+                {store.image ? (
+                  <img
+                    src={store.image}
+                    alt={store.name}
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 border border-black"
+                  />
+                ) : (
+                  <div class="w-full h-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
+                    <span class="text-6xl">🏪</span>
+                  </div>
+                )}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+              </div>
+              <div class="absolute bottom-0 left-0 right-0 p-4">
+                <h3 class="text-xl font-bold text-white mb-1">{store.name}</h3>
+                {store.address && (
+                  <p class="text-sm text-gray-300">
+                    {store.address.city}, {store.address.state}
+                  </p>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <div class="inline-block bg-gray-800 rounded-lg p-8">
+            <div class="text-6xl mb-4">🏪</div>
+            <h3 class="text-xl font-medium text-white mb-2">Locations Coming Soon</h3>
+            <p class="text-gray-400">Check back soon for store locations</p>
           </div>
         </div>
       )}
 
-      <div class="mt-12 text-right">
-        <a href="/stores" class="text-yellow-400 hover:text-yellow-300 transition-colors underline">
-          View All Locations →
+      <div class="text-center mt-12">
+        <a href="/stores" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300">
+          View All Locations
         </a>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- About Section -->
-  <div class="py-16">
-    <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
-      <div class="mb-8 text-center">
-        <h2 class="mb-3 text-2xl font-bold text-white md:text-3xl uppercase">
-          Why Choose Mint Deals
+  <!-- Promotions Section -->
+  <section class="bg-black py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-right mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 uppercase">
+          Promotions
         </h2>
-        <p class="text-lg text-green-300">
-          Your trusted partner in cannabis discovery
-        </p>
       </div>
 
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-3 xl:gap-12">
-        <!-- Feature 1 -->
-        <a href="/stores" class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400 hover:scale-105 transform group">
-          <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg group-hover:bg-green-800">
-            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-          </div>
-          <h3 class="mb-3 text-xl font-bold text-yellow-400 group-hover:text-yellow-300 uppercase">Find Locations</h3>
-          <p class="text-green-300">
-            Discover trusted dispensaries near you with detailed information and directions.
-          </p>
-          <div class="mt-4 flex items-center text-yellow-400 group-hover:text-yellow-300">
-            <span class="text-sm font-medium">View All Stores</span>
-            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </div>
-        </a>
+      <div class="relative">
+        <!-- Banner Carousel Container -->
+        <div class="overflow-hidden rounded-lg">
+          <div id="promotions-carousel" class="flex transition-transform duration-700 ease-in-out">
+            <!-- Banner 1 -->
+            <div class="w-full flex-shrink-0">
+              <div class="relative aspect-[16/6] bg-gradient-to-r from-green-600 to-green-800 rounded-lg overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center p-8">
+                  <div class="text-center">
+                    <h3 class="text-4xl md:text-6xl font-bold text-white mb-4">Special Offer!</h3>
+                    <p class="text-xl md:text-2xl text-white mb-6">Save 20% on all products this week</p>
+                    <a href="/deals" class="inline-block bg-white text-green-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors duration-300">
+                      Shop Deals
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <!-- Feature 2 -->
-        <a href="/categories" class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400 hover:scale-105 transform group">
-          <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg group-hover:bg-green-800">
-            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-            </svg>
-          </div>
-          <h3 class="mb-3 text-xl font-bold text-yellow-400 group-hover:text-yellow-300 uppercase">Browse Products</h3>
-          <p class="text-green-300">
-            Explore comprehensive product information and educational resources.
-          </p>
-          <div class="mt-4 flex items-center text-yellow-400 group-hover:text-yellow-300">
-            <span class="text-sm font-medium">View All Categories</span>
-            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </div>
-        </a>
+            <!-- Banner 2 -->
+            <div class="w-full flex-shrink-0">
+              <div class="relative aspect-[16/6] bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center p-8">
+                  <div class="text-center">
+                    <h3 class="text-4xl md:text-6xl font-bold text-white mb-4">New Products!</h3>
+                    <p class="text-xl md:text-2xl text-white mb-6">Check out our latest arrivals</p>
+                    <a href="/categories" class="inline-block bg-white text-yellow-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors duration-300">
+                      Explore Now
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <!-- Feature 3 -->
-        <a href="/deals" class="p-6 transition-all bg-black border-2 border-green-500 rounded-lg shadow-lg hover:border-yellow-400 hover:scale-105 transform group">
-          <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg group-hover:bg-green-800">
-            <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+            <!-- Banner 3 -->
+            <div class="w-full flex-shrink-0">
+              <div class="relative aspect-[16/6] bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center p-8">
+                  <div class="text-center">
+                    <h3 class="text-4xl md:text-6xl font-bold text-white mb-4">Member Rewards!</h3>
+                    <p class="text-xl md:text-2xl text-white mb-6">Join our loyalty program today</p>
+                    <a href="/stores" class="inline-block bg-white text-purple-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors duration-300">
+                      Learn More
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <h3 class="mb-3 text-xl font-bold text-yellow-400 group-hover:text-yellow-300 uppercase">Find Deals</h3>
-          <p class="text-green-300">
-            Discover the latest deals and promotions from dispensaries near you.
-          </p>
-          <div class="mt-4 flex items-center text-yellow-400 group-hover:text-yellow-300">
-            <span class="text-sm font-medium">View All Deals</span>
-            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </div>
-        </a>
+        </div>
+
+        <!-- Navigation Dots -->
+        <div class="flex justify-center mt-6 gap-3">
+          <button class="promo-dot w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-75 transition-opacity" data-index="0"></button>
+          <button class="promo-dot w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-75 transition-opacity" data-index="1"></button>
+          <button class="promo-dot w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-75 transition-opacity" data-index="2"></button>
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button id="promo-prev" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-300 z-10">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <button id="promo-next" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-300 z-10">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
       </div>
     </div>
-  </div>
-  </div>
+  </section>
 
-  <!-- Categories interactive panel script -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const categoryCards = document.querySelectorAll('.category-card');
-      const detailPanel = document.getElementById('category-detail-panel');
-      const closeBtn = document.getElementById('close-detail');
+  <!-- Shop Categories Section -->
+  <section class="bg-gray-900 py-16">
+    <div class="w-full">
+      {categories.length > 0 ? (
+        <>
+          <div class="relative">
+            <!-- Carousel Container -->
+            <div class="overflow-hidden">
+              <div id="categories-carousel" class="flex transition-transform duration-500 ease-out">
+                {categories.map((category) => (
+                  <a
+                    href={`/${category.slug}`}
+                    class="flex-shrink-0 w-full md:w-1/2 lg:w-1/3 xl:w-1/4 group relative overflow-hidden border border-black"
+                  >
+                    <div class="aspect-[16/9] relative overflow-hidden bg-gray-800">
+                      {category.image ? (
+                        <img
+                          src={category.image}
+                          alt={category.title}
+                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 border border-black"
+                        />
+                      ) : (
+                        <div class="w-full h-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
+                          <span class="text-6xl">🌿</span>
+                        </div>
+                      )}
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 class="text-2xl font-bold text-white mb-2">{category.title}</h3>
+                      <p class="text-sm text-gray-300 line-clamp-2">
+                        {category.description || 'Learn More'}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
 
-      const detailImage = document.getElementById('detail-image');
-      const detailIcon = document.getElementById('detail-icon');
-      const detailIconFallback = document.getElementById('detail-icon-fallback');
-      const detailTitle = document.getElementById('detail-title');
-      const detailCount = document.getElementById('detail-count');
-      const detailDescription = document.getElementById('detail-description');
-      const detailLink = document.getElementById('detail-link');
+            <!-- Navigation Buttons -->
+            <button
+              id="categories-prev"
+              class="absolute left-4 top-1/2 -translate-y-1/2 bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 z-10"
+              aria-label="Previous categories"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <button
+              id="categories-next"
+              class="absolute right-4 top-1/2 -translate-y-1/2 bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 z-10"
+              aria-label="Next categories"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
 
-      // Check if we're on mobile
-      const isMobile = () => window.innerWidth < 768;
+          <div class="text-right mt-12 px-4 sm:px-6 lg:px-8">
+            <a href="/categories" class="text-yellow-400 hover:text-yellow-300 transition-colors underline text-lg">
+              View All Categories →
+            </a>
+          </div>
+        </>
+      ) : (
+        <div class="text-center py-12">
+          <div class="inline-block bg-gray-800 rounded-lg p-8">
+            <div class="text-6xl mb-4">🌿</div>
+            <h3 class="text-xl font-medium text-white mb-2">Categories Coming Soon</h3>
+            <p class="text-gray-400">Check back soon for product categories</p>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</Layout>
 
-      // Handle category card clicks
-      categoryCards.forEach(card => {
-        const header = card.querySelector('.category-header');
-        const content = card.querySelector('.category-content');
-        const arrow = card.querySelector('.category-arrow');
+<script>
+  // States Carousel
+  function initStatesCarousel() {
+    const carousel = document.getElementById('states-carousel');
+    const prevBtn = document.getElementById('states-prev');
+    const nextBtn = document.getElementById('states-next');
 
-        header.addEventListener('click', () => {
-          if (isMobile()) {
-            // Mobile: Toggle in-card expansion
-            const isExpanded = content.style.maxHeight && content.style.maxHeight !== '0px';
+    if (!carousel || !prevBtn || !nextBtn) return;
 
-            // Close all other cards
-            categoryCards.forEach(otherCard => {
-              if (otherCard !== card) {
-                const otherContent = otherCard.querySelector('.category-content');
-                const otherArrow = otherCard.querySelector('.category-arrow');
-                otherContent.style.maxHeight = '0';
-                otherArrow.classList.remove('rotate-180');
-              }
-            });
+    let currentIndex = 0;
+    const totalCards = carousel.children.length;
 
-            // Toggle current card
-            if (isExpanded) {
-              content.style.maxHeight = '0';
-              arrow.classList.remove('rotate-180');
-            } else {
-              content.style.maxHeight = content.scrollHeight + 'px';
-              arrow.classList.add('rotate-180');
-            }
-          } else {
-            // Desktop: Show side panel
-            const title = card.dataset.categoryTitle;
-            const description = card.dataset.categoryDescription;
-            const count = card.dataset.categoryCount;
-            const slug = card.dataset.categorySlug;
-            const icon = card.dataset.categoryIcon;
-            const image = card.dataset.categoryImage;
-
-            // Update panel content
-            detailTitle.textContent = title;
-            detailCount.textContent = `${count} products available`;
-            detailDescription.textContent = description || `Explore our selection of ${title.toLowerCase()} products.`;
-            detailLink.href = `/${slug}`;
-
-            // Show image or icon
-            if (image) {
-              detailImage.src = image;
-              detailImage.alt = title;
-              detailImage.classList.remove('hidden');
-              detailIconFallback.classList.add('hidden');
-            } else {
-              detailImage.classList.add('hidden');
-              detailIconFallback.classList.remove('hidden');
-              detailIcon.textContent = icon;
-            }
-
-            // Show panel
-            detailPanel.classList.remove('opacity-0', 'pointer-events-none');
-            detailPanel.classList.add('opacity-100', 'pointer-events-auto');
-          }
-        });
-      });
-
-      // Close detail panel (desktop only)
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-          detailPanel.classList.remove('opacity-100', 'pointer-events-auto');
-          detailPanel.classList.add('opacity-0', 'pointer-events-none');
-        });
-      }
-
-      // Handle window resize
-      let resizeTimer;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          // Close all mobile expansions when switching to desktop
-          if (!isMobile()) {
-            categoryCards.forEach(card => {
-              const content = card.querySelector('.category-content');
-              const arrow = card.querySelector('.category-arrow');
-              content.style.maxHeight = '0';
-              arrow.classList.remove('rotate-180');
-            });
-          } else {
-            // Close desktop panel when switching to mobile
-            detailPanel.classList.remove('opacity-100', 'pointer-events-auto');
-            detailPanel.classList.add('opacity-0', 'pointer-events-none');
-          }
-        }, 250);
-      });
-    });
-  </script>
-
-  <!-- Polaroid Scatter Animation Script -->
-  <script>
-    let polaroidInterval = null;
-
-    function initPolaroidAnimation() {
-      const polaroidCards = document.querySelectorAll('.polaroid-scattered');
-
-      if (polaroidCards.length === 0) return;
-
-      // Clear any existing interval
-      if (polaroidInterval) {
-        clearInterval(polaroidInterval);
-      }
-
-      // Store original positions for each card
-      const originalPositions = Array.from(polaroidCards).map(card => ({
-        x: card.style.left,
-        y: card.style.top,
-        rotate: parseInt(card.style.transform.match(/rotate\((-?\d+)deg\)/)?.[1] || 0)
-      }));
-
-      // Function to shuffle polaroids
-      function shufflePolaroids() {
-        polaroidCards.forEach((card, index) => {
-          // Generate new random position
-          const newX = Math.random() * 70 + 5; // 5% to 75%
-          const newY = Math.random() * 50 + 5; // 5% to 55%
-          const newRotate = (Math.random() - 0.5) * 30; // -15 to +15 degrees
-          const newZ = Math.floor(Math.random() * polaroidCards.length) + 1;
-
-          // Animate to new position
-          card.style.transition = 'all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
-          card.style.left = `${newX}%`;
-          card.style.top = `${newY}%`;
-          card.style.transform = `rotate(${newRotate}deg)`;
-          card.style.zIndex = newZ;
-        });
-      }
-
-      // Shuffle every 5 seconds
-      polaroidInterval = setInterval(shufflePolaroids, 5000);
-
-      // Click to bring to front
-      polaroidCards.forEach((card) => {
-        card.addEventListener('click', () => {
-          // Reset all z-indexes
-          polaroidCards.forEach((c, i) => {
-            c.style.zIndex = i + 1;
-          });
-          // Bring clicked card to front
-          card.style.zIndex = 100;
-        });
-      });
-
-      // Add subtle floating animation to each polaroid
-      polaroidCards.forEach((card, index) => {
-        const delay = Math.random() * 2;
-        const duration = 3 + Math.random() * 2;
-
-        // Store current rotation for animation
-        const currentRotation = parseInt(card.style.transform.match(/rotate\((-?\d+)deg\)/)?.[1] || 0);
-        card.style.setProperty('--rotation', `${currentRotation}deg`);
-      });
+    function getVisibleCards() {
+      const width = window.innerWidth;
+      if (width >= 1280) return 4; // xl: 4 cards
+      if (width >= 1024) return 3; // lg: 3 cards
+      if (width >= 768) return 2;  // md: 2 cards
+      return 1; // mobile: 1 card
     }
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', initPolaroidAnimation);
+    function updateCarousel() {
+      const visibleCards = getVisibleCards();
+      const maxIndex = Math.max(0, totalCards - visibleCards);
 
-    // Re-initialize after Astro View Transitions
-    document.addEventListener('astro:page-load', initPolaroidAnimation);
-  </script>
-
-  <!-- Regions carousel script -->
-  <script>
-    function initRegionsCarousel() {
-      const carousel = document.getElementById('regions-carousel');
-      const prevBtn = document.getElementById('regions-prev');
-      const nextBtn = document.getElementById('regions-next');
-
-      if (!carousel || !prevBtn || !nextBtn) return;
-
-      let currentPosition = 0;
-      const cardWidth = 288 + 24; // 288px (w-72) + 24px gap
-      const visibleCards = Math.floor(carousel.parentElement.offsetWidth / cardWidth);
-      const totalCards = carousel.children.length;
-      const maxPosition = -(totalCards - visibleCards) * cardWidth;
-
-      // Update button states
-      function updateButtons() {
-        prevBtn.disabled = currentPosition >= 0;
-        nextBtn.disabled = currentPosition <= maxPosition;
-
-        prevBtn.style.opacity = currentPosition >= 0 ? '0.5' : '1';
-        nextBtn.style.opacity = currentPosition <= maxPosition ? '0.5' : '1';
+      if (currentIndex > maxIndex) {
+        currentIndex = maxIndex;
       }
 
-      // Scroll to previous
-      prevBtn.addEventListener('click', () => {
-        if (currentPosition < 0) {
-          currentPosition += cardWidth;
-          if (currentPosition > 0) currentPosition = 0;
-          carousel.style.transform = `translateX(${currentPosition}px)`;
-          updateButtons();
-        }
-      });
+      const percentage = -(currentIndex * (100 / visibleCards));
+      carousel.style.transform = `translateX(${percentage}%)`;
 
-      // Scroll to next
-      nextBtn.addEventListener('click', () => {
-        if (currentPosition > maxPosition) {
-          currentPosition -= cardWidth;
-          if (currentPosition < maxPosition) currentPosition = maxPosition;
-          carousel.style.transform = `translateX(${currentPosition}px)`;
-          updateButtons();
-        }
-      });
-
-      // Initial button state
       updateButtons();
-
-      // Update on window resize
-      window.addEventListener('resize', () => {
-        const newVisibleCards = Math.floor(carousel.parentElement.offsetWidth / cardWidth);
-        const newMaxPosition = -(totalCards - newVisibleCards) * cardWidth;
-
-        if (currentPosition < newMaxPosition) {
-          currentPosition = newMaxPosition;
-          carousel.style.transform = `translateX(${currentPosition}px)`;
-        }
-
-        updateButtons();
-      });
     }
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', initRegionsCarousel);
+    function updateButtons() {
+      const visibleCards = getVisibleCards();
+      const maxIndex = Math.max(0, totalCards - visibleCards);
 
-    // Re-initialize after Astro View Transitions
-    document.addEventListener('astro:page-load', initRegionsCarousel);
-  </script>
+      prevBtn.disabled = currentIndex <= 0;
+      nextBtn.disabled = currentIndex >= maxIndex;
+      prevBtn.style.opacity = currentIndex <= 0 ? '0.5' : '1';
+      nextBtn.style.opacity = currentIndex >= maxIndex ? '0.5' : '1';
+    }
 
-  <!-- Location-based sorting script -->
-  <script>
-    // Haversine formula to calculate distance between two coordinates
+    prevBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateCarousel();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const visibleCards = getVisibleCards();
+      const maxIndex = Math.max(0, totalCards - visibleCards);
+      if (currentIndex < maxIndex) {
+        currentIndex++;
+        updateCarousel();
+      }
+    });
+
+    updateCarousel();
+
+    window.addEventListener('resize', () => {
+      updateCarousel();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initStatesCarousel);
+  document.addEventListener('astro:page-load', initStatesCarousel);
+</script>
+
+<script>
+  // Store Location Sorting by Distance
+  function sortStoresByLocation() {
+    const storesGrid = document.getElementById('stores-grid');
+    if (!storesGrid) return;
+
+    const storeCards = Array.from(storesGrid.querySelectorAll('.store-card'));
+
+    // Haversine formula to calculate distance between two points
     function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 3958.756; // Earth's radius in miles
+      const R = 3959; // Earth's radius in miles
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
-
-      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = R * c;
-
-      return distance;
+      return R * c;
     }
 
-    // Format distance display
-    function formatDistance(distance) {
-      if (distance < 1) {
-        return `${(distance * 5280).toFixed(0)} ft`;
-      } else {
-        return `${distance.toFixed(1)} mi`;
-      }
+    // Sort stores by distance from user location
+    function sortByDistance(userLat, userLng) {
+      const sortedCards = storeCards
+        .map(card => {
+          const lat = parseFloat(card.dataset.lat);
+          const lng = parseFloat(card.dataset.lng);
+          const distance = (lat && lng) ? calculateDistance(userLat, userLng, lat, lng) : Infinity;
+          return { card, distance };
+        })
+        .sort((a, b) => a.distance - b.distance);
+
+      // Re-append cards in sorted order
+      sortedCards.forEach(({ card }) => storesGrid.appendChild(card));
     }
 
-    // Sort stores by distance and update display
-    function sortStoresByDistance(userLat, userLon) {
-      const storeCards = Array.from(document.querySelectorAll('.store-card'));
-      const storesList = document.getElementById('stores-list');
+    // Default: Show Tempe location first
+    function sortWithTempeFirst() {
+      const sortedCards = storeCards.sort((a, b) => {
+        const nameA = a.dataset.name || '';
+        const nameB = b.dataset.name || '';
 
-      // Calculate distances and store in array
-      const storesWithDistance = storeCards.map(card => {
-        const lat = parseFloat(card.dataset.lat);
-        const lng = parseFloat(card.dataset.lng);
+        // Prioritize Tempe
+        if (nameA.toLowerCase().includes('tempe')) return -1;
+        if (nameB.toLowerCase().includes('tempe')) return 1;
 
-        let distance = Infinity;
-        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-          distance = calculateDistance(userLat, userLon, lat, lng);
-        }
-
-        return {
-          element: card,
-          distance: distance,
-          name: card.dataset.name
-        };
+        return 0;
       });
 
-      // Sort by distance (closest first)
-      storesWithDistance.sort((a, b) => a.distance - b.distance);
-
-      // Update DOM order and add distance labels, show only top 3
-      storesWithDistance.forEach((store, index) => {
-        // Show only the first 3 stores
-        if (index < 3) {
-          store.element.style.display = 'block';
-        } else {
-          store.element.style.display = 'none';
-        }
-
-        // Update distance display
-        const distanceElement = store.element.querySelector('.store-distance');
-        if (store.distance !== Infinity) {
-          distanceElement.textContent = formatDistance(store.distance);
-          distanceElement.classList.remove('hidden');
-        }
-
-        // Update alternating layout for the new order
-        const gridContainer = store.element.querySelector('.grid');
-        const imageSection = store.element.querySelector('.relative.h-64');
-        const textSection = store.element.querySelector('.flex.flex-col');
-
-        if (gridContainer && imageSection && textSection) {
-          // Remove existing order classes
-          imageSection.classList.remove('md:order-1', 'md:order-2');
-          textSection.classList.remove('md:order-1', 'md:order-2');
-
-          // Apply new order based on index
-          if (index % 2 === 1) {
-            // Odd index: image on right
-            imageSection.classList.add('md:order-2');
-            textSection.classList.add('md:order-1');
-          } else {
-            // Even index: image on left (default, but explicit for clarity)
-            imageSection.classList.remove('md:order-2');
-            textSection.classList.remove('md:order-1');
-          }
-        }
-
-        // Re-append to change order (this will re-sort the stores)
-        storesList.appendChild(store.element);
-      });
-
-      console.log('🏪 Stores sorted by distance:', storesWithDistance.map(s => ({ name: s.name, distance: s.distance.toFixed(1) + ' mi' })));
+      sortedCards.forEach(card => storesGrid.appendChild(card));
     }
 
-    // Main geolocation function
-    function setupLocationSorting() {
-      const locationStatus = document.getElementById('location-status');
-      const locationLoading = document.getElementById('location-loading');
-      const locationSuccess = document.getElementById('location-success');
-      const locationError = document.getElementById('location-error');
-
-      // Show status bar
-      locationStatus.classList.remove('hidden');
-
-      // Check if geolocation is supported
-      if (!navigator.geolocation) {
-        console.log('📍 Geolocation not supported');
-        locationLoading.classList.add('hidden');
-        locationError.classList.remove('hidden');
-        return;
-      }
-
-      // Get user's location
+    // Try to get user's geolocation
+    if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const userLat = position.coords.latitude;
-          const userLon = position.coords.longitude;
-
-          console.log('📍 User location obtained:', { lat: userLat, lon: userLon });
-
-          // Update UI
-          locationLoading.classList.add('hidden');
-          locationSuccess.classList.remove('hidden');
-
-          // Sort stores by distance
-          sortStoresByDistance(userLat, userLon);
-
-          // Hide status after 3 seconds
-          setTimeout(() => {
-            locationStatus.style.transition = 'opacity 0.5s ease-out';
-            locationStatus.style.opacity = '0';
-            setTimeout(() => {
-              locationStatus.classList.add('hidden');
-              locationStatus.style.opacity = '1';
-            }, 500);
-          }, 3000);
+          sortByDistance(position.coords.latitude, position.coords.longitude);
         },
         (error) => {
-          console.log('📍 Geolocation error:', error.message);
-
-          // Update UI for error
-          locationLoading.classList.add('hidden');
-          locationError.classList.remove('hidden');
-
-          // Hide status after 3 seconds
-          setTimeout(() => {
-            locationStatus.style.transition = 'opacity 0.5s ease-out';
-            locationStatus.style.opacity = '0';
-            setTimeout(() => {
-              locationStatus.classList.add('hidden');
-              locationStatus.style.opacity = '1';
-            }, 500);
-          }, 3000);
+          // If location denied or error, show Tempe first
+          console.log('Geolocation not available, showing Tempe first');
+          sortWithTempeFirst();
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000 // 5 minutes
-        }
+        { timeout: 5000 }
       );
+    } else {
+      // If geolocation not supported, show Tempe first
+      sortWithTempeFirst();
     }
+  }
 
-    // Initialize when DOM is loaded
-    document.addEventListener('DOMContentLoaded', () => {
-      // Only run if we have stores on the page
-      const storeCards = document.querySelectorAll('.store-card');
-      if (storeCards.length > 0) {
-        // Initially hide all stores except first 3
-        storeCards.forEach((card, index) => {
-          if (index >= 3) {
-            card.style.display = 'none';
-          }
-        });
+  document.addEventListener('DOMContentLoaded', sortStoresByLocation);
+  document.addEventListener('astro:page-load', sortStoresByLocation);
+</script>
 
-        // Setup location-based sorting
-        setupLocationSorting();
-      }
-    });
-  </script>
+<script>
+  // Promotions Carousel with Auto-rotation
+  function initPromotionsCarousel() {
+    const carousel = document.getElementById('promotions-carousel');
+    const prevBtn = document.getElementById('promo-prev');
+    const nextBtn = document.getElementById('promo-next');
+    const dots = document.querySelectorAll('.promo-dot');
 
-  <!-- Category Card Parallax Script -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const categoryCards = document.querySelectorAll('.bento-card');
+    if (!carousel || !prevBtn || !nextBtn) return;
 
-      // Parallax effect on scroll
-      function handleScroll() {
-        categoryCards.forEach((card) => {
-          const rect = card.getBoundingClientRect();
-          const scrollProgress = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
+    let currentIndex = 0;
+    const totalBanners = carousel.children.length;
+    let autoRotateInterval;
 
-          // Only apply parallax when card is in viewport
-          if (scrollProgress > 0 && scrollProgress < 1) {
-            const img = card.querySelector('img');
-            if (img) {
-              // Move background image slower than scroll (parallax effect)
-              const translateY = (scrollProgress - 0.5) * 30;
-              const scale = 1 + (scrollProgress * 0.1);
-              img.style.transform = `translateY(${translateY}px) scale(${scale})`;
-            }
-          }
-        });
-      }
+    function updateCarousel() {
+      carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
 
-      // Mouse move parallax effect
-      function handleMouseMove(e) {
-        const mouseX = e.clientX / window.innerWidth;
-        const mouseY = e.clientY / window.innerHeight;
-
-        categoryCards.forEach((card) => {
-          const rect = card.getBoundingClientRect();
-          const cardCenterX = rect.left + rect.width / 2;
-          const cardCenterY = rect.top + rect.height / 2;
-
-          // Calculate distance from mouse to card center
-          const distanceX = (e.clientX - cardCenterX) / window.innerWidth;
-          const distanceY = (e.clientY - cardCenterY) / window.innerHeight;
-
-          const img = card.querySelector('img');
-          if (img) {
-            // Apply subtle tilt and movement based on mouse position
-            const moveX = distanceX * 15;
-            const moveY = distanceY * 15;
-            img.style.transform = `translate(${moveX}px, ${moveY}px) scale(1.1)`;
-            img.style.transition = 'transform 0.3s ease-out';
-          }
-        });
-      }
-
-      // Intersection Observer for reveal animations
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const img = entry.target.querySelector('img');
-            if (img) {
-              img.style.animation = 'parallaxReveal 0.8s ease-out forwards';
-            }
-          }
-        });
-      }, { threshold: 0.1 });
-
-      categoryCards.forEach((card) => observer.observe(card));
-
-      // Event listeners
-      let ticking = false;
-      window.addEventListener('scroll', () => {
-        if (!ticking) {
-          window.requestAnimationFrame(() => {
-            handleScroll();
-            ticking = false;
-          });
-          ticking = true;
+      // Update dots
+      dots.forEach((dot, index) => {
+        if (index === currentIndex) {
+          dot.classList.remove('opacity-50');
+          dot.classList.add('opacity-100');
+        } else {
+          dot.classList.remove('opacity-100');
+          dot.classList.add('opacity-50');
         }
       });
+    }
 
-      document.addEventListener('mousemove', handleMouseMove);
+    function goToSlide(index) {
+      currentIndex = index;
+      if (currentIndex < 0) currentIndex = totalBanners - 1;
+      if (currentIndex >= totalBanners) currentIndex = 0;
+      updateCarousel();
+      resetAutoRotate();
+    }
 
-      // Initial call
-      handleScroll();
-    });
-  </script>
+    function nextSlide() {
+      goToSlide(currentIndex + 1);
+    }
 
-  <style>
-    @keyframes parallaxReveal {
-      from {
-        transform: scale(1.2) translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: scale(1.1) translateY(0);
-        opacity: 1;
+    function prevSlide() {
+      goToSlide(currentIndex - 1);
+    }
+
+    function startAutoRotate() {
+      autoRotateInterval = setInterval(nextSlide, 5000); // Auto-rotate every 5 seconds
+    }
+
+    function stopAutoRotate() {
+      if (autoRotateInterval) {
+        clearInterval(autoRotateInterval);
       }
     }
-  </style>
-</Layout>
+
+    function resetAutoRotate() {
+      stopAutoRotate();
+      startAutoRotate();
+    }
+
+    // Event listeners
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const index = parseInt(dot.dataset.index);
+        goToSlide(index);
+      });
+    });
+
+    // Pause auto-rotation on hover
+    carousel.addEventListener('mouseenter', stopAutoRotate);
+    carousel.addEventListener('mouseleave', startAutoRotate);
+
+    // Initialize
+    updateCarousel();
+    startAutoRotate();
+  }
+
+  document.addEventListener('DOMContentLoaded', initPromotionsCarousel);
+  document.addEventListener('astro:page-load', initPromotionsCarousel);
+</script>
+
+<script>
+  // Categories Carousel
+  function initCategoriesCarousel() {
+    const carousel = document.getElementById('categories-carousel');
+    const prevBtn = document.getElementById('categories-prev');
+    const nextBtn = document.getElementById('categories-next');
+
+    if (!carousel || !prevBtn || !nextBtn) return;
+
+    let currentIndex = 0;
+    const totalCards = carousel.children.length;
+
+    function getVisibleCards() {
+      const width = window.innerWidth;
+      if (width >= 1280) return 4; // xl: 4 cards
+      if (width >= 1024) return 3; // lg: 3 cards
+      if (width >= 768) return 2;  // md: 2 cards
+      return 1; // mobile: 1 card
+    }
+
+    function updateCarousel() {
+      const visibleCards = getVisibleCards();
+      const maxIndex = Math.max(0, totalCards - visibleCards);
+
+      if (currentIndex > maxIndex) {
+        currentIndex = maxIndex;
+      }
+
+      const percentage = -(currentIndex * (100 / visibleCards));
+      carousel.style.transform = `translateX(${percentage}%)`;
+
+      updateButtons();
+    }
+
+    function updateButtons() {
+      const visibleCards = getVisibleCards();
+      const maxIndex = Math.max(0, totalCards - visibleCards);
+
+      prevBtn.disabled = currentIndex <= 0;
+      nextBtn.disabled = currentIndex >= maxIndex;
+      prevBtn.style.opacity = currentIndex <= 0 ? '0.5' : '1';
+      nextBtn.style.opacity = currentIndex >= maxIndex ? '0.5' : '1';
+    }
+
+    prevBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateCarousel();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const visibleCards = getVisibleCards();
+      const maxIndex = Math.max(0, totalCards - visibleCards);
+      if (currentIndex < maxIndex) {
+        currentIndex++;
+        updateCarousel();
+      }
+    });
+
+    updateCarousel();
+
+    window.addEventListener('resize', () => {
+      updateCarousel();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initCategoriesCarousel);
+  document.addEventListener('astro:page-load', initCategoriesCarousel);
+</script>
+
+<style>
+  @keyframes blob {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    25% {
+      transform: translate(20px, -50px) scale(1.1);
+    }
+    50% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    75% {
+      transform: translate(50px, 50px) scale(1.05);
+    }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+</style>

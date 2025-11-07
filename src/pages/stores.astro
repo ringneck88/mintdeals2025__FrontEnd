@@ -632,7 +632,7 @@ try {
         );
       }
 
-      // Get user's geolocation
+      // Get user's geolocation with Tempe as default
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -642,9 +642,19 @@ try {
             sortStoresByDistance();
           },
           (error) => {
-            console.warn('⚠️ Could not get user location:', error.message);
+            console.warn('⚠️ Could not get user location, using Tempe as default:', error.message);
+            // Default to Tempe, AZ location
+            userLat = 33.4145;
+            userLon = -111.9192;
+            sortStoresByDistance();
           }
         );
+      } else {
+        // Geolocation not available, use Tempe as default
+        console.log('📍 Geolocation not available, using Tempe as default');
+        userLat = 33.4145;
+        userLon = -111.9192;
+        sortStoresByDistance();
       }
 
       // Enhanced filtering with animation

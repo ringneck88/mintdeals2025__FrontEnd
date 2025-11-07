@@ -13,54 +13,6 @@ let stores = [];
 let storeInfo = null;
 let apiError = null;
 
-// Available lifestyle polaroid images
-const lifestyleImages = [
-  { img: "20251001_1034_Joyful Moment Together_simple_compose_01k6gdah5ef7n9mj7hyscbm439.png", title: "Share Joy", vibe: "Social" },
-  { img: "20251001_1041_Serene Morning Ritual_simple_compose_01k6gdpzjeexe95stnx5nn3y9b.png", title: "Morning Zen", vibe: "Relaxation" },
-  { img: "20251001_1106_Festival Sunset Vibes_simple_compose_01k6gf43hcednabq9xzx5rk5tj.png", title: "Festival Fun", vibe: "Adventure" },
-  { img: "20251001_1118_Neon Night Stroll_simple_compose_01k6gftp4ae6r8g2b610xw1f4a.png", title: "Night Life", vibe: "Urban" },
-  { img: "20251001_1124_Desert Highway Hangout_simple_compose_01k6gg6918ef5br5x494z7h7gy.png", title: "Desert Vibes", vibe: "Adventure" },
-  { img: "20251001_1127_Morning Serenity Moment_simple_compose_01k6ggdyvcfhwtr97712pe392e.png", title: "Serenity", vibe: "Relaxation" },
-  { img: "20251001_1130_Kitchen Gathering Joy_simple_compose_01k6ggh1vhe1gvqdd64sfj0web.png", title: "Kitchen Joy", vibe: "Social" },
-  { img: "20251001_1138_Jazz Club Vibes_simple_compose_01k6ggzbdeeefb6t68pprex49z.png", title: "Jazz Club", vibe: "Urban" },
-  { img: "20251001_1141_Sunny Park Gathering_simple_compose_01k6gh5v42fx4a4gkbdpe9rvsb.png", title: "Park Day", vibe: "Outdoor" },
-  { img: "20251001_1149_Backyard BBQ Gathering_simple_compose_01k6ghjj7ff7prsem7192hhz5f.png", title: "BBQ Time", vibe: "Social" },
-];
-
-// Randomly select 2-6 polaroids for the hero
-function shuffleArray(array: any[]) {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
-// Random count between 2 and 6
-const polaroidCount = Math.floor(Math.random() * 5) + 2;
-const selectedPolaroids = shuffleArray(lifestyleImages).slice(0, polaroidCount);
-
-// Generate random positions spread across entire hero section
-const polaroidsWithPositions = selectedPolaroids.map((polaroid, index) => {
-  // Positions closer to center but avoiding text area
-  const positions = [
-    { top: '8%', left: '15%' },
-    { top: '10%', right: '18%' },
-    { top: '28%', left: '12%' },
-    { top: '32%', right: '15%' },
-    { top: '55%', left: '18%' },
-    { top: '58%', right: '20%' },
-    { bottom: '18%', left: '14%' },
-    { bottom: '15%', right: '16%' },
-    { top: '20%', left: '30%' },
-    { top: '68%', right: '28%' },
-  ];
-  const position = positions[index % positions.length];
-  const rotation = Math.random() * 20 - 10; // Random rotation between -10 and 10 degrees
-  return { ...polaroid, ...position, rotation };
-});
-
 // Helper function to get discount badge info
 function getDiscountBadge(discount) {
   if (!discount) return { text: 'Special', color: 'from-yellow-500 to-orange-500' };
@@ -299,32 +251,6 @@ try {
   <div class="content-wrapper">
     <!-- Hero Section -->
     <div class="text-white hero-section relative">
-      <!-- Floating Polaroids with Mouse Tracking -->
-      {polaroidsWithPositions.map((polaroid, index) => {
-        const positionStyle = Object.entries(polaroid)
-          .filter(([key]) => ['top', 'bottom', 'left', 'right'].includes(key))
-          .map(([key, value]) => `${key}: ${value}`)
-          .join('; ');
-
-        return (
-          <div
-            class="hidden lg:block absolute polaroid-float"
-            style={`${positionStyle}; width: 140px; z-index: 1;`}
-            data-speed={0.02 + (index * 0.01)}
-          >
-            <div class="bg-white rounded-lg shadow-2xl p-1.5" style={`transform: rotate(${polaroid.rotation}deg);`}>
-              <div class="relative w-full h-20 bg-gray-200 overflow-hidden rounded">
-                <img src={`/assets/lifestyleimages/${polaroid.img}`} alt={polaroid.title} class="w-full h-full object-cover" />
-              </div>
-              <img src="/favicon.png" alt="Mint" class="absolute left-2 w-8 h-8 rounded-full shadow-lg" style="bottom: 18px; z-index: 20;" />
-              <div class="relative mt-1.5 text-center pt-3">
-                <p class="text-xs font-bold text-gray-800" style="font-family: 'Permanent Marker', cursive;">{polaroid.title}</p>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%] relative z-10">
         <!-- Breadcrumb -->
         <nav class="mb-6 text-sm">
@@ -348,7 +274,7 @@ try {
 
     <!-- Main Content -->
     <div class="py-16">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-full">
 
         {apiError ? (
           <div class="py-12 text-center">
@@ -387,12 +313,13 @@ try {
             </div>
           </div>
         ) : (
-          <div id="stores-container">
+          <div id="stores-container" class="space-y-6">
             {/* Loop through each store and display its products */}
             {Object.values(productsByStore).map((storeGroup) => (
-              <div class="mb-16 store-section" data-store-id={storeGroup.storeId}>
-                {/* Store Header */}
-                <div class="mb-6 p-6 bg-gradient-to-r from-green-900/50 to-black rounded-lg">
+              <div class="py-8 px-4 store-section" data-store-id={storeGroup.storeId} style="background-color: rgba(0, 0, 0, 0.95); margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); width: 100vw;">
+                <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-full">
+                  {/* Store Header */}
+                  <div class="mb-6 p-6 rounded-lg" style="background-color: rgba(50, 50, 50, 0.1);">
                   <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
                       <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 uppercase">
@@ -427,19 +354,27 @@ try {
                 </div>
 
                 {/* Products Grid for this store */}
-                <div class="products-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                  {storeGroup.products.slice(0, 6).map((product, index) => {
+                <div class="products-grid grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {[...storeGroup.products]
+                    .sort((a, b) => {
+                      // Sort by expiration date - soonest first
+                      const aDate = a.discounts?.[0]?.validUntil ? new Date(a.discounts[0].validUntil) : new Date('9999-12-31');
+                      const bDate = b.discounts?.[0]?.validUntil ? new Date(b.discounts[0].validUntil) : new Date('9999-12-31');
+                      return aDate - bDate;
+                    })
+                    .slice(0, 8)
+                    .map((product, index) => {
                     // Cycle through available discounts so each card shows a different one
                     const discountIndex = product.discounts?.length > 0 ? index % product.discounts.length : 0;
                     const primaryDiscount = product.discounts?.[discountIndex];
                     const badge = getDiscountBadge(primaryDiscount);
 
                     return (
-                      <div class="product-card relative overflow-hidden bg-black rounded-lg shadow-lg hover:shadow-2xl group" data-store-id={storeGroup.storeId}>
-                    {/* Red Banner with Discount Name */}
+                      <div class="product-card relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl group" style="background-color: rgba(50, 50, 50, 0.1);" data-store-id={storeGroup.storeId}>
+                    {/* Discount Name Banner */}
                     {primaryDiscount && (
-                      <div class="w-full bg-gradient-to-r from-red-600 to-red-700 py-1.5 px-2">
-                        <div class="text-white font-bold text-[10px] text-center uppercase truncate">
+                      <div class="w-full py-3 px-3" style="background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);">
+                        <div class="text-white font-bold text-sm text-center uppercase">
                           {primaryDiscount.discountName}
                         </div>
                       </div>
@@ -457,7 +392,11 @@ try {
                         />
                       ) : (
                         <div class="flex items-center justify-center w-full h-full">
-                          <span class="text-6xl opacity-30">🌿</span>
+                          <img
+                            src="/favicon.png"
+                            alt="Mint Logo"
+                            class="w-24 h-24 object-contain opacity-50"
+                          />
                         </div>
                       )}
                       {/* Overlay gradient */}
@@ -504,6 +443,11 @@ try {
                           <div class="text-[9px] text-yellow-400 text-center">
                             ⏰ Valid until {formatDate(primaryDiscount.validUntil)}
                           </div>
+                          {(index % 3 === 0 || index % 5 === 0) && (
+                            <div class="text-[9px] text-red-400 font-bold text-center mt-1">
+                              {index % 3 === 0 ? '🔥 Hurry! Only a few left!' : '⚡ Limited stock available!'}
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -518,6 +462,7 @@ try {
                   </div>
                     );
                   })}
+                </div>
                 </div>
               </div>
             ))}
@@ -554,47 +499,5 @@ try {
   <!-- Minimal script for deals page - geolocation removed for performance -->
   <script>
     console.log('📍 Deals page loaded - showing all stores');
-  </script>
-
-  <script is:inline>
-    // Mouse tracking for polaroid movement
-    function initPolaroidMouseTracking() {
-      const polaroids = document.querySelectorAll('.polaroid-float');
-
-      if (polaroids.length === 0) {
-        console.log('No polaroids found');
-        return;
-      }
-
-      console.log(`Found ${polaroids.length} polaroids`);
-
-      document.addEventListener('mousemove', (e) => {
-        const mouseX = e.clientX / window.innerWidth;
-        const mouseY = e.clientY / window.innerHeight;
-
-        polaroids.forEach((polaroid) => {
-          const speed = parseFloat(polaroid.getAttribute('data-speed') || '0.02');
-          const x = (mouseX - 0.5) * 100 * speed;
-          const y = (mouseY - 0.5) * 100 * speed;
-
-          // Get the inner div with rotation
-          const innerDiv = polaroid.querySelector('.bg-white');
-          if (innerDiv) {
-            const currentRotation = innerDiv.style.transform.match(/rotate\(([^)]+)\)/)?.[1] || '0deg';
-            innerDiv.style.transform = `rotate(${currentRotation}) translate(${x}px, ${y}px)`;
-          }
-        });
-      });
-    }
-
-    // Initialize on both initial load and page transitions
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initPolaroidMouseTracking);
-    } else {
-      initPolaroidMouseTracking();
-    }
-
-    // Also handle Astro view transitions
-    document.addEventListener('astro:page-load', initPolaroidMouseTracking);
   </script>
 </Layout>

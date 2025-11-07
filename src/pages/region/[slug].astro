@@ -232,21 +232,6 @@ const regionImageUrl = getImageUrl(region?.image)
     <div class="bg-black py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- About This Region Section -->
-        {regionDescription && (
-          <div class="mb-12 bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-8">
-            <h2 class="text-3xl font-bold mb-6 flex items-center text-white uppercase">
-              <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              About {regionName}
-            </h2>
-            <p class="text-green-100 text-lg leading-relaxed">
-              {regionDescription}
-            </p>
-          </div>
-        )}
-
         <!-- Stores Section -->
         {stores.length > 0 ? (
           <div id="stores-section">
@@ -310,6 +295,21 @@ const regionImageUrl = getImageUrl(region?.image)
               <h3 class="mb-2 text-lg font-medium text-white uppercase">No Locations Found</h3>
               <p class="text-green-300">No stores found in this region yet.</p>
             </div>
+          </div>
+        )}
+
+        <!-- About This Region Section -->
+        {regionDescription && (
+          <div class="mt-12 mb-12 bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-8">
+            <h2 class="text-3xl font-bold mb-6 flex items-center text-white uppercase">
+              <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              About {regionName}
+            </h2>
+            <p class="text-green-100 text-lg leading-relaxed">
+              {regionDescription}
+            </p>
           </div>
         )}
 

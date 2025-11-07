@@ -105,7 +105,7 @@ try {
   <!-- Hero Section -->
   <section class="relative text-white py-16">
     <div class="absolute inset-0 bg-black opacity-40"></div>
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="relative z-10 max-w-[95%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20">
       <!-- Breadcrumb -->
       <nav class="mb-8 text-sm">
         <div class="flex items-center space-x-2">
@@ -189,7 +189,7 @@ try {
 
   <!-- Main Content -->
   <div class="bg-black py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[95%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         <!-- Main Column -->
@@ -206,39 +206,6 @@ try {
             <p class="text-green-100 text-lg leading-relaxed">
               {storeLongDescription}
             </p>
-          </div>
-
-          <!-- Products Section -->
-          <div class="bg-gradient-to-br from-green-900/40 to-black/60 rounded-lg shadow-xl p-8 border-2 border-green-500">
-            <h2 class="text-3xl font-bold mb-6 flex items-center">
-              <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-              </svg>
-              <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.35rem;">Available Products</span>
-            </h2>
-
-            <!-- Dutchie Menu Embed -->
-            {dutchieStoreId ? (
-              <div id="dutchie-embed-container" class="w-full bg-white rounded-lg p-6 min-h-[300px]">
-                <script async id={`dutchie--carousel-embed-${dutchieStoreId}__script`} src={`https://dutchie.com/api/v3/embedded-menu/671fc62366a1a243eddfc444/carousels/${dutchieStoreId}.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fcape-coral-menu%2F&hideTitle=true`} is:inline></script>
-              </div>
-            ) : (
-              <div class="w-full bg-white rounded-lg p-6 min-h-[300px] flex items-center justify-center">
-                <p class="text-gray-500 text-lg">Product menu not available for this location.</p>
-              </div>
-            )}
-
-            <!-- Add custom styles to ensure Dutchie content is visible -->
-            <style is:global>
-              #dutchie-embed-container * {
-                color: inherit !important;
-              }
-              #dutchie-embed-container iframe {
-                background: white !important;
-                height: auto !important;
-                min-height: 250px !important;
-              }
-            </style>
           </div>
 
         </div>
@@ -261,9 +228,9 @@ try {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
-                  <div>
-                    <p class="text-green-200">{storeAddress}</p>
-                    <p class="text-green-200">{storeCity}, {storeState} {storeZip}</p>
+                  <div class="space-y-1">
+                    <p class="text-green-200 leading-relaxed">{storeAddress}</p>
+                    <p class="text-green-200 leading-relaxed">{storeCity}, {storeState} <span class="ml-2">{storeZip}</span></p>
                   </div>
                 </div>
               )}
@@ -302,7 +269,7 @@ try {
                   </svg>
                   <span class="inline-block pb-2 leading-tight bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent" style="padding-bottom: 0.25rem;">Store Hours</span>
                 </h3>
-                <div id="countdown-timer-store" class="text-sm text-green-300 mt-2 ml-8"></div>
+                <div id="countdown-timer-store" class="text-base text-green-300 mt-2 ml-8"></div>
               </div>
               <div class="space-y-2">
                 {store.hours.map((hour: any) => {
@@ -338,10 +305,10 @@ try {
                   const closeTime = formatTime(hour.closeTime || '');
 
                   return (
-                    <div class={`flex justify-between text-sm p-2 rounded transition-colors ${isToday ? 'bg-yellow-400/20 border-l-4 border-yellow-400' : ''}`}>
+                    <div class={`flex justify-between text-base p-2 rounded transition-colors ${isToday ? 'bg-yellow-400/20 border-l-4 border-yellow-400' : ''}`}>
                       <span class={`font-medium ${isToday ? 'text-yellow-400 font-bold' : 'text-green-300'}`}>
                         {dayName}
-                        {isToday && <span class="ml-2 text-xs">(Today)</span>}
+                        {isToday && <span class="ml-2 text-sm">(Today)</span>}
                       </span>
                       <span class={isToday ? 'text-yellow-300' : 'text-green-200'}>
                         {hour.is_24hour ? '24 Hours' : hour.isClosed ? 'Closed' : `${openTime} - ${closeTime}`}
@@ -369,6 +336,60 @@ try {
         </a>
       </div>
     </div>
+  </div>
+
+  <!-- Products Section - Full Width -->
+  <div id="products-full-width" class="bg-white">
+    <!-- Dutchie Menu Embed -->
+    {dutchieStoreId ? (
+      <div id="dutchie-embed-container" class="w-full bg-white min-h-[300px]">
+        <script async id={`dutchie--carousel-embed-${dutchieStoreId}__script`} src={`https://dutchie.com/api/v3/embedded-menu/671fc62366a1a243eddfc444/carousels/${dutchieStoreId}.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fcape-coral-menu%2F&hideTitle=true`} is:inline></script>
+      </div>
+    ) : (
+      <div class="w-full bg-white min-h-[300px] flex items-center justify-center">
+        <p class="text-gray-500 text-lg">Product menu not available for this location.</p>
+      </div>
+    )}
+
+    <!-- Add custom styles to ensure Dutchie content is visible and full width -->
+    <style is:global>
+      /* Ensure body allows overflow for full-bleed */
+      body {
+        overflow-x: hidden !important;
+      }
+
+      #products-full-width {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw !important;
+        margin-right: -50vw !important;
+        padding: 0 !important;
+      }
+
+      #dutchie-embed-container {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      #dutchie-embed-container * {
+        color: inherit !important;
+        background: transparent !important;
+      }
+
+      #dutchie-embed-container iframe {
+        background: white !important;
+        height: auto !important;
+        min-height: 250px !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        display: block !important;
+      }
+    </style>
   </div>
 
   <script is:inline define:vars={{ storeHours: store?.hours || [] }}>

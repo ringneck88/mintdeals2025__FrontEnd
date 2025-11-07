@@ -46,6 +46,31 @@ export async function getStaticPaths() {
 const { category } = Astro.params;
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
+// Function to minimally clean HTML from Strapi - only remove problematic attributes
+function cleanStrapiHTML(html: string): string {
+  if (!html) return '';
+
+  let cleaned = html;
+
+  // Only remove font-family from inline styles to use our font
+  cleaned = cleaned.replace(/font-family:\s*[^;]+;?/gi, '');
+
+  // Remove fixed widths that break responsive design
+  cleaned = cleaned.replace(/width:\s*\d+px;?/gi, '');
+  cleaned = cleaned.replace(/max-width:\s*\d+px;?/gi, '');
+
+  // Remove empty style attributes
+  cleaned = cleaned.replace(/\s*style\s*=\s*[""]\s*[""]?/gi, '');
+
+  // Remove non-breaking spaces that cause issues
+  cleaned = cleaned.replace(/&nbsp;/gi, ' ');
+
+  // Remove empty paragraphs
+  cleaned = cleaned.replace(/<p[^>]*>\s*<\/p>/gi, '');
+
+  return cleaned.trim();
+}
+
 // Fetch category details
 let categoryName = category.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
 let categoryDescription = '';
@@ -64,7 +89,8 @@ try {
 
       categoryName = catData.Name || catData.name || categoryName;
       categoryDescription = catData.Description || catData.description || catData.Discription || '';
-      categoryRichText = catData.RichText || catData.richText || catData.rich_text || '';
+      const rawRichText = catData.RichText || catData.richText || catData.rich_text || '';
+      categoryRichText = cleanStrapiHTML(rawRichText);
 
       // Get SEO fields
       const seoData = catData.seo || catData.SEO || catData.Seo;
@@ -98,54 +124,6 @@ try {
 } catch (error) {
   console.error('Error fetching products:', error);
 }
-
-// Available lifestyle polaroid images
-const lifestyleImages = [
-  { img: "20251001_1034_Joyful Moment Together_simple_compose_01k6gdah5ef7n9mj7hyscbm439.png", title: "Share Joy", vibe: "Social" },
-  { img: "20251001_1041_Serene Morning Ritual_simple_compose_01k6gdpzjeexe95stnx5nn3y9b.png", title: "Morning Zen", vibe: "Relaxation" },
-  { img: "20251001_1106_Festival Sunset Vibes_simple_compose_01k6gf43hcednabq9xzx5rk5tj.png", title: "Festival Fun", vibe: "Adventure" },
-  { img: "20251001_1118_Neon Night Stroll_simple_compose_01k6gftp4ae6r8g2b610xw1f4a.png", title: "Night Life", vibe: "Urban" },
-  { img: "20251001_1124_Desert Highway Hangout_simple_compose_01k6gg6918ef5br5x494z7h7gy.png", title: "Desert Vibes", vibe: "Adventure" },
-  { img: "20251001_1127_Morning Serenity Moment_simple_compose_01k6ggdyvcfhwtr97712pe392e.png", title: "Serenity", vibe: "Relaxation" },
-  { img: "20251001_1130_Kitchen Gathering Joy_simple_compose_01k6ggh1vhe1gvqdd64sfj0web.png", title: "Kitchen Joy", vibe: "Social" },
-  { img: "20251001_1138_Jazz Club Vibes_simple_compose_01k6ggzbdeeefb6t68pprex49z.png", title: "Jazz Club", vibe: "Urban" },
-  { img: "20251001_1141_Sunny Park Gathering_simple_compose_01k6gh5v42fx4a4gkbdpe9rvsb.png", title: "Park Day", vibe: "Outdoor" },
-  { img: "20251001_1149_Backyard BBQ Gathering_simple_compose_01k6ghjj7ff7prsem7192hhz5f.png", title: "BBQ Time", vibe: "Social" },
-];
-
-// Randomly select 2-6 polaroids for the hero
-function shuffleArray(array: any[]) {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
-// Random count between 2 and 6
-const polaroidCount = Math.floor(Math.random() * 5) + 2;
-const selectedPolaroids = shuffleArray(lifestyleImages).slice(0, polaroidCount);
-
-// Generate random positions spread across entire hero section
-const polaroidsWithPositions = selectedPolaroids.map((polaroid, index) => {
-  // Positions closer to center but avoiding text area
-  const positions = [
-    { top: '8%', left: '15%' },
-    { top: '10%', right: '18%' },
-    { top: '28%', left: '12%' },
-    { top: '32%', right: '15%' },
-    { top: '55%', left: '18%' },
-    { top: '58%', right: '20%' },
-    { bottom: '18%', left: '14%' },
-    { bottom: '15%', right: '16%' },
-    { top: '20%', left: '30%' },
-    { top: '68%', right: '28%' },
-  ];
-  const position = positions[index % positions.length];
-  const rotation = Math.random() * 20 - 10; // Random rotation between -10 and 10 degrees
-  return { ...polaroid, ...position, rotation };
-});
 
 // Category icon mapping
 const categoryIcons: Record<string, string> = {
@@ -591,17 +569,22 @@ const categoryIcon = categoryIcons[category] || '🌱';
     overflow: hidden;
   }
 
-  /* Rich text content styling - clean and readable */
+  /* Rich text content styling - preserve Strapi formatting */
   .rich-text-content {
-    color: #d1fae5;
-    line-height: 1.8;
-    font-size: 1.125rem;
+    display: block;
+    font-family: 'Montserrat', system-ui, sans-serif;
     width: 100%;
     max-width: 100%;
-    margin: 0;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    hyphens: auto;
+    box-sizing: border-box;
+  }
+
+  /* Only override font family and ensure responsiveness */
+  .rich-text-content * {
+    font-family: 'Montserrat', system-ui, sans-serif !important;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .rich-text-content > * {
@@ -624,124 +607,50 @@ const categoryIcon = categoryIcons[category] || '🌱';
     color: inherit !important;
   }
 
-  /* Professional typesetting for headings */
+  /* Preserve Strapi formatting but ensure readability */
   .rich-text-content h1,
   .rich-text-content h2,
   .rich-text-content h3,
   .rich-text-content h4,
   .rich-text-content h5,
   .rich-text-content h6 {
-    color: #fbbf24 !important;
-    font-weight: 700 !important;
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    padding: 1rem 0 !important;
-    border-top: 2px solid rgba(74, 222, 128, 0.3) !important;
-    border-bottom: 2px solid rgba(74, 222, 128, 0.3) !important;
-    margin: 1.5rem 0 !important;
-    letter-spacing: normal !important;
-  }
-
-  .rich-text-content h1 {
-    font-size: 2rem !important;
-    line-height: 3.7em !important;
-    width: 100% !important;
-    clear: both !important;
-  }
-
-  .rich-text-content h2 {
-    font-size: 1.75rem !important;
-    line-height: 3.7em !important;
-    text-align: center !important;
-    width: 100% !important;
-    clear: both !important;
-  }
-
-  .rich-text-content h3 {
-    font-size: 1.5rem !important;
-    line-height: 3.7em !important;
-    text-align: center !important;
-    width: 100% !important;
-    clear: both !important;
-  }
-
-  .rich-text-content h4 {
-    font-size: 1.25rem !important;
-    line-height: 3.7em !important;
-    width: 100% !important;
-    clear: both !important;
-  }
-
-  .rich-text-content h5 {
-    font-size: 1.1rem !important;
-    line-height: 3.7em !important;
-    width: 100% !important;
-    clear: both !important;
-  }
-
-  .rich-text-content h6 {
-    font-size: 1rem !important;
-    line-height: 3.7em !important;
-    width: 100% !important;
-    clear: both !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
+    clear: both;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
   }
 
   .rich-text-content p {
-    margin-bottom: 1.25em;
-    line-height: 1.8;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    margin-bottom: 1em;
+    line-height: 1.6;
   }
 
   .rich-text-content ul,
   .rich-text-content ol {
-    margin: 1em 0 1.25em 1.5em;
-    line-height: 1.8;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    margin: 1em 0;
+    padding-left: 2em;
   }
 
   .rich-text-content li {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     margin-bottom: 0.5em;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
   }
 
-  .rich-text-content hr {
-    border: none;
-    border-top: 1px solid #4ade80;
-    margin: 2em 0;
-  }
-
-  .rich-text-content a {
-    color: #fbbf24;
-    text-decoration: underline;
-  }
-
-  .rich-text-content a:hover {
-    color: #fcd34d;
-  }
-
-  .rich-text-content strong {
-    color: #86efac;
-    font-weight: bold;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    display: inline;
-  }
-
-  .rich-text-content em {
-    font-style: italic;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    display: inline;
-  }
-
-  /* Image styling */
+  /* Image styling - ensure images display */
   .rich-text-content img {
-    border: 1px solid #000 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1.5em auto;
     border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   /* Table styling */
@@ -752,21 +661,15 @@ const categoryIcon = categoryIcons[category] || '🌱';
 
   .rich-text-content table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 0;
-    background: rgba(0, 0, 0, 0.5);
-    border: 2px solid #4ade80 !important;
-    border-radius: 8px;
-    table-layout: auto !important;
+    border-collapse: collapse;
+    margin: 2em 0;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .rich-text-content table *,
   .rich-text-content table * * {
-    box-sizing: border-box !important;
-    position: static !important;
-    float: none !important;
-    white-space: normal !important;
+    box-sizing: border-box;
   }
 
   .rich-text-content thead {
@@ -774,121 +677,31 @@ const categoryIcon = categoryIcons[category] || '🌱';
   }
 
   .rich-text-content thead th {
-    color: #000 !important;
-    font-weight: 700;
+    font-weight: 600;
     text-align: left;
-    padding: 1rem !important;
-    border: 1px solid #22c55e !important;
-    border-top: none !important;
-  }
-
-  .rich-text-content thead th:first-child {
-    border-left: none !important;
-  }
-
-  .rich-text-content thead th:last-child {
-    border-right: none !important;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
   }
 
   .rich-text-content tbody tr {
-    border-bottom: 1px solid #4ade80;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .rich-text-content tbody tr:hover {
-    background: rgba(74, 222, 128, 0.15);
+    background: rgba(255, 255, 255, 0.05);
   }
 
   .rich-text-content td,
   .rich-text-content th {
-    padding: 0.875rem 1rem !important;
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    vertical-align: top !important;
+    padding: 0.75rem 1rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .rich-text-content tbody td {
-    color: #d1fae5 !important;
-    border: 1px solid #4ade80 !important;
-    padding: 0.875rem 1rem !important;
-    overflow: visible !important;
-    vertical-align: top !important;
-  }
-
-  /* Override inline styles from CMS */
-  .rich-text-content table td div,
-  .rich-text-content table th div {
-    position: static !important;
-    white-space: normal !important;
-    width: auto !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    overflow: visible !important;
-    float: none !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    transform: none !important;
-  }
-
-  /* Strip all inline styles from table elements */
-  .rich-text-content table[style],
-  .rich-text-content table tr[style],
-  .rich-text-content table td[style],
-  .rich-text-content table th[style],
-  .rich-text-content table div[style] {
-    border-right: 0 !important;
-  }
-
-  .rich-text-content table td[style*="width"],
-  .rich-text-content table div[style*="width"] {
-    width: auto !important;
-  }
-
-  /* Nuclear option: completely remove divs from table cells and use their text */
-  .rich-text-content table td > div,
-  .rich-text-content table th > div {
-    all: revert !important;
-    display: block !important;
-    position: static !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    float: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .rich-text-content table td > div > div,
-  .rich-text-content table th > div > div {
-    all: revert !important;
-    display: inline !important;
-    position: static !important;
-    width: auto !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    float: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .rich-text-content tbody td:first-child {
-    border-left: none !important;
-  }
-
-  .rich-text-content tbody td:last-child {
-    border-right: none !important;
-  }
-
-  .rich-text-content tbody tr:first-child td {
-    border-top: none !important;
-  }
-
-  .rich-text-content tbody tr:last-child td {
-    border-bottom: none !important;
+    padding: 0.75rem 1rem;
   }
 
   /* Mobile table responsiveness */
@@ -1032,32 +845,6 @@ const categoryIcon = categoryIcons[category] || '🌱';
   <div class="content-wrapper">
     <!-- Hero Section -->
     <div class="text-white hero-section relative">
-      <!-- Floating Polaroids with Mouse Tracking -->
-      {polaroidsWithPositions.map((polaroid, index) => {
-        const positionStyle = Object.entries(polaroid)
-          .filter(([key]) => ['top', 'bottom', 'left', 'right'].includes(key))
-          .map(([key, value]) => `${key}: ${value}`)
-          .join('; ');
-
-        return (
-          <div
-            class="hidden lg:block absolute polaroid-float"
-            style={`${positionStyle}; width: 140px; z-index: 1;`}
-            data-speed={0.02 + (index * 0.01)}
-          >
-            <div class="bg-white rounded-lg shadow-2xl p-1.5" style={`transform: rotate(${polaroid.rotation}deg);`}>
-              <div class="relative w-full h-20 bg-gray-200 overflow-hidden rounded">
-                <img src={`/assets/lifestyleimages/${polaroid.img}`} alt={polaroid.title} class="w-full h-full object-cover" />
-              </div>
-              <img src="/favicon.png" alt="Mint" class="absolute left-2 w-8 h-8 rounded-full shadow-lg" style="bottom: 18px; z-index: 20;" />
-              <div class="relative mt-1.5 text-center pt-3">
-                <p class="text-xs font-bold text-gray-800" style="font-family: 'Permanent Marker', cursive;">{polaroid.title}</p>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-
       <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-5xl">
         <div class="text-center">
           {categoryImage ? (
@@ -1091,188 +878,11 @@ const categoryIcon = categoryIcons[category] || '🌱';
       <div class="py-12 bg-gradient-to-b from-black/80 to-green-900/40">
         <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-4xl">
           <div class="p-6 bg-black rounded-lg md:p-8 overflow-hidden">
-            <div class="flex flex-col items-center mb-8 text-center gap-4">
-              {categoryImage ? (
-                <img
-                  src={categoryImage}
-                  alt={categoryName}
-                  class="object-cover w-20 h-20 rounded-lg"
-                />
-              ) : (
-                <div class="w-20 h-20 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                  <span class="text-4xl">{categoryIcon}</span>
-                </div>
-              )}
-              <h2 class="text-2xl font-bold text-yellow-400 md:text-3xl">About {categoryName}</h2>
-            </div>
             <div class="rich-text-content" set:html={categoryRichText}></div>
           </div>
         </div>
       </div>
     )}
 
-    <!-- Products Section -->
-    <div class="py-12 bg-black bg-opacity-90">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
-        {products.length > 0 ? (
-          <div>
-            <div class="mb-8 text-center">
-              <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
-                Available Products
-              </h2>
-              <p class="text-lg text-green-300">
-                {products.length} product{products.length !== 1 ? 's' : ''} in {categoryName}
-              </p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {products.map((product: any) => {
-                const productName = product.name || product.Name || 'Product';
-                const productDescription = product.description || product.Description || '';
-                const productImage = product.image?.url || product.Image?.url;
-                const imageUrl = productImage ?
-                  (productImage.startsWith('http') ? productImage : `${API_BASE}${productImage}`) :
-                  null;
-
-                return (
-                  <div class="relative overflow-hidden transition-all transform bg-black group rounded-xl hover:scale-105">
-                    {imageUrl ? (
-                      <div class="h-40 overflow-hidden bg-gradient-to-br from-green-900/30 to-black/50">
-                        <img
-                          src={imageUrl}
-                          alt={productName}
-                          class="object-cover w-full h-full transition-opacity opacity-80 group-hover:opacity-100"
-                        />
-                      </div>
-                    ) : (
-                      <div class="h-40 bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                        <span class="text-5xl">{categoryIcon}</span>
-                      </div>
-                    )}
-
-                    <div class="p-4 text-center">
-                      <h3 class="mb-2 text-base font-bold text-yellow-400 group-hover:text-yellow-300 line-clamp-2" style="line-height: 1.4;">
-                        {productName}
-                      </h3>
-
-                      {productDescription && (
-                        <p class="mb-3 text-xs text-green-300 line-clamp-2" style="line-height: 1.5;">
-                          {productDescription}
-                        </p>
-                      )}
-
-                      <div class="flex items-center justify-center">
-                        <span class="inline-block px-3 py-1 text-xs font-medium text-green-400 bg-green-900 rounded-full">
-                          {categoryName}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <div class="py-12 text-center">
-            <div class="max-w-md p-8 mx-auto bg-black rounded-lg">
-              <div class="mb-6 text-6xl">{categoryIcon}</div>
-              <h3 class="mb-3 text-xl font-bold text-yellow-400" style="line-height: 1.4;">No Products Available</h3>
-              <p class="text-base text-green-300" style="line-height: 1.6;">Check back soon for {categoryName.toLowerCase()} products!</p>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-
-    <!-- About Section -->
-    <div class="py-12 bg-gradient-to-b from-green-900/40 to-black/60">
-      <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
-        <div class="mb-8 text-center">
-          <h2 class="mb-3 text-2xl font-bold text-yellow-400 md:text-3xl">
-            Why Choose Mint Deals
-          </h2>
-          <p class="text-lg text-green-300">
-            Your trusted partner in cannabis discovery
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <!-- Feature 1 -->
-          <div class="p-6 transition-all bg-black rounded-lg shadow-lg">
-            <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">
-              <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-            </div>
-            <h3 class="mb-3 text-xl font-bold text-yellow-400">Find Locations</h3>
-            <p class="text-green-300">
-              Discover trusted dispensaries near you with detailed information and directions.
-            </p>
-          </div>
-
-          <!-- Feature 2 -->
-          <div class="p-6 transition-all bg-black rounded-lg shadow-lg">
-            <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">
-              <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-              </svg>
-            </div>
-            <h3 class="mb-3 text-xl font-bold text-yellow-400">Browse Products</h3>
-            <p class="text-green-300">
-              Explore comprehensive product information and educational resources.
-            </p>
-          </div>
-
-          <!-- Feature 3 -->
-          <div class="p-6 transition-all bg-black rounded-lg shadow-lg">
-            <div class="flex items-center justify-center w-12 h-12 mb-4 bg-green-900 rounded-lg">
-              <svg class="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <h3 class="mb-3 text-xl font-bold text-yellow-400">Trusted Information</h3>
-            <p class="text-green-300">
-              Access reliable, up-to-date information from verified sources and experts.
-            </p>
-          </div>
-        </div>
-
-        <!-- Back to Categories -->
-        <div class="mt-12 text-center">
-          <a
-            href="/categories"
-            class="text-yellow-400 hover:text-yellow-300 underline"
-          >
-            ← Browse All Categories
-          </a>
-        </div>
-      </div>
-    </div>
   </div>
 </Layout>
-
-<script>
-  // Mouse tracking for polaroid movement
-  document.addEventListener('DOMContentLoaded', () => {
-    const polaroids = document.querySelectorAll('.polaroid-float');
-
-    document.addEventListener('mousemove', (e) => {
-      const mouseX = e.clientX / window.innerWidth;
-      const mouseY = e.clientY / window.innerHeight;
-
-      polaroids.forEach((polaroid) => {
-        const speed = parseFloat(polaroid.getAttribute('data-speed') || '0.02');
-        const x = (mouseX - 0.5) * 100 * speed;
-        const y = (mouseY - 0.5) * 100 * speed;
-
-        // Get the inner div with rotation
-        const innerDiv = polaroid.querySelector('.bg-white');
-        if (innerDiv) {
-          const currentRotation = innerDiv.style.transform.match(/rotate\(([^)]+)\)/)?.[1] || '0deg';
-          innerDiv.style.transform = `rotate(${currentRotation}) translate(${x}px, ${y}px)`;
-        }
-      });
-    });
-  });
-</script>

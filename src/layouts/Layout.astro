@@ -1,7 +1,6 @@
 ---
 import '../styles/global.css';
 import AgeGate from '../components/AgeGate.astro';
-import ThemeSwitcher from '../components/ThemeSwitcher.astro';
 import { ViewTransitions } from 'astro:transitions';
 
 export interface Props {
@@ -191,7 +190,7 @@ function getCategoryIcon(slug: string) {
 
             <!-- Categories Dropdown -->
             <div class="relative" id="categoriesDropdown">
-              <a href="/categories" class="text-gray-200 hover:text-emerald-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
+              <a href="/categories" class="text-gray-200 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1 hover-green">
                 Categories
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -199,20 +198,20 @@ function getCategoryIcon(slug: string) {
               </a>
 
               <!-- Dropdown Menu -->
-              <div id="categoriesMenu" class="absolute left-0 mt-1 w-72 bg-black border-2 border-emerald-600 rounded-lg shadow-2xl hidden z-50">
+              <div id="categoriesMenu" class="absolute left-0 mt-1 w-72 border border-black rounded-lg hidden z-50" style="background-color: rgba(25, 25, 25, 0.95); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 0, 0.2);">
                 <div class="py-2 max-h-96 overflow-y-auto">
-                  <div class="px-4 py-3 border-b-2 border-emerald-800 bg-gradient-to-r from-emerald-900 to-emerald-800">
-                    <p class="text-yellow-400 font-bold text-sm pb-1 leading-snug">Browse by Category</p>
+                  <div class="px-4 py-3">
+                    <p class="text-yellow-400 font-bold text-base pb-1 leading-snug">Browse by Category</p>
                   </div>
                   {categories.map(category => (
                     <a
                       href={`/${category.slug}`}
-                      class="block px-4 py-3 text-sm text-gray-200 hover:bg-gradient-to-r hover:from-emerald-900 hover:to-transparent hover:text-emerald-400 transition-all border-b border-gray-800 last:border-b-0"
+                      class="block px-4 py-3 text-base text-gray-200 hover-mint-green transition-colors"
                     >
                       <span class="font-medium">{category.name}</span>
                     </a>
                   ))}
-                  <a href="/categories" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-emerald-800 bg-gradient-to-r from-green-500 to-transparent text-white hover:from-green-600 hover:to-transparent transition-all">
+                  <a href="/categories" class="block px-4 py-3 text-base font-bold text-center text-white hover-mint-green transition-colors">
                     View All Categories →
                   </a>
                 </div>
@@ -221,7 +220,7 @@ function getCategoryIcon(slug: string) {
 
             <!-- States Dropdown -->
             <div class="relative" id="regionsDropdown">
-              <a href="/regions" class="text-gray-200 hover:text-green-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
+              <a href="/regions" class="text-gray-200 hover-mint-green px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
                 States
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -229,21 +228,21 @@ function getCategoryIcon(slug: string) {
               </a>
 
               <!-- Dropdown Menu -->
-              <div id="regionsMenu" class="absolute left-0 mt-1 w-64 bg-black border-2 border-green-600 rounded-lg shadow-2xl hidden z-50">
+              <div id="regionsMenu" class="absolute left-0 mt-1 w-64 border border-black rounded-lg hidden z-50" style="background-color: rgba(25, 25, 25, 0.95); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 0, 0.2);">
                 <div class="py-2 max-h-96 overflow-y-auto">
-                  <div class="px-4 py-3 border-b-2 border-green-800 bg-gradient-to-r from-green-900 to-green-800">
-                    <p class="text-yellow-400 font-bold text-sm pb-1 leading-snug">Browse by State</p>
+                  <div class="px-4 py-3">
+                    <p class="text-yellow-400 font-bold text-base pb-1 leading-snug">Browse by State</p>
                   </div>
                   {navRegions.map(region => (
                     <a
                       href={`/region/${region.slug}`}
-                      class="block px-4 py-3 text-sm text-gray-200 hover:bg-gradient-to-r hover:from-green-900 hover:to-transparent hover:text-green-400 transition-all border-b border-gray-800 last:border-b-0"
+                      class="block px-4 py-3 text-base text-gray-200 hover-mint-green transition-colors"
                     >
                       <span class="font-medium">{region.name}</span>
-                      {region.code && <span class="text-xs text-gray-400 ml-2">({region.code})</span>}
+                      {region.code && <span class="text-sm text-gray-400 ml-2">({region.code})</span>}
                     </a>
                   ))}
-                  <a href="/regions" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-green-800 bg-gradient-to-r from-green-500 to-transparent text-white hover:from-green-600 hover:to-transparent transition-all">
+                  <a href="/regions" class="block px-4 py-3 text-base font-bold text-center text-white hover-mint-green transition-colors">
                     View All States →
                   </a>
                 </div>
@@ -252,7 +251,7 @@ function getCategoryIcon(slug: string) {
 
             <!-- Locations Dropdown -->
             <div class="relative" id="locationsDropdown">
-              <a href="/stores" class="text-gray-200 hover:text-green-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
+              <a href="/stores" class="text-gray-200 hover-mint-green px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
                 Locations
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -260,32 +259,30 @@ function getCategoryIcon(slug: string) {
               </a>
 
               <!-- Dropdown Menu -->
-              <div id="locationsMenu" class="absolute left-0 mt-1 w-80 bg-black border-2 border-green-600 rounded-lg shadow-2xl hidden z-50">
+              <div id="locationsMenu" class="absolute left-0 mt-1 w-80 border border-black rounded-lg hidden z-50" style="background-color: rgba(25, 25, 25, 0.95); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 0, 0.2);">
                 <div class="py-2 max-h-96 overflow-y-auto">
-                  <div class="px-4 py-3 border-b-2 border-green-800 bg-gradient-to-r from-green-900 to-green-800">
-                    <p class="text-yellow-400 font-bold text-sm pb-1 leading-snug">Browse by Location</p>
+                  <div class="px-4 py-3">
+                    <p class="text-yellow-400 font-bold text-base pb-1 leading-snug">Browse by Location</p>
                   </div>
-                  {Object.keys(storesByRegion).sort().map(regionName => (
-                    <div class="border-b border-gray-800 last:border-b-0">
-                      {/* Region Header */}
-                      <div class="px-4 py-2 bg-gray-900 text-green-400 font-semibold text-xs uppercase tracking-wide">
-                        {regionName}
-                      </div>
+                  {(() => {
+                    // Flatten all stores and limit to 5
+                    const allStores = Object.keys(storesByRegion).sort().flatMap(regionName =>
+                      storesByRegion[regionName].map((store: any) => ({
+                        ...store,
+                        regionName
+                      }))
+                    ).slice(0, 5);
 
-                      {/* Stores in Region */}
-                      <div class="bg-gray-950">
-                        {storesByRegion[regionName].map((store: any) => (
-                          <a
-                            href={`/location/${store.slug}`}
-                            class="block px-4 py-2 pl-6 text-sm text-gray-300 hover:bg-gradient-to-r hover:from-green-900 hover:to-transparent hover:text-green-300 transition-all"
-                          >
-                            <span>{store.name}</span>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                  <a href="/stores" class="block px-4 py-3 text-sm font-bold text-center border-t-2 border-green-800 bg-gradient-to-r from-green-500 to-transparent text-white hover:from-green-600 hover:to-transparent transition-all">
+                    return allStores.map((store: any) => (
+                      <a
+                        href={`/location/${store.slug}`}
+                        class="block px-4 py-3 text-base text-gray-300 hover-mint-green transition-colors"
+                      >
+                        <span>{store.name}</span>
+                      </a>
+                    ));
+                  })()}
+                  <a href="/stores" class="block px-4 py-3 text-base font-bold text-center text-white hover-mint-green transition-colors">
                     View All Locations →
                   </a>
                 </div>
@@ -331,10 +328,10 @@ function getCategoryIcon(slug: string) {
                 <a href="/" class="text-gray-400 hover:text-yellow-400 text-sm transition-colors">Home</a>
               </li>
               <li>
-                <a href="/categories" class="text-gray-400 hover:text-emerald-400 text-sm transition-colors">Categories</a>
+                <a href="/categories" class="text-gray-400 hover-mint-green text-sm transition-colors">Categories</a>
               </li>
               <li>
-                <a href="/stores" class="text-gray-400 hover:text-green-400 text-sm transition-colors">Locations</a>
+                <a href="/stores" class="text-gray-400 hover-mint-green text-sm transition-colors">Locations</a>
               </li>
               <li>
                 <a href="/map" class="text-gray-400 hover:text-purple-400 text-sm transition-colors">Map</a>
@@ -350,13 +347,13 @@ function getCategoryIcon(slug: string) {
             <h3 class="text-lg font-semibold text-white mb-4">Resources</h3>
             <ul class="space-y-2">
               <li>
-                <a href="/dosing-guide" class="text-gray-400 hover:text-emerald-400 text-sm transition-colors">Dosing Guide</a>
+                <a href="/dosing-guide" class="text-gray-400 hover-mint-green text-sm transition-colors">Dosing Guide</a>
               </li>
               <li>
-                <a href="/coa" class="text-gray-400 hover:text-emerald-400 text-sm transition-colors">Certificate of Analysis</a>
+                <a href="/coa" class="text-gray-400 hover-mint-green text-sm transition-colors">Certificate of Analysis</a>
               </li>
               <li>
-                <a href="/regions" class="text-gray-400 hover:text-emerald-400 text-sm transition-colors">Regions</a>
+                <a href="/regions" class="text-gray-400 hover-mint-green text-sm transition-colors">Regions</a>
               </li>
             </ul>
           </div>
@@ -391,7 +388,7 @@ function getCategoryIcon(slug: string) {
     </footer>
 
     <script>
-      // Display user's current location for debugging
+      // Display user's current location for debugging with Tempe as default
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -405,14 +402,14 @@ function getCategoryIcon(slug: string) {
           (error) => {
             const debugEl = document.getElementById('userLocationDebug');
             if (debugEl) {
-              debugEl.textContent = `Location Error: ${error.message}`;
+              debugEl.textContent = `Using Tempe location (default): Lat 33.4145, Lon -111.9192`;
             }
           }
         );
       } else {
         const debugEl = document.getElementById('userLocationDebug');
         if (debugEl) {
-          debugEl.textContent = 'Geolocation not supported';
+          debugEl.textContent = 'Using Tempe location (default): Lat 33.4145, Lon -111.9192';
         }
       }
     </script>
@@ -539,7 +536,19 @@ function getCategoryIcon(slug: string) {
       document.addEventListener('astro:page-load', initializeDropdowns);
     </script>
 
-    <!-- Theme Switcher Component -->
-    <ThemeSwitcher />
+    <style is:global>
+      .hover-mint-green:hover {
+        color: #009247 !important;
+      }
+      .text-mint-green {
+        color: #009247 !important;
+      }
+      .bg-mint-green {
+        background-color: #009247 !important;
+      }
+      .border-mint-green {
+        border-color: #009247 !important;
+      }
+    </style>
   </body>
 </html>

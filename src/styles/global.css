@@ -22,7 +22,7 @@
 
 /* Gradient text effects */
 .text-gradient {
-  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, #00954c 0%, #06b6d4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -153,12 +153,12 @@
 
 /* Custom button effects */
 .btn-gradient {
-  background: linear-gradient(135deg, #10b981, #06b6d4);
+  background: linear-gradient(135deg, #00954c, #06b6d4);
   transition: all 0.3s ease;
 }
 
 .btn-gradient:hover {
-  background: linear-gradient(135deg, #059669, #0891b2);
+  background: linear-gradient(135deg, #00773d, #0891b2);
   transform: translateY(-2px);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
@@ -225,12 +225,12 @@ nav a, button, .btn {
 }
 
 .scrollbar-thumb-green-500::-webkit-scrollbar-thumb {
-  background-color: #00954C;
+  background-color: #00954c;
   border-radius: 3px;
 }
 
 .scrollbar-track-green-900\/20::-webkit-scrollbar-track {
-  background-color: rgba(0, 43, 20, 0.2);
+  background-color: rgba(0, 30, 15, 0.2);
 }
 
 /* Polaroid Scatter Animation */
@@ -257,12 +257,12 @@ nav a, button, .btn {
 
 /* Default Theme (Mint) */
 :root {
-  --theme-primary: #00954C;
-  --theme-primary-light: #33bf7f;
-  --theme-primary-dark: #007a3e;
-  --theme-secondary: #fcb900;
-  --theme-accent: #10b981;
-  --theme-bg-start: rgba(41, 163, 41, 0.35);
+  --theme-primary: #00954c;
+  --theme-primary-light: #33a76b;
+  --theme-primary-dark: #00773d;
+  --theme-secondary: #d9a752;
+  --theme-accent: #00954c;
+  --theme-bg-start: rgba(0, 149, 76, 0.35);
   --theme-bg-end: rgba(255, 255, 255, 0.02);
   --theme-text: #ffffff;
   --theme-text-dark: #000000;
@@ -275,7 +275,7 @@ nav a, button, .btn {
   --theme-primary-light: #ff4d9b;
   --theme-primary-dark: #cc0058;
   --theme-secondary: #00f5ff;
-  --theme-accent: #ffbe0b;
+  --theme-accent: #d9a752;
   --theme-bg-start: rgba(255, 0, 110, 0.4);
   --theme-bg-end: rgba(0, 245, 255, 0.2);
   --theme-text: #ffffff;
@@ -288,10 +288,10 @@ nav a, button, .btn {
   --theme-primary: #ff6b35;
   --theme-primary-light: #ff8c5f;
   --theme-primary-dark: #d4562a;
-  --theme-secondary: #f7b801;
+  --theme-secondary: #d9a752;
   --theme-accent: #004e89;
   --theme-bg-start: rgba(255, 107, 53, 0.4);
-  --theme-bg-end: rgba(247, 184, 1, 0.2);
+  --theme-bg-end: rgba(217, 167, 82, 0.2);
   --theme-text: #fef9e6;
   --theme-text-dark: #1a1a1a;
   --theme-overlay: rgba(26, 26, 26, 0.6);
@@ -303,7 +303,7 @@ nav a, button, .btn {
   --theme-primary-light: #b56ce0;
   --theme-primary-dark: #7b3da3;
   --theme-secondary: #ff6f3c;
-  --theme-accent: #ffd23f;
+  --theme-accent: #d9a752;
   --theme-bg-start: rgba(155, 77, 202, 0.4);
   --theme-bg-end: rgba(255, 111, 60, 0.2);
   --theme-text: #fff5eb;
@@ -313,13 +313,13 @@ nav a, button, .btn {
 
 /* Hip Hop Theme - Urban, gold, bold */
 [data-theme="hip-hop"] {
-  --theme-primary: #ffd700;
-  --theme-primary-light: #ffe44d;
-  --theme-primary-dark: #ccac00;
+  --theme-primary: #d9a752;
+  --theme-primary-light: #e2cca3;
+  --theme-primary-dark: #c18b3a;
   --theme-secondary: #dc143c;
   --theme-accent: #ffffff;
   --theme-bg-start: rgba(0, 0, 0, 0.8);
-  --theme-bg-end: rgba(255, 215, 0, 0.3);
+  --theme-bg-end: rgba(217, 167, 82, 0.3);
   --theme-text: #ffffff;
   --theme-text-dark: #000000;
   --theme-overlay: rgba(0, 0, 0, 0.7);
@@ -331,7 +331,7 @@ nav a, button, .btn {
   --theme-primary-light: #ff4da6;
   --theme-primary-dark: #cc0066;
   --theme-secondary: #00d9ff;
-  --theme-accent: #ffff00;
+  --theme-accent: #d9a752;
   --theme-bg-start: rgba(255, 0, 128, 0.5);
   --theme-bg-end: rgba(0, 217, 255, 0.3);
   --theme-text: #ffffff;
@@ -345,7 +345,7 @@ nav a, button, .btn {
   --theme-primary-light: #a78bfa;
   --theme-primary-dark: #7c3aed;
   --theme-secondary: #06b6d4;
-  --theme-accent: #f59e0b;
+  --theme-accent: #d9a752;
   --theme-bg-start: rgba(0, 0, 0, 0.95);
   --theme-bg-end: rgba(139, 92, 246, 0.2);
   --theme-text: #e0e7ff;
@@ -359,7 +359,7 @@ nav a, button, .btn {
   --theme-primary-light: #d99a58;
   --theme-primary-dark: #a86328;
   --theme-secondary: #8b4513;
-  --theme-accent: #daa520;
+  --theme-accent: #d9a752;
   --theme-bg-start: rgba(101, 67, 33, 0.6);
   --theme-bg-end: rgba(139, 69, 19, 0.3);
   --theme-text: #f5deb3;

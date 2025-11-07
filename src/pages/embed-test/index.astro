@@ -1,0 +1,171 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
+let stores = [];
+let apiError = null;
+
+try {
+  const response = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
+  const data = await response.json();
+
+  if (data?.data && Array.isArray(data.data)) {
+    stores = data.data.map((store: any) => {
+      // The API returns a flat structure, not nested under attributes
+      return {
+        name: store.name || store.Name || 'Store',
+        slug: store.slug || store.Slug || store.documentId,
+        dutchieStoreId: store.DutchieStoreID || store.dutchieStoreId || store.dutchie_store_id,
+        city: store.address?.city || store.City || '',
+        state: store.address?.state || store.State || ''
+      };
+    });
+  }
+} catch (error) {
+  console.error('Error fetching stores:', error);
+  apiError = 'Failed to load stores';
+}
+---
+
+<Layout
+  title="Dutchie Embed Test - Select Store - Mint Deals"
+  description="Select a store to test Dutchie carousel embeds"
+>
+  <div class="min-h-screen bg-black">
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-gray-900 to-black py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 uppercase">
+            Dutchie Embed Test
+          </h1>
+          <p class="text-xl text-gray-300">
+            Select a store to test multiple carousel embeds
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stores List -->
+    <section class="py-16 bg-gray-900">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {apiError ? (
+          <div class="text-center py-12">
+            <div class="max-w-md mx-auto bg-red-900/40 rounded-lg p-8">
+              <h3 class="text-lg font-medium text-white mb-2 uppercase">Error</h3>
+              <p class="text-sm text-red-300">{apiError}</p>
+            </div>
+          </div>
+        ) : stores.length > 0 ? (
+          <>
+            <h2 class="text-3xl font-bold text-white mb-8 uppercase text-center">
+              Select a Store
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {stores.map((store) => (
+                <a
+                  href={`/embed-test/${store.slug}`}
+                  class="block bg-black rounded-lg p-6 hover:bg-gray-800 transition-all duration-300 hover:transform hover:scale-105"
+                >
+                  <div class="flex items-start justify-between mb-4">
+                    <h3 class="text-xl font-bold text-white">
+                      {store.name}
+                    </h3>
+                    {store.dutchieStoreId ? (
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        Active
+                      </span>
+                    ) : (
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900 text-red-300">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        No ID
+                      </span>
+                    )}
+                  </div>
+                  {(store.city || store.state) && (
+                    <p class="text-gray-400 mb-4">
+                      {store.city}{store.city && store.state ? ', ' : ''}{store.state}
+                    </p>
+                  )}
+                  {store.dutchieStoreId && (
+                    <p class="text-sm text-green-400 font-mono mb-4">
+                      ID: {store.dutchieStoreId}
+                    </p>
+                  )}
+                  <div class="flex items-center text-yellow-400">
+                    <span class="font-medium">Test Embeds</span>
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div class="text-center py-12">
+            <div class="max-w-md mx-auto bg-gray-800 rounded-lg p-8">
+              <h3 class="text-lg font-medium text-white mb-2 uppercase">No Stores Found</h3>
+              <p class="text-sm text-gray-400">No stores available for testing.</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="py-16 bg-black">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-gradient-to-br from-blue-900/40 to-black/60 rounded-lg p-8">
+          <h3 class="text-2xl font-bold text-white mb-4">How It Works</h3>
+          <ul class="space-y-3 text-gray-300">
+            <li class="flex items-start">
+              <svg class="w-6 h-6 mr-3 text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Each store page shows 3 different Dutchie carousel embeds</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-6 h-6 mr-3 text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Banner sections separate the embeds for better visual organization</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-6 h-6 mr-3 text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>The embeds use each store's unique Dutchie Store ID from the CMS</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-6 h-6 mr-3 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>Stores marked with "No ID" need a DutchieStoreID configured in the CMS</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <section class="py-16 bg-gray-900">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/stores" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300">
+            View All Stores
+          </a>
+          <a href="/" class="inline-block bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300">
+            Back to Home
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>

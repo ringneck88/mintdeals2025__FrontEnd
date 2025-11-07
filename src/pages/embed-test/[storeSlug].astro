@@ -1,0 +1,190 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
+export async function getStaticPaths() {
+  try {
+    const response = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
+    const data = await response.json();
+
+    if (data?.data && Array.isArray(data.data)) {
+      return data.data.map((store: any) => {
+        // The API returns a flat structure, not nested under attributes
+        const slug = store.slug || store.Slug || store.documentId;
+        const name = store.name || store.Name || 'Store';
+        const dutchieStoreId = store.DutchieStoreID || store.dutchieStoreId || store.dutchie_store_id;
+
+        console.log(`📝 Building path for ${name}: DutchieID = ${dutchieStoreId || 'NOT FOUND'}`);
+
+        return {
+          params: { storeSlug: slug },
+          props: {
+            storeName: name,
+            dutchieStoreId: dutchieStoreId,
+            slug: slug
+          }
+        };
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching stores:', error);
+  }
+
+  return [];
+}
+
+const { storeName, dutchieStoreId, slug } = Astro.props;
+
+// Debug: Log what props we received
+console.log(`🎯 Page Props for ${storeName}:`);
+console.log(`   - dutchieStoreId: ${dutchieStoreId}`);
+console.log(`   - slug: ${slug}`);
+
+// If no Dutchie store ID is available, show an error
+const hasValidDutchieId = dutchieStoreId && dutchieStoreId !== '';
+console.log(`   - hasValidDutchieId: ${hasValidDutchieId}`);
+---
+
+<Layout
+  title={`${storeName} - Dutchie Embed Test - Mint Deals`}
+  description={`Testing multiple Dutchie carousel embeds for ${storeName}`}
+>
+  <div class="min-h-screen bg-black">
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-gray-900 to-black py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 uppercase">
+            {storeName}
+          </h1>
+          <p class="text-xl text-gray-300 mb-4">
+            Dutchie Embed Test
+          </p>
+          {hasValidDutchieId ? (
+            <p class="text-sm text-green-400">
+              Store ID: {dutchieStoreId}
+            </p>
+          ) : (
+            <p class="text-sm text-red-400">
+              No Dutchie Store ID configured
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+
+    {hasValidDutchieId ? (
+      <>
+        <!-- First Embed Section -->
+        <section class="py-16 bg-gray-900">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-white mb-8 uppercase text-center">
+              Featured Products Carousel
+            </h2>
+            <div class="bg-black rounded-lg p-4">
+              <div set:html={`<script async="" id="dutchie--carousel-embed-7a1195b9-adb8-4b7b-91e5-23fdc8df8c12__script" src="https://dutchie.com/api/v3/embedded-menu/${dutchieStoreId}/carousels/7a1195b9-adb8-4b7b-91e5-23fdc8df8c12.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fembed-test%2F${slug}%2F"></script>`}></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Banner Section 1 -->
+        <section class="py-16 bg-black">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative overflow-hidden rounded-lg bg-gradient-to-r from-green-600 to-green-800 p-12 text-center">
+              <div class="relative z-10">
+                <h3 class="text-4xl font-bold text-white mb-4">Special Offers Available</h3>
+                <p class="text-xl text-white mb-6">Check out our latest deals and promotions</p>
+                <a href="/deals" class="inline-block bg-white text-green-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors duration-300">
+                  View Deals
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Second Embed Section -->
+        <section class="py-16 bg-gray-900">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-white mb-8 uppercase text-center">
+              Popular Products
+            </h2>
+            <div class="bg-black rounded-lg p-4">
+              <div set:html={`<script async="" id="dutchie--carousel-embed-da803f8d-df11-4da4-8076-1cef920dda6a__script" src="https://dutchie.com/api/v3/embedded-menu/${dutchieStoreId}/carousels/da803f8d-df11-4da4-8076-1cef920dda6a.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fembed-test%2F${slug}%2F"></script>`}></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Banner Section 2 -->
+        <section class="py-16 bg-black">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative overflow-hidden rounded-lg bg-gradient-to-r from-yellow-500 to-yellow-600 p-12 text-center">
+              <div class="relative z-10">
+                <h3 class="text-4xl font-bold text-white mb-4">New Arrivals</h3>
+                <p class="text-xl text-white mb-6">Discover our latest premium products</p>
+                <a href="/categories" class="inline-block bg-white text-yellow-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors duration-300">
+                  Browse Categories
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Third Embed Section -->
+        <section class="py-16 bg-gray-900">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-white mb-8 uppercase text-center">
+              Customer Favorites
+            </h2>
+            <div class="bg-black rounded-lg p-4">
+              <div set:html={`<script async="" id="dutchie--carousel-embed-b23a4f74-4248-46b8-982d-57369fae63c4__script" src="https://dutchie.com/api/v3/embedded-menu/${dutchieStoreId}/carousels/b23a4f74-4248-46b8-982d-57369fae63c4.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fembed-test%2F${slug}%2F"></script>`}></div>
+            </div>
+          </div>
+        </section>
+      </>
+    ) : (
+      <section class="py-16 bg-gray-900">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="bg-red-900/40 rounded-lg p-8 text-center">
+            <svg class="w-16 h-16 mx-auto mb-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h3 class="text-2xl font-bold text-white mb-4">No Dutchie Store ID</h3>
+            <p class="text-red-200 mb-6">
+              This store does not have a Dutchie Store ID configured. Please add the DutchieStoreID field to the store in the CMS.
+            </p>
+            <a href="/stores" class="inline-block bg-white text-red-600 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors duration-300">
+              View All Stores
+            </a>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Footer CTA -->
+    <section class="py-16 bg-black">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h3 class="text-3xl font-bold text-white mb-4">Ready to Shop?</h3>
+        <p class="text-xl text-gray-300 mb-8">Visit one of our locations or browse online</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href={`/location/${slug}`} class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300">
+            View Store Page
+          </a>
+          <a href="/stores" class="inline-block bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300">
+            All Stores
+          </a>
+          <a href="/" class="inline-block bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300">
+            Back to Home
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<script>
+  // Ensure scripts load properly
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('Dutchie embed test page loaded');
+  });
+</script>
