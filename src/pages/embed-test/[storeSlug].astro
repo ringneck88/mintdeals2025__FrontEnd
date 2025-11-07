@@ -61,8 +61,9 @@ if (hasValidDutchieId && storeId) {
       carousels = carouselsData.data.map((carousel: any) => ({
         name: carousel.name || carousel.Name || 'Carousel',
         dutchie_carousel_id: carousel.dutchie_carousel_id || carousel.dutchieCarouselId,
+        full_embed_script: carousel.full_embed_script || carousel.fullEmbedScript,
         order: carousel.order || 0
-      })).filter(c => c.dutchie_carousel_id); // Only include carousels with valid IDs
+      })).filter(c => c.dutchie_carousel_id || c.full_embed_script); // Include if has either ID or full script
 
       console.log(`🎠 Found ${carousels.length} active carousels for ${storeName}`);
     }
@@ -112,7 +113,13 @@ if (hasValidDutchieId && storeId) {
                     {carousel.name}
                   </h2>
                   <div class="bg-black rounded-lg p-4">
-                    <div set:html={`<script async="" id="dutchie--carousel-embed-${carousel.dutchie_carousel_id}__script" src="https://dutchie.com/api/v3/embedded-menu/${dutchieStoreId}/carousels/${carousel.dutchie_carousel_id}.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fembed-test%2F${slug}%2F"></script>`}></div>
+                    <div
+                      id={`dutchie-carousel-container-${carousel.dutchie_carousel_id || index}`}
+                      data-store-id={dutchieStoreId}
+                      data-carousel-id={carousel.dutchie_carousel_id}
+                      data-slug={slug}
+                      data-full-script={carousel.full_embed_script || ''}
+                    ></div>
                   </div>
                 </div>
               </section>
@@ -203,20 +210,65 @@ if (hasValidDutchieId && storeId) {
 </Layout>
 
 <script is:inline>
-  // Force reload Dutchie scripts if they haven't loaded after 2 seconds
-  setTimeout(() => {
-    const scripts = document.querySelectorAll('script[id^="dutchie--carousel-embed"]');
-    console.log(`Found ${scripts.length} Dutchie scripts`);
+  // Dynamically load Dutchie carousel scripts
+  document.addEventListener('DOMContentLoaded', () => {
+    const containers = document.querySelectorAll('[id^="dutchie-carousel-container-"]');
+    console.log(`Found ${containers.length} carousel containers to load`);
 
-    scripts.forEach((script, index) => {
-      const src = script.getAttribute('src');
-      if (src) {
-        console.log(`Dutchie script ${index + 1}: ${src.substring(0, 80)}...`);
+    containers.forEach((container, index) => {
+      const fullScript = container.getAttribute('data-full-script');
+
+      // Check if we have a full embed script
+      if (fullScript && fullScript.trim() !== '') {
+        console.log(`Using full embed script for carousel ${index + 1}`);
+
+        // Parse the full script to extract the script tag
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = fullScript;
+        const scriptTag = tempDiv.querySelector('script');
+
+        if (scriptTag) {
+          // Create a new script element with the same attributes
+          const script = document.createElement('script');
+          script.async = scriptTag.async;
+          script.id = scriptTag.id;
+          script.src = scriptTag.src;
+
+          // Add script to container
+          container.appendChild(script);
+          console.log(`Full embed script loaded: ${scriptTag.src}`);
+        } else {
+          console.error(`Could not parse script from full_embed_script for carousel ${index + 1}`);
+        }
+      } else {
+        // Fallback to constructing script from individual fields
+        const storeId = container.getAttribute('data-store-id');
+        const carouselId = container.getAttribute('data-carousel-id');
+        const slug = container.getAttribute('data-slug');
+
+        if (storeId && carouselId) {
+          console.log(`Constructing carousel script ${index + 1}: ${carouselId} for store ${storeId}`);
+
+          // Create script element
+          const script = document.createElement('script');
+          script.async = true;
+          script.id = `dutchie--carousel-embed-${carouselId}__script`;
+          script.src = `https://dutchie.com/api/v3/embedded-menu/${storeId}/carousels/${carouselId}.js?routeRoot=https%3A%2F%2Fmintdeals.com%2Fembed-test%2F${slug}%2F`;
+
+          // Add script to container
+          container.appendChild(script);
+
+          console.log(`Script added for carousel ${carouselId}`);
+        } else {
+          console.error(`Missing data attributes for container ${index + 1}`);
+        }
       }
     });
 
-    // Check if Dutchie widgets have loaded
-    const widgets = document.querySelectorAll('[id^="dutchie--carousel-embed"]');
-    console.log(`Found ${widgets.length} Dutchie widget containers`);
-  }, 2000);
+    // Check if widgets loaded after 3 seconds
+    setTimeout(() => {
+      const widgets = document.querySelectorAll('[id^="dutchie--carousel-embed"]');
+      console.log(`Dutchie widgets rendered: ${widgets.length}`);
+    }, 3000);
+  });
 </script>
