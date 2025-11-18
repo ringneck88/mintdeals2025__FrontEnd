@@ -382,6 +382,8 @@ try {
                       }
                     }
 
+                    const googlePlaceId = store.google_place_id || '';
+
                     return (
                       <div class="store-card relative overflow-hidden transition-all transform bg-black rounded-lg shadow-lg hover:shadow-2xl hover:scale-105">
                         {/* Store Name Header */}
@@ -389,6 +391,14 @@ try {
                           <h3 class="text-lg font-bold text-center text-white uppercase">
                             {storeName}
                           </h3>
+                          {googlePlaceId && (
+                            <div
+                              class="store-rating flex justify-center mt-1"
+                              data-place-id={googlePlaceId}
+                            >
+                              <span class="loading-text text-gray-400 text-xs">Loading rating...</span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Store Image */}
@@ -469,15 +479,17 @@ try {
                           )}
 
                           {/* Shop Now Button */}
-                          <a
-                            href={`/location/${store.slug || store.documentId}`}
-                            class="inline-flex items-center justify-center font-bold text-white bg-green-600 hover:bg-green-700 transition-colors px-6 py-2 rounded-lg text-sm shadow-lg"
-                          >
-                            Shop Now
-                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                            </svg>
-                          </a>
+                          <div class="flex justify-end">
+                            <a
+                              href={`/location/${store.slug || store.documentId}`}
+                              class="inline-flex items-center justify-center font-bold text-white bg-green-600 hover:bg-green-700 transition-colors px-6 py-2 rounded-lg text-sm shadow-lg"
+                            >
+                              Shop Now
+                              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                              </svg>
+                            </a>
+                          </div>
                         </div>
                       </div>
                     );
@@ -640,4 +652,72 @@ try {
 
   document.addEventListener('DOMContentLoaded', sortRegionsByLocation);
   document.addEventListener('astro:page-load', sortRegionsByLocation);
+</script>
+
+<!-- Google Maps API for fetching ratings -->
+<script is:inline>
+  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+    key: "AIzaSyDl5xx_mgt89hCcjRgbfM_qLfJrCDJUdJw",
+    v: "weekly"
+  });
+</script>
+
+<!-- Google Ratings Script -->
+<script is:inline>
+  async function loadGoogleRatings() {
+    try {
+      if (typeof google === 'undefined') return;
+
+      const { Place } = await google.maps.importLibrary("places");
+      const ratingElements = document.querySelectorAll('.store-rating');
+
+      for (let i = 0; i < ratingElements.length; i++) {
+        const element = ratingElements[i];
+        const placeId = element.getAttribute('data-place-id');
+
+        if (!placeId) continue;
+
+        if (i > 0) await new Promise(resolve => setTimeout(resolve, 100));
+
+        try {
+          const place = new Place({ id: placeId });
+          await place.fetchFields({ fields: ['rating', 'userRatingCount'] });
+
+          if (place.rating) {
+            const rating = place.rating;
+            const totalReviews = place.userRatingCount || 0;
+
+            element.innerHTML = `
+              <a href="https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${placeId}"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="flex items-center gap-1 text-yellow-400 hover:text-yellow-300 transition-colors font-semibold text-sm"
+                 title="View on Google Maps">
+                <span>⭐ ${rating}</span>
+                <span class="text-xs text-gray-300">(${totalReviews})</span>
+              </a>
+            `;
+          } else {
+            element.innerHTML = '';
+          }
+        } catch (error) {
+          console.error('Error fetching rating:', error);
+          element.innerHTML = '';
+        }
+      }
+    } catch (error) {
+      console.error('Error loading Google ratings:', error);
+      document.querySelectorAll('.store-rating .loading-text').forEach(el => {
+        el.style.display = 'none';
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadGoogleRatings);
+  } else {
+    loadGoogleRatings();
+  }
+
+  document.addEventListener('astro:page-load', loadGoogleRatings);
 </script>

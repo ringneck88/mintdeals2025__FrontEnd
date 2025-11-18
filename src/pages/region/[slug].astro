@@ -314,61 +314,113 @@ if (stores.length > 0) {
               const storeSlug = store.slug;
               const storeData = storeCarousels.get(storeSlug);
               const storeName = store.Name || store.name;
+              const storeAddress = getStringValue(store.address?.street) || getStringValue(store.Street) || '';
               const storeCity = getStringValue(store.address?.city) || getStringValue(store.City) || '';
+              const storeState = getStringValue(store.address?.state) || getStringValue(store.State) || '';
+              const storeZip = getStringValue(store.address?.zipCode) || getStringValue(store.Zip) || '';
               const storePhone = getStringValue(store.Phone) || getStringValue(store.phone) || '';
+              const googlePlaceId = store.google_place_id || '';
+
+              // Build Google Maps directions URL
+              let directionsUrl = '';
+              if (store.geo?.lat && store.geo?.lng) {
+                directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${store.geo.lat},${store.geo.lng}`;
+              } else if (storeAddress || storeCity) {
+                const addressParts = [storeAddress, storeCity, storeState, storeZip].filter(part => part).join(', ');
+                directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressParts)}`;
+              }
 
               return (
                 <div class="mb-12 bg-gradient-to-br from-gray-900 to-black">
                   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div class="flex justify-between items-start gap-4">
-                      <div class="flex-1">
-                        <h3 class="text-2xl font-bold text-yellow-400 mb-3">{storeName}</h3>
-                        <div class="flex flex-wrap gap-4">
-                          {storeCity && (
-                            <p class="flex items-center text-green-300">
-                              <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                              </svg>
-                              {storeCity}
-                            </p>
-                          )}
-                          {storePhone && (
-                            <a href={`tel:${storePhone}`} class="flex items-center text-green-300 hover:text-yellow-400">
-                              <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                              </svg>
-                              {storePhone}
-                            </a>
-                          )}
+                    <div class="flex flex-col gap-4">
+                      <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1">
+                          <div class="flex items-center gap-3 mb-3">
+                            <h3 class="text-2xl font-bold text-white uppercase">{storeName}</h3>
+                            {googlePlaceId && (
+                              <div
+                                class="store-rating"
+                                data-place-id={googlePlaceId}
+                                data-store-slug={storeSlug}
+                              >
+                                <div class="flex items-center gap-1 text-sm">
+                                  <span class="loading-text text-gray-400">Loading rating...</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div class="flex flex-col gap-3">
+                            {(storeAddress || storeCity) && (
+                              <p class="flex items-start text-white">
+                                <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span>
+                                  {storeAddress && <>{storeAddress}<br /></>}
+                                  {storeCity && storeState && storeZip && <>{storeCity}, {storeState} {storeZip}</>}
+                                  {storeCity && !storeState && <>{storeCity}</>}
+                                </span>
+                              </p>
+                            )}
+                            {storePhone && (
+                              <a href={`tel:${storePhone}`} class="flex items-center text-white hover:text-yellow-400">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                </svg>
+                                {storePhone}
+                              </a>
+                            )}
+                            {directionsUrl && (
+                              <a href={directionsUrl} target="_blank" rel="noopener noreferrer" class="flex items-center text-white hover:text-yellow-400">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                </svg>
+                                Get Driving Directions
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        <div class="flex-shrink-0">
+                          <a
+                            href={`/location/${storeSlug}`}
+                            class="inline-flex items-center px-6 py-2 bg-green-500 text-white font-bold rounded-full hover:bg-green-600 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
+                          >
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            Shop Full Menu
+                          </a>
                         </div>
                       </div>
-
-                      <a
-                        href={`/location/${storeSlug}`}
-                        class="inline-flex items-center px-6 py-2 bg-yellow-400 text-black font-bold rounded-full hover:bg-yellow-300 transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap"
-                      >
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        Shop Full Menu
-                      </a>
                     </div>
                   </div>
 
                   {storeData && storeData.carousel && (
-                    <div class="bg-white carousel-container-wrapper" style="display: none;" data-carousel-index={storeSlug}>
-                      <div class="p-6">
-                        <div
-                          id={`dutchie-carousel-container-${storeSlug}-${storeData.carousel.dutchie_carousel_id || 0}`}
-                          data-store-id={storeData.dutchieStoreId}
-                          data-carousel-id={storeData.carousel.dutchie_carousel_id}
-                          data-slug={storeSlug}
-                          data-full-script={storeData.carousel.full_embed_script || ''}
-                          class="dutchie-carousel-wrapper"
-                        ></div>
+                    <>
+                      <div class="carousel-loading-spinner bg-white py-16" data-carousel-spinner={storeSlug}>
+                        <div class="flex flex-col items-center justify-center gap-4">
+                          <div class="spinner-border animate-spin inline-block w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full" role="status">
+                            <span class="sr-only">Loading...</span>
+                          </div>
+                          <p class="text-gray-600 font-semibold">Loading products...</p>
+                        </div>
                       </div>
-                    </div>
+                      <div class="bg-white carousel-container-wrapper" style="display: none;" data-carousel-index={storeSlug}>
+                        <div class="p-6">
+                          <div
+                            id={`dutchie-carousel-container-${storeSlug}-${storeData.carousel.dutchie_carousel_id || 0}`}
+                            data-store-id={storeData.dutchieStoreId}
+                            data-carousel-id={storeData.carousel.dutchie_carousel_id}
+                            data-slug={storeSlug}
+                            data-full-script={storeData.carousel.full_embed_script || ''}
+                            class="dutchie-carousel-wrapper"
+                          ></div>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
               );
@@ -410,6 +462,14 @@ if (stores.length > 0) {
     </div>
   </div>
 </Layout>
+
+<!-- Google Maps API for fetching ratings -->
+<script is:inline>
+  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+    key: "AIzaSyDl5xx_mgt89hCcjRgbfM_qLfJrCDJUdJw",
+    v: "weekly"
+  });
+</script>
 
 <script>
   // Region Hero Carousel
@@ -493,6 +553,85 @@ if (stores.length > 0) {
   document.addEventListener('astro:page-load', initRegionHeroCarousel);
 </script>
 
+<!-- Google Ratings Script -->
+<script is:inline>
+  // Simple function to load Google ratings
+  async function loadGoogleRatings() {
+    console.log('Loading Google ratings...');
+    try {
+      if (typeof google === 'undefined') {
+        console.log('Google not loaded yet');
+        return;
+      }
+
+      console.log('Importing Places library...');
+      // Use new Places API
+      const { Place } = await google.maps.importLibrary("places");
+      console.log('Places library loaded');
+
+      // Find all rating elements
+      const ratingElements = document.querySelectorAll('.store-rating');
+      console.log(`Found ${ratingElements.length} rating elements`);
+
+      // Fetch ratings for each store
+      for (let i = 0; i < ratingElements.length; i++) {
+        const element = ratingElements[i];
+        const placeId = element.getAttribute('data-place-id');
+
+        if (!placeId) continue;
+
+        // Add small delay to avoid rate limiting
+        if (i > 0) await new Promise(resolve => setTimeout(resolve, 100));
+
+        try {
+          console.log(`Fetching rating for place ID: ${placeId}`);
+          const place = new Place({ id: placeId });
+          await place.fetchFields({ fields: ['rating', 'userRatingCount'] });
+
+          console.log(`Rating:`, place.rating, `Reviews:`, place.userRatingCount);
+
+          if (place.rating) {
+            const rating = place.rating;
+            const totalReviews = place.userRatingCount || 0;
+
+            // Display simple star rating
+            element.innerHTML = `
+              <a href="https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${placeId}"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="flex items-center gap-1 text-yellow-400 hover:text-yellow-300 transition-colors font-semibold"
+                 title="View on Google Maps">
+                <span>⭐ ${rating}</span>
+                <span class="text-xs text-gray-300">(${totalReviews})</span>
+              </a>
+            `;
+          } else {
+            element.innerHTML = '';
+          }
+        } catch (error) {
+          console.error('Error fetching rating for place:', placeId, error);
+          element.innerHTML = '';
+        }
+      }
+    } catch (error) {
+      console.error('Error loading Google ratings:', error);
+      document.querySelectorAll('.store-rating .loading-text').forEach(el => {
+        el.style.display = 'none';
+      });
+    }
+  }
+
+  // Load ratings when page is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadGoogleRatings);
+  } else {
+    loadGoogleRatings();
+  }
+
+  // Also run on Astro page navigation
+  document.addEventListener('astro:page-load', loadGoogleRatings);
+</script>
+
 <!-- Dutchie Carousel Script Injection -->
 <script is:inline>
   // Dynamically load Dutchie carousel scripts
@@ -571,11 +710,19 @@ if (stores.length > 0) {
 
       console.log(`🎨 Check #${checkCount}: Found ${widgets.length} widgets out of ${allContainers.length} containers`);
 
-      // Show containers for successfully loaded widgets
+      // Show containers for successfully loaded widgets and hide spinners
       widgets.forEach((widget) => {
         const container = widget.closest('.carousel-container-wrapper');
         if (container && container.style.display === 'none') {
           const index = container.getAttribute('data-carousel-index');
+
+          // Hide the spinner
+          const spinner = document.querySelector(`[data-carousel-spinner="${index}"]`);
+          if (spinner) {
+            spinner.style.display = 'none';
+          }
+
+          // Show the carousel
           container.style.display = 'block';
           console.log(`✅ Showing carousel container #${index} - widget loaded`);
         }
@@ -585,6 +732,14 @@ if (stores.length > 0) {
       if (checkCount >= 10) {
         allContainers.forEach((container, index) => {
           if (container.style.display === 'none') {
+            const carouselIndex = container.getAttribute('data-carousel-index');
+
+            // Hide the spinner
+            const spinner = document.querySelector(`[data-carousel-spinner="${carouselIndex}"]`);
+            if (spinner) {
+              spinner.style.display = 'none';
+            }
+
             container.style.display = 'block';
             console.log(`⏰ Force-showing carousel container #${index} after 5 seconds`);
           }
@@ -600,9 +755,17 @@ if (stores.length > 0) {
 
       console.log(`🎨 Final status: ${widgets.length} widgets loaded out of ${allContainers.length} containers`);
 
-      // Make sure all containers are visible
+      // Make sure all containers are visible and spinners are hidden
       allContainers.forEach((container, index) => {
         if (container.style.display === 'none') {
+          const carouselIndex = container.getAttribute('data-carousel-index');
+
+          // Hide the spinner
+          const spinner = document.querySelector(`[data-carousel-spinner="${carouselIndex}"]`);
+          if (spinner) {
+            spinner.style.display = 'none';
+          }
+
           container.style.display = 'block';
           console.log(`🔧 Final show of container #${index}`);
         }

@@ -35,6 +35,7 @@ const storeAddress = getStringValue(store?.address?.street) || getStringValue(st
 const storeZip = getStringValue(store?.address?.zipCode) || getStringValue(store?.zip_code) || '';
 const storePhone = getStringValue(store?.phone) || '';
 const storeEmail = getStringValue(store?.email) || '';
+const googlePlaceId = store?.google_place_id || '';
 
 // Build Google Maps URL - prefer coordinates from geo field, fallback to address
 let mapsUrl = '';
@@ -318,10 +319,20 @@ try {
       <div class="absolute inset-0 bg-black/40"></div>
 
       <!-- Title Overlay -->
-      <div class="absolute inset-0 flex items-center justify-center">
+      <div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
         <h1 class="text-4xl md:text-6xl font-bold text-white uppercase text-center px-4" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);">
           {storeName}
         </h1>
+        {googlePlaceId && (
+          <div
+            class="store-rating"
+            data-place-id={googlePlaceId}
+          >
+            <div class="flex items-center gap-1 text-sm">
+              <span class="loading-text text-gray-300" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);">Loading rating...</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   </section>
@@ -500,7 +511,7 @@ try {
                       href={mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="inline-flex items-center text-mint-green hover:text-yellow-400 font-semibold"
+                      class="inline-flex items-center text-white hover:text-yellow-400 font-semibold"
                     >
                       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
@@ -520,7 +531,7 @@ try {
                     </svg>
                     Phone
                   </h3>
-                  <a href={`tel:${storePhone}`} class="text-white hover:text-mint-green text-lg">
+                  <a href={`tel:${storePhone}`} class="text-white hover:text-yellow-400 text-lg">
                     {storePhone}
                   </a>
                 </div>
@@ -535,7 +546,7 @@ try {
                     </svg>
                     Email
                   </h3>
-                  <a href={`mailto:${storeEmail}`} class="text-white hover:text-mint-green">
+                  <a href={`mailto:${storeEmail}`} class="text-white hover:text-yellow-400">
                     {storeEmail}
                   </a>
                 </div>
@@ -796,6 +807,73 @@ try {
       // Auto-advance carousel every 5 seconds
       setInterval(nextSlide, 5000);
     }
+  </script>
+
+  <!-- Google Maps API for fetching ratings -->
+  <script is:inline>
+    (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+      key: "AIzaSyDl5xx_mgt89hCcjRgbfM_qLfJrCDJUdJw",
+      v: "weekly"
+    });
+  </script>
+
+  <!-- Google Ratings Script -->
+  <script is:inline>
+    async function loadGoogleRatings() {
+      try {
+        if (typeof google === 'undefined') return;
+
+        const { Place } = await google.maps.importLibrary("places");
+        const ratingElements = document.querySelectorAll('.store-rating');
+
+        for (let i = 0; i < ratingElements.length; i++) {
+          const element = ratingElements[i];
+          const placeId = element.getAttribute('data-place-id');
+
+          if (!placeId) continue;
+
+          try {
+            const place = new Place({ id: placeId });
+            await place.fetchFields({ fields: ['rating', 'userRatingCount'] });
+
+            if (place.rating) {
+              const rating = place.rating;
+              const totalReviews = place.userRatingCount || 0;
+
+              element.innerHTML = `
+                <a href="https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${placeId}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="flex items-center gap-1 text-yellow-400 hover:text-yellow-300 transition-colors font-semibold text-lg"
+                   title="View on Google Maps"
+                   style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);">
+                  <span>⭐ ${rating}</span>
+                  <span class="text-sm text-gray-200">(${totalReviews})</span>
+                </a>
+              `;
+            } else {
+              element.innerHTML = '';
+            }
+          } catch (error) {
+            console.error('Error fetching rating:', error);
+            element.innerHTML = '';
+          }
+        }
+      } catch (error) {
+        console.error('Error loading Google ratings:', error);
+        document.querySelectorAll('.store-rating .loading-text').forEach(el => {
+          el.style.display = 'none';
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadGoogleRatings);
+    } else {
+      loadGoogleRatings();
+    }
+
+    document.addEventListener('astro:page-load', loadGoogleRatings);
   </script>
 
   </div> <!-- Close content-wrapper -->

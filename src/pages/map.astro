@@ -686,16 +686,20 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
                   <p class="mb-3 text-sm text-green-300">
                     ${store.city}, ${store.state} ${store.zip}
                   </p>
-                  <div class="flex justify-between items-center">
-                    <a href="${store.googlePlaceId ? `https://www.google.com/maps/dir/?api=1&destination=&destination_place_id=${store.googlePlaceId}` : `https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="text-sm text-green-400 hover:text-green-300 transition-colors">
-                      Directions →
-                    </a>
-                    <a href="/location/${store.slug}" class="inline-flex items-center px-4 py-2 bg-yellow-400 text-black font-bold rounded-full text-sm hover:bg-yellow-500 transition-colors">
-                      Shop Now →
-                    </a>
+                  <div class="space-y-2">
+                    <div class="flex justify-start">
+                      <a href="${store.googlePlaceId ? `https://www.google.com/maps/dir/?api=1&destination=&destination_place_id=${store.googlePlaceId}` : `https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}"
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         class="text-sm text-green-400 hover:text-green-300 transition-colors">
+                        Directions →
+                      </a>
+                    </div>
+                    <div class="flex justify-end">
+                      <a href="/location/${store.slug}" class="inline-flex items-center px-4 py-2 bg-green-500 text-white font-bold rounded-full text-sm hover:bg-green-600 transition-colors">
+                        Shop Now →
+                      </a>
+                    </div>
                   </div>
                 </div>
               `).join('')}
