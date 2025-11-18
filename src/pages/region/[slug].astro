@@ -359,7 +359,7 @@ if (stores.length > 0) {
                                 </svg>
                                 <span>
                                   {storeAddress && <>{storeAddress}<br /></>}
-                                  {storeCity && storeState && storeZip && <>{storeCity}, {storeState} {storeZip}</>}
+                                  {storeCity && storeState && storeZip && <>{storeCity}, {storeState}{' '}{storeZip}</>}
                                   {storeCity && !storeState && <>{storeCity}</>}
                                 </span>
                               </p>
@@ -437,7 +437,7 @@ if (stores.length > 0) {
 
         <!-- About This Region Section -->
         {regionDescription && (
-          <div class="mt-12 mb-12 bg-gradient-to-br from-green-900/40 to-black/60 p-8">
+          <div class="mt-12 mb-12 bg-gray-800 p-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <h2 class="text-3xl font-bold mb-6 flex items-center text-white uppercase">
                 <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -445,7 +445,7 @@ if (stores.length > 0) {
                 </svg>
                 About {regionName}
               </h2>
-              <p class="text-green-100 text-lg leading-relaxed">
+              <p class="text-white text-lg leading-relaxed">
                 {regionDescription}
               </p>
             </div>
