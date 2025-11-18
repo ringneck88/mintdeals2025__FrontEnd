@@ -290,160 +290,38 @@ try {
   <div class="content-wrapper">
 
   <!-- Hero Section -->
-  <section class="relative text-white py-12">
-    <div class="absolute inset-0 bg-black opacity-40"></div>
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Breadcrumb -->
-      <nav class="mb-8 text-sm">
-        <div class="flex items-center space-x-2">
-          <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
-          <span class="text-mint-green">/</span>
-          <a href="/stores" class="text-yellow-400 hover:text-yellow-300">Stores</a>
-          <span class="text-mint-green">/</span>
-          <span class="text-white">{storeName}</span>
+  <section class="relative text-white">
+    <!-- Breadcrumb - Top Left -->
+    <nav class="absolute top-4 left-4 z-20 text-sm">
+      <div class="flex items-center space-x-2 bg-black/50 px-3 py-2 rounded">
+        <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
+        <span class="text-mint-green">/</span>
+        <a href="/regions" class="text-yellow-400 hover:text-yellow-300">Locations</a>
+        <span class="text-mint-green">/</span>
+        <span class="text-white">{storeName}</span>
+      </div>
+    </nav>
+
+    <!-- Full Width Hero Image -->
+    <div class="relative w-full h-64 md:h-96 overflow-hidden">
+      {storeImage ? (
+        <img
+          src={storeImage}
+          alt={storeName}
+          class="w-full h-full object-cover"
+        />
+      ) : (
+        <div class="w-full h-full flex items-center justify-center" style="background: linear-gradient(to bottom right, #006633, #009247);">
+          <span class="text-9xl">🏪</span>
         </div>
-      </nav>
+      )}
+      <div class="absolute inset-0 bg-black/40"></div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <!-- Store Image -->
-        <div class="lg:col-span-1">
-          {storeImage ? (
-            <img
-              src={storeImage}
-              alt={storeName}
-              class="w-full h-52 lg:h-64 object-cover rounded-lg shadow-xl border border-black"
-            />
-          ) : (
-            <div class="w-full h-52 lg:h-64 rounded-lg shadow-xl border border-black flex items-center justify-center" style="background: linear-gradient(to bottom right, #006633, #009247);">
-              <span class="text-8xl">🏪</span>
-            </div>
-          )}
-        </div>
-
-        <!-- Store Info & Contact -->
-        <div class="lg:col-span-2">
-          <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white uppercase">
-            {storeName}
-          </h1>
-
-          <p class="text-lg mb-6 leading-relaxed" style="color: #d4f4e1;">
-            {storeShortDescription}
-          </p>
-
-          <!-- Contact Info -->
-          <div class="mb-6">
-            <div class="space-y-3">
-              {storeAddress && (
-                <div class="flex items-start">
-                  <svg class="w-5 h-5 text-mint-green mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                  <div class="space-y-1">
-                    <p style="color: #b8e6d5;" class="leading-relaxed">{storeAddress}</p>
-                    <p class="text-green-200 leading-relaxed">{storeCity}, {storeState} <span class="ml-2">{storeZip}</span></p>
-                    {mapsUrl && (
-                      <a
-                        href={mapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-yellow-400 hover:text-yellow-300 text-sm mt-1 inline-block"
-                      >
-                        Get Driving Directions →
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {storePhone && (
-                <div class="flex items-center">
-                  <svg class="w-5 h-5 text-mint-green mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                  </svg>
-                  <a href={`tel:${storePhone}`} class="text-mint-green hover:text-yellow-400">
-                    {storePhone}
-                  </a>
-                </div>
-              )}
-
-              {storeEmail && (
-                <div class="flex items-center">
-                  <svg class="w-5 h-5 text-mint-green mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                  </svg>
-                  <a href={`mailto:${storeEmail}`} class="text-mint-green hover:text-yellow-400">
-                    {storeEmail}
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <!-- Store Hours - Compact Right Column -->
-        {store?.hours && store.hours.length > 0 && (
-          <div class="lg:col-span-1">
-            <div class="sticky top-4">
-              <h3 class="text-lg font-bold flex items-center text-white mb-3 uppercase">
-                <svg class="w-5 h-5 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Hours
-              </h3>
-              <div id="countdown-timer" class="text-base text-mint-green mb-3"></div>
-              <div class="space-y-1" id="store-hours-list">
-                {store.hours.map((hour: any) => {
-                  const dayName = hour.dayOfWeek
-                    ? hour.dayOfWeek.charAt(0).toUpperCase() + hour.dayOfWeek.slice(1, 3).toLowerCase()
-                    : 'Day';
-
-                  // Format time to 12-hour format with single letter (09:00:00 -> 9:00A, 21:00:00 -> 9:00P)
-                  const formatTime = (time: string) => {
-                    if (!time) return '';
-
-                    // Check if already in 12-hour format with AM/PM
-                    if (/AM|PM/i.test(time)) {
-                      return time.replace(/\s*AM/i, 'A').replace(/\s*PM/i, 'P');
-                    }
-
-                    // Parse 24-hour format (09:00:00 or 09:00)
-                    const match = time.match(/^(\d{1,2}):(\d{2})/);
-                    if (!match) return time;
-
-                    let hours = parseInt(match[1]);
-                    const minutes = match[2];
-                    const period = hours >= 12 ? 'P' : 'A';
-
-                    // Convert to 12-hour format
-                    if (hours === 0) hours = 12;
-                    else if (hours > 12) hours -= 12;
-
-                    return `${hours}:${minutes}${period}`;
-                  };
-
-                  const openTime = formatTime(hour.openTime || '');
-                  const closeTime = formatTime(hour.closeTime || '');
-
-                  return (
-                    <div
-                      class="hour-row flex justify-between text-base py-1 transition-colors"
-                      data-day={hour.dayOfWeek?.toLowerCase()}
-                    >
-                      <span class="day-name font-medium text-mint-green">
-                        {dayName}
-                        <span class="today-label ml-1 text-sm hidden"></span>
-                      </span>
-                      <span class="time-display" style="color: #b8e6d5;">
-                        {hour.is_24hour ? '24hrs' : hour.isClosed ? 'Closed' : `${openTime}-${closeTime}`}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
+      <!-- Title Overlay -->
+      <div class="absolute inset-0 flex items-center justify-center">
+        <h1 class="text-4xl md:text-6xl font-bold text-white uppercase text-center px-4" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);">
+          {storeName}
+        </h1>
       </div>
     </div>
   </section>
@@ -505,18 +383,16 @@ try {
     <div class="w-full">
 
       <!-- Products Section - Full Width -->
-      <div class="mb-8 bg-white">
-        <!-- Dutchie Carousel Embed -->
-        {(carouselRetailerId && carouselId) ? (
-          <DutchieCarousel retailerId={carouselRetailerId} carouselId={carouselId} routeRoot={routeRoot} />
-        ) : dutchieStoreId ? (
-          <DutchieEmbed storeId={dutchieStoreId} />
-        ) : (
-          <div class="w-full min-h-[300px] flex items-center justify-center">
-            <p class="text-gray-500 text-lg">Product menu not available for this location.</p>
-          </div>
-        )}
-      </div>
+      {(carouselRetailerId && carouselId) || dutchieStoreId ? (
+        <div class="mb-8 bg-white">
+          <!-- Dutchie Carousel Embed -->
+          {(carouselRetailerId && carouselId) ? (
+            <DutchieCarousel retailerId={carouselRetailerId} carouselId={carouselId} routeRoot={routeRoot} />
+          ) : (
+            <DutchieEmbed storeId={dutchieStoreId} />
+          )}
+        </div>
+      ) : null}
 
       <style is:global>
         /* Full width iframe styles */
@@ -593,13 +469,140 @@ try {
         });
       </script>
 
+      <!-- Store Information Section - Above Footer -->
+      <div style="background-color: rgba(42, 63, 79, 0.6);" class="shadow-xl p-6 md:p-10 mt-8">
+        <div class="max-w-5xl mx-auto">
+          <h2 class="text-3xl font-bold mb-8 text-white uppercase text-center">Visit Us</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            <!-- Left Column: Contact & Location -->
+            <div class="space-y-6">
+
+              <!-- Address -->
+              {(storeAddress || storeCity || storeState) && (
+                <div class="bg-black/30 p-4 rounded-lg">
+                  <h3 class="text-lg font-semibold text-yellow-400 mb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Address
+                  </h3>
+                  <p class="text-white mb-2">
+                    {storeAddress && <span>{storeAddress}<br /></span>}
+                    {storeCity && <span>{storeCity}, </span>}
+                    {storeState && <span>{storeState} </span>}
+                    {storeZip && <span>{storeZip}</span>}
+                  </p>
+                  {mapsUrl && (
+                    <a
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center text-mint-green hover:text-yellow-400 font-semibold"
+                    >
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                      </svg>
+                      Get Driving Directions →
+                    </a>
+                  )}
+                </div>
+              )}
+
+              <!-- Phone -->
+              {storePhone && (
+                <div class="bg-black/30 p-4 rounded-lg">
+                  <h3 class="text-lg font-semibold text-yellow-400 mb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                    Phone
+                  </h3>
+                  <a href={`tel:${storePhone}`} class="text-white hover:text-mint-green text-lg">
+                    {storePhone}
+                  </a>
+                </div>
+              )}
+
+              <!-- Email -->
+              {storeEmail && (
+                <div class="bg-black/30 p-4 rounded-lg">
+                  <h3 class="text-lg font-semibold text-yellow-400 mb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Email
+                  </h3>
+                  <a href={`mailto:${storeEmail}`} class="text-white hover:text-mint-green">
+                    {storeEmail}
+                  </a>
+                </div>
+              )}
+
+            </div>
+
+            <!-- Right Column: Store Hours -->
+            <div class="bg-black/30 p-4 rounded-lg">
+              <h3 class="text-lg font-semibold text-yellow-400 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Store Hours
+              </h3>
+
+              <!-- Countdown Timer -->
+              <div id="countdown-timer" class="mb-4 text-center py-2 bg-black/40 rounded"></div>
+
+              <!-- Hours List -->
+              <div class="space-y-2">
+                {store?.hours && store.hours.length > 0 ? (
+                  store.hours.map((hourEntry: any) => {
+                    const dayName = hourEntry.dayOfWeek || '';
+                    const isClosed = hourEntry.isClosed || false;
+                    const is24Hour = hourEntry.is_24hour || false;
+                    const openTime = hourEntry.openTime || '';
+                    const closeTime = hourEntry.closeTime || '';
+
+                    return (
+                      <div
+                        class="hour-row flex justify-between items-center py-2 px-3 rounded transition-all duration-200"
+                        data-day={dayName}
+                      >
+                        <span class="day-name text-mint-green font-medium">
+                          {dayName}
+                          <span class="today-label hidden ml-2 text-xs"></span>
+                        </span>
+                        <span class="time-display text-white">
+                          {isClosed ? (
+                            <span class="text-red-400">Closed</span>
+                          ) : is24Hour ? (
+                            <span class="text-green-400">Open 24 Hours</span>
+                          ) : (
+                            <span>{openTime} - {closeTime}</span>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p class="text-white text-center py-4">Hours not available</p>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       <!-- Back Link -->
       <div class="mt-12 text-center px-4 md:px-0">
         <a
-          href="/stores"
+          href="/regions"
           class="text-yellow-400 hover:text-yellow-300 underline"
         >
-          ← Back to All Stores
+          ← Back to All Locations
         </a>
       </div>
     </div>

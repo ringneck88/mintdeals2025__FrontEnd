@@ -10,6 +10,7 @@ const mapCenter = {
 };
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
 ---
 
 <style>
@@ -97,97 +98,101 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
     100% { transform: rotate(360deg); }
   }
 
-  /* Custom marker styles */
-  .custom-marker {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    border: 3px solid white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    cursor: pointer;
-  }
-
-  .marker-24hour {
-    background: rgb(34, 197, 94);
-  }
-
-  .marker-regular {
-    background: rgb(251, 191, 36);
-  }
-
-  /* Leaflet popup customization */
-  .leaflet-popup-content-wrapper {
-    border-radius: 8px;
+  /* Google Maps Info Window Custom Styling */
+  .gm-style .gm-style-iw-c {
     padding: 0;
+    border-radius: 8px;
+    max-width: 320px !important;
   }
 
-  .leaflet-popup-content {
-    margin: 0;
-    min-width: 280px;
+  .gm-style .gm-style-iw-d {
+    overflow: auto !important;
   }
 
-  .store-popup {
-    padding: 12px;
+  .store-info-window {
+    padding: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: white;
   }
 
-  .store-popup h3 {
+  .store-info-window h3 {
     margin: 0 0 8px 0;
-    color: rgb(34, 197, 94);
-    font-size: 16px;
+    color: #16a34a !important;
+    font-size: 18px;
     font-weight: bold;
   }
 
-  .store-popup .badge-24hour {
+  .store-info-window .badge-24hour {
     display: inline-block;
     background: rgb(34, 197, 94);
     color: white;
-    padding: 2px 8px;
+    padding: 4px 10px;
     border-radius: 4px;
     font-size: 11px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-weight: bold;
   }
 
-  .store-popup .address {
-    margin-bottom: 8px;
-    color: #333;
+  .store-info-window .rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: #333 !important;
     font-size: 14px;
   }
 
-  .store-popup .buttons {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
+  .store-info-window .rating .stars {
+    color: #FFA500;
+    font-size: 16px;
   }
 
-  .store-popup .btn {
+  .store-info-window .address {
+    margin-bottom: 12px;
+    color: #1f2937 !important;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .store-info-window .address div {
+    color: #1f2937 !important;
+  }
+
+  .store-info-window .buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .store-info-window .btn {
     flex: 1;
     text-align: center;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 6px;
     text-decoration: none;
     font-weight: 600;
     font-size: 13px;
     color: white;
+    transition: transform 0.2s;
   }
 
-  .store-popup .btn-view {
+  .store-info-window .btn:hover {
+    transform: scale(1.05);
+  }
+
+  .store-info-window .btn-view {
     background: linear-gradient(to right, rgb(251, 191, 36), rgb(249, 115, 22));
   }
 
-  .store-popup .btn-directions {
+  .store-info-window .btn-directions {
     background: rgb(34, 197, 94);
+  }
+
+  .store-info-window .btn-profile {
+    background: rgb(59, 130, 246);
   }
 </style>
 
 <Layout title="Store Locations Map - Mint Cannabis" description="Interactive map showing all Mint Cannabis dispensary locations across the USA">
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-
   <!-- Video Background -->
   <div class="video-background">
     <video autoplay loop muted playsinline>
@@ -233,9 +238,6 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
         <!-- Store List by State -->
         <div class="mt-12" id="storeList">
-          <h2 class="mb-6 text-2xl font-bold text-center text-white uppercase md:text-3xl">
-            BY STATE
-          </h2>
           <div id="storeListContent" class="space-y-6">
             <!-- Will be populated by JavaScript -->
           </div>
@@ -257,20 +259,75 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
     </div>
   </div>
 
-  <!-- Leaflet JS -->
-  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Google Maps JavaScript API -->
+  <script async defer src={`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,marker&callback=initMap`}></script>
 
   <!-- Map initialization script -->
-  <script is:inline define:vars={{ center: mapCenter, apiBase: API_BASE }}>
-    // Wait for Leaflet to load
-    window.addEventListener('load', function() {
-      let map;
-      let stores = [];
+  <script is:inline define:vars={{ center: mapCenter, apiBase: API_BASE, googleApiKey: GOOGLE_MAPS_API_KEY }}>
+    let map;
+    let stores = [];
+    let markers = [];
+    let placesService;
 
-      async function fetchStores() {
-        try {
-          console.log('🗺️ Fetching stores from API...');
-          const response = await fetch(`${apiBase}/stores?populate=*&pagination[pageSize]=500`);
+    // Initialize map - called by Google Maps callback
+    window.initMap = async function() {
+      console.log('🗺️ Initializing Google Maps...');
+
+      // Create map centered on USA
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: center.lat, lng: center.lng },
+        zoom: 4,
+        mapId: 'mint-cannabis-map', // For advanced markers
+        styles: [
+          {
+            "featureType": "all",
+            "elementType": "geometry",
+            "stylers": [{ "color": "#242f3e" }]
+          },
+          {
+            "featureType": "all",
+            "elementType": "labels.text.stroke",
+            "stylers": [{ "lightness": -80 }]
+          },
+          {
+            "featureType": "administrative",
+            "elementType": "labels.text.fill",
+            "stylers": [{ "color": "#746855" }]
+          },
+          {
+            "featureType": "poi",
+            "elementType": "labels.text.fill",
+            "stylers": [{ "color": "#d59563" }]
+          },
+          {
+            "featureType": "road",
+            "elementType": "geometry.fill",
+            "stylers": [{ "color": "#2b3544" }]
+          },
+          {
+            "featureType": "road",
+            "elementType": "labels.text.fill",
+            "stylers": [{ "color": "#9ca5b3" }]
+          },
+          {
+            "featureType": "water",
+            "elementType": "geometry",
+            "stylers": [{ "color": "#17263c" }]
+          }
+        ]
+      });
+
+      // Initialize Places Service for fetching business details
+      placesService = new google.maps.places.PlacesService(map);
+
+      // Fetch and display stores
+      await fetchStores();
+    };
+
+    async function fetchStores() {
+      try {
+        console.log('📍 Fetching stores from API...');
+        const response = await fetch(`${apiBase}/stores?populate=*&pagination[pageSize]=500`);
 
         if (!response.ok) {
           throw new Error(`API returned ${response.status}`);
@@ -281,7 +338,7 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
         console.log(`✅ Fetched ${rawStores.length} stores`);
 
         stores = rawStores.map(store => {
-          const locationSlug = store.location_slug ||
+          const locationSlug = store.slug || store.location_slug ||
                               (store.name ? store.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : '');
 
           const address = store.address || {};
@@ -324,30 +381,257 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
             longitude,
             is24Hour,
             phone: store.phone || '',
-            region: store.region?.name || ''
+            region: store.region?.name || '',
+            googlePlaceId: store.google_place_id || null
           };
         }).filter(store => store.latitude && store.longitude);
 
         console.log(`✅ ${stores.length} stores have coordinates`);
+        console.log(`📍 ${stores.filter(s => s.googlePlaceId).length} stores have Google Place IDs`);
+
+        // Assign marker numbers to stores
+        stores.forEach((store, index) => {
+          store.markerNumber = index + 1;
+        });
 
         // Update store count text
         document.getElementById('storeCount').textContent = `Explore all ${stores.length} Mint Cannabis dispensaries across the USA`;
 
-        // Populate store list by state
+        // Add markers to map first
+        addMarkers();
+
+        // Fetch place details for stores with Place IDs (for ratings/reviews)
+        await fetchAllPlaceDetails();
+
+        // Populate store list by state AFTER ratings are fetched
         populateStoreList();
 
-        // Initialize map with stores
-        initMap();
+        // Hide loading overlay after everything is loaded
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+          overlay.style.display = 'none';
+        }
       } catch (error) {
         console.error('❌ Error fetching stores:', error);
-        document.getElementById('loadingOverlay').innerHTML = `
-          <div style="text-align: center; color: white;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
-            <div style="font-size: 1.2rem; font-weight: bold;">Error Loading Stores</div>
-            <div style="margin-top: 0.5rem;">${error.message}</div>
-          </div>
-        `;
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+          overlay.innerHTML = `
+            <div style="text-align: center; color: white;">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+              <div style="font-size: 1.2rem; font-weight: bold;">Error Loading Stores</div>
+              <div style="margin-top: 0.5rem;">${error.message}</div>
+            </div>
+          `;
+        }
       }
+    }
+
+    // Fetch place details for all stores with Place IDs
+    async function fetchAllPlaceDetails() {
+      console.log('⭐ Fetching Google Place details for ratings...');
+      const storesWithPlaceIds = stores.filter(s => s.googlePlaceId);
+
+      for (let i = 0; i < storesWithPlaceIds.length; i++) {
+        const store = storesWithPlaceIds[i];
+
+        // Add delay to avoid rate limiting
+        if (i > 0) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        await new Promise((resolve) => {
+          const request = {
+            placeId: store.googlePlaceId,
+            fields: ['rating', 'user_ratings_total']
+          };
+
+          placesService.getDetails(request, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+              store.rating = place.rating || null;
+              store.userRatingsTotal = place.user_ratings_total || 0;
+              console.log(`✅ ${store.name}: ${store.rating}⭐ (${store.userRatingsTotal} reviews)`);
+            } else {
+              console.warn(`⚠️ Could not load rating for ${store.name}: ${status}`);
+            }
+            resolve();
+          });
+        });
+      }
+
+      console.log(`✅ Loaded ratings for ${storesWithPlaceIds.length} stores`);
+    }
+
+    // Create highlighted marker icon (larger)
+    function createHighlightedMarkerIcon(number) {
+      return {
+        url: '/favicon.png',
+        scaledSize: new google.maps.Size(35, 35), // Larger size when highlighted
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17.5, 17.5)
+      };
+    }
+
+    // Create normal marker icon
+    function createNormalMarkerIcon(number) {
+      return {
+        url: '/favicon.png',
+        scaledSize: new google.maps.Size(25, 25),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(12.5, 12.5)
+      };
+    }
+
+    function addMarkers() {
+      const bounds = new google.maps.LatLngBounds();
+
+      stores.forEach((store, index) => {
+        const position = { lat: store.latitude, lng: store.longitude };
+        const markerNumber = store.markerNumber; // Already assigned in fetchStores()
+
+        // Create custom marker icon using Mint coin logo
+        const markerIcon = createNormalMarkerIcon(markerNumber);
+
+        // Create marker
+        const marker = new google.maps.Marker({
+          position: position,
+          map: map,
+          title: `${markerNumber}. ${store.name}`,
+          icon: markerIcon,
+          animation: google.maps.Animation.DROP,
+          optimized: true,
+          label: {
+            text: markerNumber.toString(),
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: '9px',
+            fontWeight: 'bold'
+          }
+        });
+
+        // Store reference to marker in the store object
+        store.marker = marker;
+
+        markers.push(marker);
+        bounds.extend(position);
+
+        // Create info window with enhanced content
+        const infoWindow = new google.maps.InfoWindow();
+
+        // Add click listener
+        marker.addListener('click', async () => {
+          // If store has Google Place ID, fetch additional details
+          if (store.googlePlaceId) {
+            await fetchPlaceDetails(store, infoWindow);
+          } else {
+            // Show basic info window
+            infoWindow.setContent(createBasicInfoWindow(store));
+          }
+          infoWindow.open(map, marker);
+        });
+      });
+
+      // Fit map to show all markers
+      if (stores.length > 0) {
+        map.fitBounds(bounds);
+
+        // Ensure zoom level doesn't get too close
+        const listener = google.maps.event.addListener(map, 'idle', function() {
+          if (map.getZoom() > 12) {
+            map.setZoom(12);
+          }
+          google.maps.event.removeListener(listener);
+        });
+      }
+    }
+
+    function createBasicInfoWindow(store) {
+      return `
+        <div class="store-info-window" style="background: white;">
+          <h3 style="color: #16a34a; margin: 0 0 8px 0; font-size: 18px; font-weight: bold;">${store.name}</h3>
+          ${store.is24Hour ? '<div class="badge-24hour">OPEN 24 HOURS</div>' : ''}
+          <div class="address" style="margin-bottom: 12px; color: #1f2937; font-size: 14px; line-height: 1.4;">
+            <div style="color: #1f2937;">${store.street}</div>
+            <div style="color: #1f2937;">${store.city}, ${store.state} ${store.zip}</div>
+            ${store.phone ? `<div style="margin-top: 6px; color: #1f2937;">📞 ${store.phone}</div>` : ''}
+          </div>
+          <div class="buttons">
+            <a href="/location/${store.slug}" class="btn btn-view">
+              Shop Now
+            </a>
+            <a href="${store.googlePlaceId ? `https://www.google.com/maps/dir/?api=1&destination=&destination_place_id=${store.googlePlaceId}` : `https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="btn btn-directions">
+              Directions
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    async function fetchPlaceDetails(store, infoWindow) {
+      return new Promise((resolve) => {
+        const request = {
+          placeId: store.googlePlaceId,
+          fields: ['name', 'rating', 'user_ratings_total', 'photos', 'url', 'opening_hours']
+        };
+
+        placesService.getDetails(request, (place, status) => {
+          if (status === google.maps.places.PlacesServiceStatus.OK) {
+            console.log(`✅ Loaded Place details for ${store.name}`, place);
+
+            // Get photo URL if available
+            let photoUrl = '';
+            if (place.photos && place.photos.length > 0) {
+              photoUrl = place.photos[0].getUrl({ maxWidth: 300, maxHeight: 200 });
+            }
+
+            // Build enhanced info window with business profile data
+            const content = `
+              <div class="store-info-window" style="background: white;">
+                ${photoUrl ? `<img src="${photoUrl}" alt="${store.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 6px; margin-bottom: 12px;">` : ''}
+                <h3 style="color: #16a34a; margin: 0 0 8px 0; font-size: 18px; font-weight: bold;">${store.name}</h3>
+                ${store.is24Hour ? '<div class="badge-24hour">OPEN 24 HOURS</div>' : ''}
+                ${place.rating ? `
+                  <div class="rating" style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #333; font-size: 14px;">
+                    <span class="stars" style="color: #FFA500; font-size: 16px;">${'⭐'.repeat(Math.round(place.rating))}</span>
+                    <span style="color: #1f2937;"><strong>${place.rating}</strong> (${place.user_ratings_total || 0} reviews)</span>
+                  </div>
+                ` : ''}
+                <div class="address" style="margin-bottom: 12px; color: #1f2937; font-size: 14px; line-height: 1.4;">
+                  <div style="color: #1f2937;">${store.street}</div>
+                  <div style="color: #1f2937;">${store.city}, ${store.state} ${store.zip}</div>
+                  ${store.phone ? `<div style="margin-top: 6px; color: #1f2937;">📞 ${store.phone}</div>` : ''}
+                </div>
+                <div class="buttons">
+                  <a href="/location/${store.slug}" class="btn btn-view">
+                    Shop Now
+                  </a>
+                  ${place.url ? `
+                    <a href="${place.url}" target="_blank" rel="noopener noreferrer" class="btn btn-profile">
+                      Google Profile
+                    </a>
+                  ` : `
+                    <a href="${store.googlePlaceId ? `https://www.google.com/maps/dir/?api=1&destination=&destination_place_id=${store.googlePlaceId}` : `https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn btn-directions">
+                      Directions
+                    </a>
+                  `}
+                </div>
+              </div>
+            `;
+
+            infoWindow.setContent(content);
+            resolve(place);
+          } else {
+            console.warn(`⚠️ Could not load Place details for ${store.name}: ${status}`);
+            // Fallback to basic info window
+            infoWindow.setContent(createBasicInfoWindow(store));
+            resolve(null);
+          }
+        });
+      });
     }
 
     function populateStoreList() {
@@ -369,15 +653,32 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
         const stateStores = storesByState[state];
 
         html += `
-          <div class="py-8 px-4" style="background-color: rgba(0, 0, 0, 0.95); margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); width: 100vw;">
+          <div class="py-8 px-4" style="background-color: #374151; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); width: 100vw;">
             <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[95%]">
               <h3 class="mb-4 text-xl font-bold text-white uppercase">${state}</h3>
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               ${stateStores.map(store => `
-                <div class="p-4 transition-all rounded-lg hover:bg-green-900/30" style="background-color: rgba(0, 0, 0, 0.1);">
+                <div class="store-card p-4 transition-all duration-300 rounded-lg hover:bg-green-900/30 hover:shadow-xl hover:scale-105"
+                     style="background-color: rgba(0, 0, 0, 0.1); position: relative; cursor: pointer;"
+                     data-marker-number="${store.markerNumber}">
                   <div class="flex items-start justify-between mb-2">
-                    <h4 class="font-bold text-white uppercase">${store.name}</h4>
-                    ${store.is24Hour ? '<span class="px-2 py-1 text-xs font-bold text-white bg-green-500 rounded">24H</span>' : ''}
+                    <div class="flex items-start gap-3">
+                      <span class="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-yellow-400 text-black font-bold rounded-full text-sm">${store.markerNumber}</span>
+                      <h4 class="font-bold text-white uppercase">${store.name}</h4>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                      ${store.rating && store.googlePlaceId ? `
+                        <a href="https://www.google.com/maps/search/?api=1&query=Google&query_place_id=${store.googlePlaceId}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="flex items-center gap-1 text-yellow-400 hover:text-yellow-300 transition-colors text-sm font-semibold"
+                           onclick="event.stopPropagation()">
+                          <span>⭐ ${store.rating}</span>
+                          <span class="text-xs text-gray-300">(${store.userRatingsTotal})</span>
+                        </a>
+                      ` : ''}
+                      ${store.is24Hour ? '<span class="px-2 py-1 text-xs font-bold text-white bg-green-500 rounded">24H</span>' : ''}
+                    </div>
                   </div>
                   <p class="mb-1 text-sm text-green-300">
                     ${store.street}
@@ -385,15 +686,15 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
                   <p class="mb-3 text-sm text-green-300">
                     ${store.city}, ${store.state} ${store.zip}
                   </p>
-                  <div class="flex gap-2">
-                    <a href="/location/${store.slug}" class="text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
-                      View Store →
-                    </a>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}"
+                  <div class="flex justify-between items-center">
+                    <a href="${store.googlePlaceId ? `https://www.google.com/maps/dir/?api=1&destination=&destination_place_id=${store.googlePlaceId}` : `https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}`}"
                        target="_blank"
                        rel="noopener noreferrer"
                        class="text-sm text-green-400 hover:text-green-300 transition-colors">
                       Directions →
+                    </a>
+                    <a href="/location/${store.slug}" class="inline-flex items-center px-4 py-2 bg-yellow-400 text-black font-bold rounded-full text-sm hover:bg-yellow-500 transition-colors">
+                      Shop Now →
                     </a>
                   </div>
                 </div>
@@ -405,95 +706,50 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
       });
 
       document.getElementById('storeListContent').innerHTML = html;
+
+      // Add hover event listeners to store cards
+      setTimeout(() => {
+        const storeCards = document.querySelectorAll('.store-card');
+        storeCards.forEach(card => {
+          const markerNumber = parseInt(card.getAttribute('data-marker-number'));
+          const store = stores.find(s => s.markerNumber === markerNumber);
+
+          if (store && store.marker) {
+            card.addEventListener('mouseenter', () => {
+              // Highlight marker - make it larger and bounce
+              const highlightedIcon = createHighlightedMarkerIcon(markerNumber);
+              store.marker.setIcon(highlightedIcon);
+              store.marker.setAnimation(google.maps.Animation.BOUNCE);
+
+              // Update label for highlighted state
+              store.marker.setLabel({
+                text: markerNumber.toString(),
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontSize: '11px',
+                fontWeight: 'bold'
+              });
+
+              // Pan map to show the marker
+              map.panTo(store.marker.getPosition());
+            });
+
+            card.addEventListener('mouseleave', () => {
+              // Reset marker to normal size
+              const normalIcon = createNormalMarkerIcon(markerNumber);
+              store.marker.setIcon(normalIcon);
+              store.marker.setAnimation(null);
+
+              // Reset label
+              store.marker.setLabel({
+                text: markerNumber.toString(),
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '9px',
+                fontWeight: 'bold'
+              });
+            });
+          }
+        });
+      }, 100);
     }
-
-    function initMap() {
-      // Create map centered on USA
-      map = L.map('map').setView([center.lat, center.lng], 3.5);
-
-      // Add OpenStreetMap tiles with dark theme
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20
-      }).addTo(map);
-
-      // Create custom icon function
-      function createCustomIcon(is24Hour) {
-        const iconHtml = is24Hour
-          ? '<div class="custom-marker marker-24hour"><img src="/favicon.png" alt="Mint" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;" /></div>'
-          : '<div class="custom-marker marker-regular"><img src="/favicon.png" alt="Mint" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;" /></div>';
-
-        return L.divIcon({
-          html: iconHtml,
-          className: '',
-          iconSize: [40, 40],
-          iconAnchor: [20, 20],
-          popupAnchor: [0, -20]
-        });
-      }
-
-      // Add markers for each store
-      const markers = [];
-      stores.forEach(store => {
-        const marker = L.marker([store.latitude, store.longitude], {
-          icon: createCustomIcon(store.is24Hour)
-        });
-
-        // Create popup content
-        const popupContent = `
-          <div class="store-popup">
-            <h3>${store.name}</h3>
-            ${store.is24Hour ? '<div class="badge-24hour">OPEN 24 HOURS</div>' : ''}
-            <div class="address">
-              <div>${store.street}</div>
-              <div>${store.city}, ${store.state} ${store.zip}</div>
-              ${store.phone ? `<div style="margin-top: 4px;">📞 ${store.phone}</div>` : ''}
-            </div>
-            <div class="buttons">
-              <a href="/location/${store.slug}" class="btn btn-view">
-                View Store
-              </a>
-              <a href="https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}"
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 class="btn btn-directions">
-                Directions
-              </a>
-            </div>
-          </div>
-        `;
-
-        marker.bindPopup(popupContent, {
-          maxWidth: 300,
-          className: 'custom-popup'
-        });
-
-        marker.addTo(map);
-        markers.push(marker);
-      });
-
-      // Fit map to show all markers if there are stores
-      if (stores.length > 0) {
-        const group = L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.15));
-
-        // Ensure zoom level doesn't get too close
-        if (map.getZoom() > 12) {
-          map.setZoom(12);
-        }
-      }
-
-      // Hide loading overlay
-      document.getElementById('loadingOverlay').style.display = 'none';
-    }
-
-      // Initialize when DOM is ready
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fetchStores);
-      } else {
-        fetchStores();
-      }
-    }); // End of window load event listener
   </script>
 </Layout>
