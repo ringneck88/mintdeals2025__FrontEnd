@@ -7,6 +7,7 @@ import Layout from '../layouts/Layout.astro';
 let stores = [];
 let categories = [];
 let regions = [];
+let faqs = [];
 let apiError = null;
 
 // Category icon mapping
@@ -43,11 +44,12 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 try {
 
-  // Fetch stores, categories, and regions in parallel
-  const [storesResponse, categoriesResponse, regionsResponse] = await Promise.allSettled([
+  // Fetch stores, categories, regions, and FAQs in parallel
+  const [storesResponse, categoriesResponse, regionsResponse, faqsResponse] = await Promise.allSettled([
     fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=50`),
     fetch(`${API_BASE}/categories?populate=*&pagination[pageSize]=25`),
-    fetch(`${API_BASE}/regions?populate=*&pagination[pageSize]=50`)
+    fetch(`${API_BASE}/regions?populate=*&pagination[pageSize]=50`),
+    fetch(`${API_BASE}/faqs?filters[is_global][$eq]=true&pagination[pageSize]=100`)
   ]);
 
   // Process stores
@@ -266,6 +268,62 @@ try {
                       region.regionType.toLowerCase().includes('state'));
       return region.name && isState;
     });
+  }
+
+  // Process FAQs
+  if (faqsResponse.status === 'fulfilled' && faqsResponse.value.ok) {
+    const data = await faqsResponse.value.json();
+    const faqsData = data?.data || [];
+
+    faqs = faqsData.map((faq) => {
+      return {
+        id: faq.id,
+        documentId: faq.documentId,
+        question: faq.question || '',
+        answer: faq.answer || '',
+        isGlobal: faq.is_global || false,
+        order: faq.order || 0
+      };
+    }).filter(faq => faq.question && faq.answer);
+
+    // Sort by order field if available
+    faqs.sort((a, b) => a.order - b.order);
+  }
+
+  // Temporary sample FAQs for demonstration (remove when Strapi FAQs are ready)
+  if (faqs.length === 0) {
+    faqs = [
+      {
+        id: 1,
+        question: "What are your store hours?",
+        answer: "Our store hours vary by location. Most locations are open 7 days a week from 8:00 AM to 9:30 PM. Please check your specific location's hours on their individual page.",
+        order: 1
+      },
+      {
+        id: 2,
+        question: "Do I need a medical card to shop?",
+        answer: "Requirements vary by state. In recreational states like Arizona and Nevada, you can shop with just a valid government-issued ID showing you're 21+. In medical-only states, you'll need a valid medical marijuana card.",
+        order: 2
+      },
+      {
+        id: 3,
+        question: "What payment methods do you accept?",
+        answer: "We accept cash, debit cards, and CanPay at most locations. Some locations may have ATMs on-site for your convenience. Credit cards are not currently accepted due to federal banking regulations.",
+        order: 3
+      },
+      {
+        id: 4,
+        question: "Do you offer online ordering?",
+        answer: "Yes! Most of our locations offer online ordering for pickup. Simply browse our menu, add items to your cart, and choose a pickup time. You'll receive a notification when your order is ready.",
+        order: 4
+      },
+      {
+        id: 5,
+        question: "What's your return policy?",
+        answer: "Due to the nature of cannabis products, we cannot accept returns once you leave the store. However, if there's an issue with your product, please contact us immediately and we'll work to resolve it.",
+        order: 5
+      }
+    ];
   }
 
 } catch (error) {
@@ -586,6 +644,53 @@ try {
     </div>
   </section>
 
+  <!-- FAQ Section -->
+  {faqs.length > 0 && (
+    <section class="relative py-16 bg-black">
+      <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 uppercase">
+            Frequently Asked Questions
+          </h2>
+          <p class="text-gray-400">Find answers to common questions about our services</p>
+        </div>
+
+        <div class="space-y-4">
+          {faqs.map((faq, index) => (
+            <div class="faq-item bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-green-600 transition-colors duration-300">
+              <button
+                class="faq-question w-full text-left px-6 py-5 flex justify-between items-center group"
+                data-faq-index={index}
+                aria-expanded="false"
+              >
+                <span class="text-lg font-semibold text-white group-hover:text-green-500 transition-colors duration-300">
+                  {faq.question}
+                </span>
+                <svg
+                  class="faq-icon w-6 h-6 text-green-500 transform transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              <div
+                class="faq-answer overflow-hidden transition-all duration-300 ease-in-out"
+                style="max-height: 0;"
+                data-faq-answer={index}
+              >
+                <div class="px-6 pb-5 text-gray-300 leading-relaxed">
+                  {faq.answer}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
 </Layout>
 
 <script>
@@ -799,6 +904,60 @@ try {
   document.addEventListener('astro:page-load', sortStoresByLocation);
 </script>
 
+<script>
+  // FAQ Accordion
+  function initFAQAccordion() {
+    const faqQuestions = document.querySelectorAll('.faq-question');
+
+    faqQuestions.forEach((question) => {
+      question.addEventListener('click', () => {
+        const index = question.getAttribute('data-faq-index');
+        const answer = document.querySelector(`[data-faq-answer="${index}"]`);
+        const icon = question.querySelector('.faq-icon');
+        const isExpanded = question.getAttribute('aria-expanded') === 'true';
+
+        // Close all other FAQs
+        document.querySelectorAll('.faq-question').forEach((q) => {
+          if (q !== question) {
+            q.setAttribute('aria-expanded', 'false');
+            const otherIndex = q.getAttribute('data-faq-index');
+            const otherAnswer = document.querySelector(`[data-faq-answer="${otherIndex}"]`);
+            const otherIcon = q.querySelector('.faq-icon');
+
+            if (otherAnswer) {
+              otherAnswer.style.maxHeight = '0';
+            }
+            if (otherIcon) {
+              otherIcon.style.transform = 'rotate(0deg)';
+            }
+          }
+        });
+
+        // Toggle current FAQ
+        if (isExpanded) {
+          question.setAttribute('aria-expanded', 'false');
+          if (answer) {
+            answer.style.maxHeight = '0';
+          }
+          if (icon) {
+            icon.style.transform = 'rotate(0deg)';
+          }
+        } else {
+          question.setAttribute('aria-expanded', 'true');
+          if (answer) {
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+          }
+          if (icon) {
+            icon.style.transform = 'rotate(180deg)';
+          }
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initFAQAccordion);
+  document.addEventListener('astro:page-load', initFAQAccordion);
+</script>
 
 <style>
   @keyframes blob {

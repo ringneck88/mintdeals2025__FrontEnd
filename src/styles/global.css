@@ -170,9 +170,22 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Custom cursor */
-* {
-  cursor: url('/assets/pointer_leaf.png'), auto;
+/* Custom cursor - system default normally, custom on interactive elements */
+body {
+  cursor: default;
+}
+
+/* Custom cursor on interactive elements */
+a,
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+select,
+[role="button"],
+.cursor-pointer,
+label[for] {
+  cursor: url('/assets/pointer_leaf.png'), pointer !important;
 }
 
 /* Smooth transitions for all elements */
