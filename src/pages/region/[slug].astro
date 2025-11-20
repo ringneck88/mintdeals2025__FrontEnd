@@ -724,8 +724,8 @@ if (stores.length > 0) {
         }
       });
 
-      // After 5 seconds, start showing containers even if widgets haven't loaded yet
-      if (checkCount >= 10) {
+      // After 1 second, start showing containers even if widgets haven't loaded yet
+      if (checkCount >= 5) {
         allContainers.forEach((container, index) => {
           if (container.style.display === 'none') {
             const carouselIndex = container.getAttribute('data-carousel-index');
@@ -737,13 +737,13 @@ if (stores.length > 0) {
             }
 
             container.style.display = 'block';
-            console.log(`⏰ Force-showing carousel container #${index} after 5 seconds`);
+            console.log(`⏰ Force-showing carousel container #${index} after 1 second`);
           }
         });
       }
-    }, 500);
+    }, 200);
 
-    // Stop checking after 15 seconds
+    // Stop checking after 5 seconds
     setTimeout(() => {
       clearInterval(checkWidgets);
       const widgets = document.querySelectorAll('[id^="dutchie--carousel-embed"]');
@@ -768,8 +768,8 @@ if (stores.length > 0) {
       });
 
       if (widgets.length === 0) {
-        console.warn(`⚠️ No Dutchie widgets found after 15 seconds!`);
+        console.warn(`⚠️ No Dutchie widgets found after 5 seconds!`);
       }
-    }, 15000);
+    }, 5000);
   });
 </script>
