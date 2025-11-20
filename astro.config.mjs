@@ -13,7 +13,8 @@ export default defineConfig({
     mode: 'directory',
     //imageService: "cloudflare"
     routes: {
-      strategy: 'include'
+      strategy: 'include',
+      exclude: ['/assets/*', '/videos/*']
     }
   }),
 
