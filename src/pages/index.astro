@@ -658,15 +658,10 @@ try {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           {faqs.map((faq, index) => (
             <div class="faq-card group bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-green-500 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20">
-              <div class="flex items-start gap-3 mb-3">
-                <div class="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {index + 1}
-                </div>
-                <h3 class="text-lg font-semibold text-white group-hover:text-green-500 transition-colors duration-300">
-                  {faq.question}
-                </h3>
-              </div>
-              <div class="faq-answer ml-11 overflow-hidden max-h-0 opacity-0 group-hover:max-h-96 group-hover:opacity-100 transition-all duration-500 ease-in-out">
+              <h3 class="text-lg font-semibold text-white group-hover:text-green-500 transition-colors duration-300 mb-3">
+                {faq.question}
+              </h3>
+              <div class="faq-answer overflow-hidden max-h-0 opacity-0 group-hover:max-h-96 group-hover:opacity-100 transition-all duration-500 ease-in-out">
                 <p class="text-gray-300 leading-relaxed">
                   {faq.answer}
                 </p>
