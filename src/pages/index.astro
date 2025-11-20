@@ -647,42 +647,29 @@ try {
   <!-- FAQ Section -->
   {faqs.length > 0 && (
     <section class="relative py-16 bg-black">
-      <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 uppercase">
             Frequently Asked Questions
           </h2>
-          <p class="text-gray-400">Find answers to common questions about our services</p>
+          <p class="text-gray-400">Hover over a question to see the answer</p>
         </div>
 
-        <div class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           {faqs.map((faq, index) => (
-            <div class="faq-item bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-green-600 transition-colors duration-300">
-              <button
-                class="faq-question w-full text-left px-6 py-5 flex justify-between items-center group"
-                data-faq-index={index}
-                aria-expanded="false"
-              >
-                <span class="text-lg font-semibold text-white group-hover:text-green-500 transition-colors duration-300">
-                  {faq.question}
-                </span>
-                <svg
-                  class="faq-icon w-6 h-6 text-green-500 transform transition-transform duration-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-              </button>
-              <div
-                class="faq-answer overflow-hidden transition-all duration-500 ease-in-out"
-                style="max-height: 0; opacity: 0;"
-                data-faq-answer={index}
-              >
-                <div class="px-6 pt-2 pb-5 text-gray-300 leading-relaxed">
-                  {faq.answer}
+            <div class="faq-card group bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-green-500 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/20">
+              <div class="flex items-start gap-3 mb-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {index + 1}
                 </div>
+                <h3 class="text-lg font-semibold text-white group-hover:text-green-500 transition-colors duration-300">
+                  {faq.question}
+                </h3>
+              </div>
+              <div class="faq-answer ml-11 overflow-hidden max-h-0 opacity-0 group-hover:max-h-96 group-hover:opacity-100 transition-all duration-500 ease-in-out">
+                <p class="text-gray-300 leading-relaxed">
+                  {faq.answer}
+                </p>
               </div>
             </div>
           ))}
@@ -904,83 +891,6 @@ try {
   document.addEventListener('astro:page-load', sortStoresByLocation);
 </script>
 
-<script is:inline>
-  // FAQ Accordion - runs immediately
-  (function() {
-    function initFAQAccordion() {
-      const faqQuestions = document.querySelectorAll('.faq-question');
-
-      if (faqQuestions.length === 0) {
-        console.log('No FAQ questions found');
-        return;
-      }
-
-      console.log(`Found ${faqQuestions.length} FAQ questions`);
-
-      faqQuestions.forEach((question, idx) => {
-        question.addEventListener('click', function() {
-          const index = this.getAttribute('data-faq-index');
-          const answer = document.querySelector(`[data-faq-answer="${index}"]`);
-          const icon = this.querySelector('.faq-icon');
-          const isExpanded = this.getAttribute('aria-expanded') === 'true';
-
-          console.log(`FAQ ${index} clicked, currently expanded: ${isExpanded}`);
-
-          // Close all other FAQs
-          document.querySelectorAll('.faq-question').forEach((q) => {
-            if (q !== question) {
-              q.setAttribute('aria-expanded', 'false');
-              const otherIndex = q.getAttribute('data-faq-index');
-              const otherAnswer = document.querySelector(`[data-faq-answer="${otherIndex}"]`);
-              const otherIcon = q.querySelector('.faq-icon');
-
-              if (otherAnswer) {
-                otherAnswer.style.maxHeight = '0';
-                otherAnswer.style.opacity = '0';
-              }
-              if (otherIcon) {
-                otherIcon.style.transform = 'rotate(0deg)';
-              }
-            }
-          });
-
-          // Toggle current FAQ
-          if (isExpanded) {
-            this.setAttribute('aria-expanded', 'false');
-            if (answer) {
-              answer.style.maxHeight = '0';
-              answer.style.opacity = '0';
-            }
-            if (icon) {
-              icon.style.transform = 'rotate(0deg)';
-            }
-          } else {
-            this.setAttribute('aria-expanded', 'true');
-            if (answer) {
-              // Use a large fixed max-height to ensure content fits
-              answer.style.maxHeight = '500px';
-              answer.style.opacity = '1';
-              console.log(`Expanded FAQ ${index}`);
-            }
-            if (icon) {
-              icon.style.transform = 'rotate(180deg)';
-            }
-          }
-        });
-      });
-    }
-
-    // Run immediately if DOM is already loaded
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initFAQAccordion);
-    } else {
-      initFAQAccordion();
-    }
-
-    // Also run on Astro page loads
-    document.addEventListener('astro:page-load', initFAQAccordion);
-  })();
-</script>
 
 <style>
   @keyframes blob {
