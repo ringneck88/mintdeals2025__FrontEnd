@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
+import Spinner from '../../components/Spinner.astro';
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 const { slug } = Astro.params;
@@ -401,12 +402,7 @@ if (stores.length > 0) {
                   {storeData && storeData.carousel && (
                     <>
                       <div class="carousel-loading-spinner bg-white py-16" data-carousel-spinner={storeSlug}>
-                        <div class="flex flex-col items-center justify-center gap-4">
-                          <div class="spinner-border animate-spin inline-block w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full" role="status">
-                            <span class="sr-only">Loading...</span>
-                          </div>
-                          <p class="text-gray-600 font-semibold">Loading products...</p>
-                        </div>
+                        <Spinner size="md" text="Loading products..." textColor="text-gray-600" />
                       </div>
                       <div class="bg-white carousel-container-wrapper" style="display: none;" data-carousel-index={storeSlug}>
                         <div class="p-6">

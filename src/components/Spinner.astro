@@ -1,0 +1,72 @@
+---
+interface Props {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  text?: string;
+  textColor?: string;
+}
+
+const { size = 'md', text = '', textColor = 'text-gray-300' } = Astro.props;
+
+const sizeMap = {
+  sm: 'w-8 h-8',
+  md: 'w-12 h-12',
+  lg: 'w-16 h-16',
+  xl: 'w-24 h-24'
+};
+
+const sizeClass = sizeMap[size];
+---
+
+<div class="spinner-container flex flex-col items-center justify-center gap-4">
+  <div class={`spinner-wrapper ${sizeClass}`}>
+    <img
+      src="/favicon.png"
+      alt="Loading"
+      class="spinner-favicon w-full h-full object-contain"
+    />
+  </div>
+  {text && <p class={`${textColor} font-semibold animate-pulse`}>{text}</p>}
+</div>
+
+<style>
+  .spinner-wrapper {
+    position: relative;
+    animation: spinAndMove 2s ease-in-out infinite;
+  }
+
+  .spinner-favicon {
+    animation: spin 1.5s linear infinite;
+    filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5));
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spinAndMove {
+    0% {
+      transform: translateX(0) scale(1);
+    }
+    25% {
+      transform: translateX(20px) scale(1.1);
+    }
+    50% {
+      transform: translateX(0) scale(1);
+    }
+    75% {
+      transform: translateX(-20px) scale(1.1);
+    }
+    100% {
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  .spinner-container p {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+</style>

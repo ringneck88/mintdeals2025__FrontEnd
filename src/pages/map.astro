@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import Layout from '../layouts/Layout.astro';
+import Spinner from '../components/Spinner.astro';
 
 // Calculate map center (approximate center of USA)
 const mapCenter = {
@@ -47,7 +48,7 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
   .content-wrapper {
     position: relative;
     z-index: 1;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+    background: black;
     min-height: 100vh;
   }
   .hero-section {
@@ -67,7 +68,9 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
   }
 
   .map-container {
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
 
   .loading-overlay {
@@ -84,19 +87,6 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
     border-radius: 0.5rem;
   }
 
-  .loading-spinner {
-    border: 4px solid rgba(251, 191, 36, 0.3);
-    border-top: 4px solid rgb(251, 191, 36);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
 
   /* Google Maps Info Window Custom Styling */
   .gm-style .gm-style-iw-c {
@@ -203,7 +193,7 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
   <!-- Content Wrapper -->
   <div class="content-wrapper">
     <!-- Hero Section -->
-    <div class="text-white hero-section">
+    <div class="text-white hero-section bg-gray-800">
       <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
         <!-- Breadcrumb -->
         <nav class="mb-6 text-sm">
@@ -232,7 +222,7 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
         <div class="map-container">
           <div id="map"></div>
           <div class="loading-overlay" id="loadingOverlay">
-            <div class="loading-spinner"></div>
+            <Spinner size="lg" text="Loading map..." />
           </div>
         </div>
 
@@ -264,42 +254,174 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
       map = new google.maps.Map(document.getElementById('map'), {
         center: { lat: center.lat, lng: center.lng },
         zoom: 4,
-        mapId: 'mint-cannabis-map', // For advanced markers
         styles: [
           {
             "featureType": "all",
-            "elementType": "geometry",
-            "stylers": [{ "color": "#242f3e" }]
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "weight": "2.00"
+              }
+            ]
           },
           {
             "featureType": "all",
-            "elementType": "labels.text.stroke",
-            "stylers": [{ "lightness": -80 }]
+            "elementType": "geometry.stroke",
+            "stylers": [
+              {
+                "color": "#9c9c9c"
+              }
+            ]
           },
           {
-            "featureType": "administrative",
-            "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#746855" }]
+            "featureType": "all",
+            "elementType": "labels.text",
+            "stylers": [
+              {
+                "visibility": "on"
+              }
+            ]
+          },
+          {
+            "featureType": "landscape",
+            "elementType": "all",
+            "stylers": [
+              {
+                "color": "#f2f2f2"
+              }
+            ]
+          },
+          {
+            "featureType": "landscape",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "color": "#ffffff"
+              }
+            ]
+          },
+          {
+            "featureType": "landscape.man_made",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "color": "#ffffff"
+              }
+            ]
           },
           {
             "featureType": "poi",
-            "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#d59563" }]
+            "elementType": "all",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "road",
+            "elementType": "all",
+            "stylers": [
+              {
+                "saturation": -100
+              },
+              {
+                "lightness": 45
+              }
+            ]
           },
           {
             "featureType": "road",
             "elementType": "geometry.fill",
-            "stylers": [{ "color": "#2b3544" }]
+            "stylers": [
+              {
+                "color": "#eeeeee"
+              }
+            ]
           },
           {
             "featureType": "road",
             "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#9ca5b3" }]
+            "stylers": [
+              {
+                "color": "#7b7b7b"
+              }
+            ]
+          },
+          {
+            "featureType": "road",
+            "elementType": "labels.text.stroke",
+            "stylers": [
+              {
+                "color": "#ffffff"
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway",
+            "elementType": "all",
+            "stylers": [
+              {
+                "visibility": "simplified"
+              }
+            ]
+          },
+          {
+            "featureType": "road.arterial",
+            "elementType": "labels.icon",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "transit",
+            "elementType": "all",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
           },
           {
             "featureType": "water",
-            "elementType": "geometry",
-            "stylers": [{ "color": "#17263c" }]
+            "elementType": "all",
+            "stylers": [
+              {
+                "color": "#46bcec"
+              },
+              {
+                "visibility": "on"
+              }
+            ]
+          },
+          {
+            "featureType": "water",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "color": "#b5dae1"
+              }
+            ]
+          },
+          {
+            "featureType": "water",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#070707"
+              }
+            ]
+          },
+          {
+            "featureType": "water",
+            "elementType": "labels.text.stroke",
+            "stylers": [
+              {
+                "color": "#ffffff"
+              }
+            ]
           }
         ]
       });
