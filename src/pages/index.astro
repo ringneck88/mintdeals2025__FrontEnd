@@ -276,11 +276,30 @@ try {
     const faqsData = data?.data || [];
 
     faqs = faqsData.map((faq) => {
+      // Extract text from rich text field (Strapi blocks)
+      let answerText = '';
+      if (Array.isArray(faq.answer)) {
+        // Rich text field - extract text from blocks
+        answerText = faq.answer
+          .map(block => {
+            if (block.children && Array.isArray(block.children)) {
+              return block.children
+                .map(child => child.text || '')
+                .join('');
+            }
+            return '';
+          })
+          .join('\n\n');
+      } else if (typeof faq.answer === 'string') {
+        // Simple text field
+        answerText = faq.answer;
+      }
+
       return {
         id: faq.id,
         documentId: faq.documentId,
         question: faq.question || '',
-        answer: faq.answer || '',
+        answer: answerText,
         isGlobal: faq.is_global || false,
         order: faq.order || 0
       };
