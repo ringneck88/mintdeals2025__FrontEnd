@@ -904,59 +904,78 @@ try {
   document.addEventListener('astro:page-load', sortStoresByLocation);
 </script>
 
-<script>
-  // FAQ Accordion
-  function initFAQAccordion() {
-    const faqQuestions = document.querySelectorAll('.faq-question');
+<script is:inline>
+  // FAQ Accordion - runs immediately
+  (function() {
+    function initFAQAccordion() {
+      const faqQuestions = document.querySelectorAll('.faq-question');
 
-    faqQuestions.forEach((question) => {
-      question.addEventListener('click', () => {
-        const index = question.getAttribute('data-faq-index');
-        const answer = document.querySelector(`[data-faq-answer="${index}"]`);
-        const icon = question.querySelector('.faq-icon');
-        const isExpanded = question.getAttribute('aria-expanded') === 'true';
+      if (faqQuestions.length === 0) {
+        console.log('No FAQ questions found');
+        return;
+      }
 
-        // Close all other FAQs
-        document.querySelectorAll('.faq-question').forEach((q) => {
-          if (q !== question) {
-            q.setAttribute('aria-expanded', 'false');
-            const otherIndex = q.getAttribute('data-faq-index');
-            const otherAnswer = document.querySelector(`[data-faq-answer="${otherIndex}"]`);
-            const otherIcon = q.querySelector('.faq-icon');
+      console.log(`Found ${faqQuestions.length} FAQ questions`);
 
-            if (otherAnswer) {
-              otherAnswer.style.maxHeight = '0';
+      faqQuestions.forEach((question, idx) => {
+        question.addEventListener('click', function() {
+          const index = this.getAttribute('data-faq-index');
+          const answer = document.querySelector(`[data-faq-answer="${index}"]`);
+          const icon = this.querySelector('.faq-icon');
+          const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+          console.log(`FAQ ${index} clicked, currently expanded: ${isExpanded}`);
+
+          // Close all other FAQs
+          document.querySelectorAll('.faq-question').forEach((q) => {
+            if (q !== question) {
+              q.setAttribute('aria-expanded', 'false');
+              const otherIndex = q.getAttribute('data-faq-index');
+              const otherAnswer = document.querySelector(`[data-faq-answer="${otherIndex}"]`);
+              const otherIcon = q.querySelector('.faq-icon');
+
+              if (otherAnswer) {
+                otherAnswer.style.maxHeight = '0';
+              }
+              if (otherIcon) {
+                otherIcon.style.transform = 'rotate(0deg)';
+              }
             }
-            if (otherIcon) {
-              otherIcon.style.transform = 'rotate(0deg)';
+          });
+
+          // Toggle current FAQ
+          if (isExpanded) {
+            this.setAttribute('aria-expanded', 'false');
+            if (answer) {
+              answer.style.maxHeight = '0';
+            }
+            if (icon) {
+              icon.style.transform = 'rotate(0deg)';
+            }
+          } else {
+            this.setAttribute('aria-expanded', 'true');
+            if (answer) {
+              answer.style.maxHeight = answer.scrollHeight + 'px';
+              console.log(`Set max-height to: ${answer.scrollHeight}px`);
+            }
+            if (icon) {
+              icon.style.transform = 'rotate(180deg)';
             }
           }
         });
-
-        // Toggle current FAQ
-        if (isExpanded) {
-          question.setAttribute('aria-expanded', 'false');
-          if (answer) {
-            answer.style.maxHeight = '0';
-          }
-          if (icon) {
-            icon.style.transform = 'rotate(0deg)';
-          }
-        } else {
-          question.setAttribute('aria-expanded', 'true');
-          if (answer) {
-            answer.style.maxHeight = answer.scrollHeight + 'px';
-          }
-          if (icon) {
-            icon.style.transform = 'rotate(180deg)';
-          }
-        }
       });
-    });
-  }
+    }
 
-  document.addEventListener('DOMContentLoaded', initFAQAccordion);
-  document.addEventListener('astro:page-load', initFAQAccordion);
+    // Run immediately if DOM is already loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initFAQAccordion);
+    } else {
+      initFAQAccordion();
+    }
+
+    // Also run on Astro page loads
+    document.addEventListener('astro:page-load', initFAQAccordion);
+  })();
 </script>
 
 <style>
