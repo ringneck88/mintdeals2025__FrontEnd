@@ -12,6 +12,9 @@ export default defineConfig({
   adapter: cloudflare({
     mode: 'directory',
     //imageService: "cloudflare"
+    routes: {
+      strategy: 'include'
+    }
   }),
 
   prefetch: {
