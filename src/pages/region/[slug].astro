@@ -2,7 +2,6 @@
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
-import Spinner from '../../components/Spinner.astro';
 
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 const { slug } = Astro.params;
@@ -169,18 +168,6 @@ if (stores.length > 0) {
     z-index: -1;
     overflow: hidden;
   }
-  .video-background::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: linear-gradient(to top,  rgba(41, 163, 41, 0.35), rgba(51, 204, 51, 0.3), rgba(92, 214, 92, 0.25), rgba(133, 224, 133, 0.2), rgba(194, 240, 194, 0.15), rgba(235, 250, 235, 0.1), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
-    mix-blend-mode: color;
-    pointer-events: none;
-    z-index: 1;
-  }
   .video-background video {
     object-fit: cover;
     height: 100%;
@@ -189,7 +176,6 @@ if (stores.length > 0) {
   .content-wrapper {
     position: relative;
     z-index: 1;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
   }
   .hero-section {
     min-height: 7.5vh;
@@ -230,76 +216,76 @@ if (stores.length > 0) {
   <!-- Content Wrapper -->
   <div class="content-wrapper">
     <!-- Hero Section -->
-    <section class="relative py-8 text-white">
-      <div class="absolute inset-0 bg-black opacity-40"></div>
-      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Breadcrumb -->
-        <nav class="mb-4 text-sm">
-          <div class="flex items-center space-x-2">
-            <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
-            <span class="text-green-300">/</span>
-            <a href="/regions" class="text-yellow-400 hover:text-yellow-300">Regions</a>
-            <span class="text-green-300">/</span>
-            <span class="text-white">{regionName}</span>
-          </div>
-        </nav>
-
-        <!-- Region Info -->
-        <div class="mb-4">
-          <h1 class="text-3xl md:text-4xl font-bold mb-2 text-white uppercase">
-            {regionName}
-          </h1>
-        </div>
-
-        <!-- Store Images Carousel - Full Width -->
-        <div class="w-full">
-          {stores.length > 0 ? (
-            <div class="relative w-full h-48 lg:h-[250px] rounded-lg overflow-hidden shadow-xl border border-black">
-              <div id="region-hero-carousel" class="w-full h-full">
-                {stores.map((store: any, index: number) => {
-                  const storeImage = getImageUrl(store.hero_media) || getImageUrl(store.StoreImage) || getImageUrl(store.Image) || getImageUrl(store.image);
-                  return (
-                    <div
-                      class={`carousel-slide absolute inset-0 transition-opacity duration-500 ${index === 0 ? 'opacity-100' : 'opacity-0'}`}
-                      data-index={index}
-                    >
-                      {storeImage ? (
-                        <img
-                          src={storeImage}
-                          alt={store.Name || store.name}
-                          class="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div class="w-full h-full bg-gradient-to-br from-green-900 to-green-800 flex items-center justify-center">
-                          <span class="text-8xl text-white">🏪</span>
-                        </div>
-                      )}
-                      <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6">
-                        <p class="text-white font-bold text-xl">{store.Name || store.name}</p>
-                      </div>
+    <section class="relative text-white min-h-[50vh] lg:min-h-[60vh]">
+      <!-- Store Images Carousel - Full Background -->
+      {stores.length > 0 ? (
+        <div class="absolute inset-0 w-full h-full overflow-hidden">
+          <div id="region-hero-carousel" class="w-full h-full">
+            {stores.map((store: any, index: number) => {
+              const storeImage = getImageUrl(store.hero_media) || getImageUrl(store.StoreImage) || getImageUrl(store.Image) || getImageUrl(store.image);
+              return (
+                <div
+                  class={`carousel-slide absolute inset-0 transition-opacity duration-500 ${index === 0 ? 'opacity-100' : 'opacity-0'}`}
+                  data-index={index}
+                >
+                  {storeImage ? (
+                    <img
+                      src={storeImage}
+                      alt={store.Name || store.name}
+                      class="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div class="w-full h-full bg-gradient-to-br from-green-900 to-green-800 flex items-center justify-center">
+                      <span class="text-8xl text-white">🏪</span>
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Navigation dots */}
-              {stores.length > 1 && (
-                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
-                  {stores.map((_: any, index: number) => (
-                    <button
-                      class={`carousel-dot w-3 h-3 rounded-full transition-all ${index === 0 ? 'bg-yellow-400 w-8' : 'bg-white/50'}`}
-                      data-index={index}
-                      aria-label={`Go to slide ${index + 1}`}
-                    ></button>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
-          ) : (
-            <div class="w-full h-48 lg:h-[250px] bg-gradient-to-br from-green-900 to-green-800 rounded-lg shadow-xl border border-black flex items-center justify-center">
-              <span class="text-6xl text-white">📍</span>
+              );
+            })}
+          </div>
+
+          {/* Navigation dots */}
+          {stores.length > 1 && (
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+              {stores.map((_: any, index: number) => (
+                <button
+                  class={`carousel-dot w-3 h-3 rounded-full transition-all ${index === 0 ? 'bg-yellow-400 w-8' : 'bg-white/50'}`}
+                  data-index={index}
+                  aria-label={`Go to slide ${index + 1}`}
+                ></button>
+              ))}
             </div>
           )}
+        </div>
+      ) : (
+        <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-green-900 to-green-800 flex items-center justify-center">
+          <span class="text-6xl text-white">📍</span>
+        </div>
+      )}
+
+      <!-- Dark overlay -->
+      <div class="absolute inset-0 bg-black opacity-40"></div>
+
+      <!-- Content overlay -->
+      <div class="relative z-10 flex flex-col justify-between h-full min-h-[50vh] lg:min-h-[60vh] py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <!-- Breadcrumb -->
+          <nav class="mb-4 text-sm">
+            <div class="flex items-center space-x-2">
+              <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
+              <span class="text-green-300">/</span>
+              <a href="/regions" class="text-yellow-400 hover:text-yellow-300">Regions</a>
+              <span class="text-green-300">/</span>
+              <span class="text-white">{regionName}</span>
+            </div>
+          </nav>
+
+          <!-- Region Info -->
+          <div class="mb-4">
+            <h1 class="text-3xl md:text-5xl font-bold mb-2 text-white uppercase" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6);">
+              {regionName}
+            </h1>
+          </div>
         </div>
       </div>
     </section>
@@ -311,7 +297,7 @@ if (stores.length > 0) {
         <!-- Stores Section with Carousels -->
         {stores.length > 0 ? (
           <div id="stores-section">
-            {stores.map((store: any) => {
+            {stores.map((store: any, index: number) => {
               const storeSlug = store.slug;
               const storeData = storeCarousels.get(storeSlug);
               const storeName = store.Name || store.name;
@@ -331,8 +317,10 @@ if (stores.length > 0) {
                 directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressParts)}`;
               }
 
+              const bgClass = index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-800/50';
+
               return (
-                <div class="mb-12 bg-gradient-to-br from-gray-900 to-black">
+                <div class={`mb-12 ${bgClass}`}>
                   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div class="flex flex-col gap-4">
                       <div class="flex items-start justify-between gap-4">
@@ -400,23 +388,18 @@ if (stores.length > 0) {
                   </div>
 
                   {storeData && storeData.carousel && (
-                    <>
-                      <div class="carousel-loading-spinner bg-white py-16" data-carousel-spinner={storeSlug}>
-                        <Spinner size="md" text="Loading products..." textColor="text-gray-600" />
+                    <div class="bg-white carousel-container-wrapper" data-carousel-index={storeSlug}>
+                      <div class="p-6">
+                        <div
+                          id={`dutchie-carousel-container-${storeSlug}-${storeData.carousel.dutchie_carousel_id || 0}`}
+                          data-store-id={storeData.dutchieStoreId}
+                          data-carousel-id={storeData.carousel.dutchie_carousel_id}
+                          data-slug={storeSlug}
+                          data-full-script={storeData.carousel.full_embed_script || ''}
+                          class="dutchie-carousel-wrapper"
+                        ></div>
                       </div>
-                      <div class="bg-white carousel-container-wrapper" style="display: none;" data-carousel-index={storeSlug}>
-                        <div class="p-6">
-                          <div
-                            id={`dutchie-carousel-container-${storeSlug}-${storeData.carousel.dutchie_carousel_id || 0}`}
-                            data-store-id={storeData.dutchieStoreId}
-                            data-carousel-id={storeData.carousel.dutchie_carousel_id}
-                            data-slug={storeSlug}
-                            data-full-script={storeData.carousel.full_embed_script || ''}
-                            class="dutchie-carousel-wrapper"
-                          ></div>
-                        </div>
-                      </div>
-                    </>
+                    </div>
                   )}
                 </div>
               );
@@ -697,79 +680,11 @@ if (stores.length > 0) {
       }
     });
 
-    // Check if widgets loaded and show their containers
-    let checkCount = 0;
-    const checkWidgets = setInterval(() => {
-      checkCount++;
-      const widgets = document.querySelectorAll('[id^="dutchie--carousel-embed"]');
-      const allContainers = document.querySelectorAll('.carousel-container-wrapper');
-
-      console.log(`🎨 Check #${checkCount}: Found ${widgets.length} widgets out of ${allContainers.length} containers`);
-
-      // Show containers for successfully loaded widgets and hide spinners
-      widgets.forEach((widget) => {
-        const container = widget.closest('.carousel-container-wrapper');
-        if (container && container.style.display === 'none') {
-          const index = container.getAttribute('data-carousel-index');
-
-          // Hide the spinner
-          const spinner = document.querySelector(`[data-carousel-spinner="${index}"]`);
-          if (spinner) {
-            spinner.style.display = 'none';
-          }
-
-          // Show the carousel
-          container.style.display = 'block';
-          console.log(`✅ Showing carousel container #${index} - widget loaded`);
-        }
-      });
-
-      // After 1 second, start showing containers even if widgets haven't loaded yet
-      if (checkCount >= 5) {
-        allContainers.forEach((container, index) => {
-          if (container.style.display === 'none') {
-            const carouselIndex = container.getAttribute('data-carousel-index');
-
-            // Hide the spinner
-            const spinner = document.querySelector(`[data-carousel-spinner="${carouselIndex}"]`);
-            if (spinner) {
-              spinner.style.display = 'none';
-            }
-
-            container.style.display = 'block';
-            console.log(`⏰ Force-showing carousel container #${index} after 1 second`);
-          }
-        });
-      }
-    }, 200);
-
-    // Stop checking after 5 seconds
+    // Log carousel loading status
     setTimeout(() => {
-      clearInterval(checkWidgets);
       const widgets = document.querySelectorAll('[id^="dutchie--carousel-embed"]');
       const allContainers = document.querySelectorAll('.carousel-container-wrapper');
-
-      console.log(`🎨 Final status: ${widgets.length} widgets loaded out of ${allContainers.length} containers`);
-
-      // Make sure all containers are visible and spinners are hidden
-      allContainers.forEach((container, index) => {
-        if (container.style.display === 'none') {
-          const carouselIndex = container.getAttribute('data-carousel-index');
-
-          // Hide the spinner
-          const spinner = document.querySelector(`[data-carousel-spinner="${carouselIndex}"]`);
-          if (spinner) {
-            spinner.style.display = 'none';
-          }
-
-          container.style.display = 'block';
-          console.log(`🔧 Final show of container #${index}`);
-        }
-      });
-
-      if (widgets.length === 0) {
-        console.warn(`⚠️ No Dutchie widgets found after 5 seconds!`);
-      }
-    }, 5000);
+      console.log(`🎨 Carousel status: ${widgets.length} widgets loaded out of ${allContainers.length} containers`);
+    }, 2000);
   });
 </script>

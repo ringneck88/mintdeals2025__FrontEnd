@@ -54,21 +54,24 @@ if (store) {
       );
 
       // Filter discounts that apply to this store
-      // Try multiple matching strategies
       discounts = allDiscounts.filter(discount => {
         if (!discount.appliesToLocations || discount.appliesToLocations.length === 0) {
           return false;
         }
 
-        const storeName = store.name.toLowerCase();
-        const storeSlug = store.slug.toLowerCase();
-
         return discount.appliesToLocations.some(loc => {
+          // Primary matching: by dutchieStoreID
+          if (store.dutchieStoreID && loc.dutchieStoreID) {
+            return loc.dutchieStoreID === store.dutchieStoreID;
+          }
+
+          // Fallback matching: by location name
           if (!loc.locationName) return false;
 
+          const storeName = store.name.toLowerCase();
+          const storeSlug = store.slug.toLowerCase();
           const locationName = loc.locationName.toLowerCase();
 
-          // Try multiple matching strategies
           return locationName.includes(storeName) ||
                  storeName.includes(locationName) ||
                  locationName.includes(storeSlug) ||

@@ -261,6 +261,19 @@ function getCategoryIcon(slug: string) {
       <slot />
     </main>
 
+    <!-- Back to Top Button -->
+    <div class="fixed bottom-24 right-8 z-50">
+      <button
+        id="backToTopBtn"
+        class="bg-green-600 hover:bg-green-500 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 invisible"
+        aria-label="Back to top"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+      </button>
+    </div>
+
     <footer class="bg-gray-800 text-white">
       <div class="max-w-[95%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
@@ -483,6 +496,49 @@ function getCategoryIcon(slug: string) {
 
       // Re-initialize after Astro View Transitions
       document.addEventListener('astro:page-load', initializeDropdowns);
+    </script>
+
+    <script>
+      // Back to Top Button functionality
+      function initBackToTop() {
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        if (!backToTopBtn) return;
+
+        // Show button when user scrolls down 300px
+        function toggleButton() {
+          if (window.scrollY > 300) {
+            backToTopBtn.classList.remove('opacity-0', 'invisible');
+            backToTopBtn.classList.add('opacity-100', 'visible');
+          } else {
+            backToTopBtn.classList.add('opacity-0', 'invisible');
+            backToTopBtn.classList.remove('opacity-100', 'visible');
+          }
+        }
+
+        // Scroll to top smoothly
+        backToTopBtn.addEventListener('click', () => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+
+        // Listen for scroll events
+        window.addEventListener('scroll', toggleButton);
+
+        // Initial check
+        toggleButton();
+      }
+
+      // Initialize on page load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBackToTop);
+      } else {
+        initBackToTop();
+      }
+
+      // Re-initialize after Astro View Transitions
+      document.addEventListener('astro:page-load', initBackToTop);
     </script>
 
     <style is:global>
