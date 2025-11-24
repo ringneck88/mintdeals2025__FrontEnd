@@ -6,6 +6,8 @@ const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 let store = null;
 let discounts = [];
+let totalDiscountsBeforeFilter = 0;
+let sampleLocationNames = [];
 
 // Fetch store by slug
 try {
@@ -22,6 +24,7 @@ try {
         address: storeData.address || {},
         phone: storeData.phone,
         region: storeData.region?.name || storeData.region || 'Unknown',
+        dutchieStoreID: storeData.DutchieStoreID || storeData.dutchieStoreID,
       };
     }
   }
@@ -39,8 +42,16 @@ if (store) {
       const data = await discountsResponse.json();
       const allDiscounts = data?.data || [];
 
+      totalDiscountsBeforeFilter = allDiscounts.length;
+
       console.log(`Total discounts fetched: ${allDiscounts.length}`);
       console.log(`Store name: ${store.name}`);
+      console.log('API Response:', data);
+
+      // Collect sample location names from first few discounts
+      sampleLocationNames = allDiscounts.slice(0, 5).map(d =>
+        d.appliesToLocations?.map(loc => loc.locationName).join(', ') || 'No locations'
+      );
 
       // Filter discounts that apply to this store
       // Try multiple matching strategies
@@ -206,6 +217,22 @@ const pageTitle = store ? `${store.name} Deals | Mint Cannabis` : 'Location Deal
               <p class="text-lg md:text-xl text-yellow-400 max-w-2xl mx-auto mt-4">
                 {discounts.length} {discounts.length === 1 ? 'deal' : 'deals'} available!
               </p>
+
+              <!-- Debug Info -->
+              <div class="mt-4 p-4 bg-red-900/50 rounded text-xs text-left max-w-2xl mx-auto">
+                <p class="font-bold text-white mb-2">🐛 Debug Info:</p>
+                <p class="text-gray-200">Store Name: {store.name}</p>
+                <p class="text-gray-200">Store Slug: {store.slug}</p>
+                <p class="text-gray-200">Store Dutchie ID: {store.dutchieStoreID || 'NOT SET'}</p>
+                <p class="text-gray-200">Total Discounts BEFORE Filter: {totalDiscountsBeforeFilter}</p>
+                <p class="text-gray-200">Total Discounts AFTER Filter: {discounts.length}</p>
+                {sampleLocationNames.length > 0 && (
+                  <div class="mt-2">
+                    <p class="text-white font-semibold">Sample Location Names:</p>
+                    {sampleLocationNames.map(name => <p class="text-gray-300 ml-2">- {name}</p>)}
+                  </div>
+                )}
+              </div>
             </div>
 
             <!-- Stats -->
