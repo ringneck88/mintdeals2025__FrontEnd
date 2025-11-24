@@ -1,0 +1,294 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const { slug } = Astro.params;
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
+let store = null;
+let discounts = [];
+
+// Fetch store by slug
+try {
+  const storeResponse = await fetch(`${API_BASE}/stores?filters[slug][$eq]=${slug}&populate=*`);
+  if (storeResponse.ok) {
+    const data = await storeResponse.json();
+    if (data?.data?.length > 0) {
+      const storeData = data.data[0];
+      store = {
+        id: storeData.id,
+        documentId: storeData.documentId,
+        name: storeData.name || 'Unnamed Store',
+        slug: storeData.slug || storeData.documentId,
+        address: storeData.address || {},
+        phone: storeData.phone,
+        region: storeData.region?.name || storeData.region || 'Unknown',
+      };
+    }
+  }
+} catch (error) {
+  console.error('Error fetching store:', error);
+}
+
+// Fetch active discounts for this location
+if (store) {
+  try {
+    const discountsResponse = await fetch(
+      `${API_BASE}/discounts?filters[isActive][$eq]=true&populate=appliesToLocations&pagination[pageSize]=500&sort=createdAt:desc`
+    );
+    if (discountsResponse.ok) {
+      const data = await discountsResponse.json();
+      const allDiscounts = data?.data || [];
+
+      // Filter discounts that apply to this store
+      discounts = allDiscounts.filter(discount => {
+        if (!discount.appliesToLocations || discount.appliesToLocations.length === 0) {
+          return false;
+        }
+        return discount.appliesToLocations.some(loc =>
+          loc.locationName && loc.locationName.toLowerCase().includes(store.name.toLowerCase())
+        );
+      });
+
+      // Add price calculations
+      discounts = discounts.map(discount => {
+        let retailPrice = null;
+        let discountPrice = null;
+
+        if (discount.discountType?.includes('Price To Amount')) {
+          retailPrice = Math.round(discount.discountAmount * 1.4);
+          discountPrice = discount.discountAmount;
+        } else if (discount.discountType === 'Percent' || (discount.discountAmount && discount.discountAmount < 1)) {
+          retailPrice = 50;
+          discountPrice = Math.round(retailPrice * (1 - discount.discountAmount));
+        }
+
+        return {
+          ...discount,
+          retailPrice,
+          discountPrice
+        };
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching discounts:', error);
+  }
+}
+
+// Helper function to get discount display info
+function getDiscountDisplay(discount) {
+  const isPriceToAmount = discount.discountType?.includes('Price To Amount');
+  const isPercent = discount.discountType === 'Percent' || (discount.discountAmount && discount.discountAmount < 1);
+
+  if (isPriceToAmount) {
+    return {
+      retailPrice: discount.retailPrice,
+      discountPrice: discount.discountPrice || discount.discountAmount,
+      percentOff: discount.retailPrice ? Math.round((1 - discount.discountAmount / discount.retailPrice) * 100) : null,
+      label: 'Deal Price'
+    };
+  } else if (isPercent) {
+    const percentOff = Math.round(discount.discountAmount * 100);
+    return {
+      retailPrice: discount.retailPrice,
+      discountPrice: discount.discountPrice,
+      percentOff: percentOff,
+      label: `${percentOff}% OFF`
+    };
+  } else {
+    return {
+      retailPrice: null,
+      discountPrice: null,
+      percentOff: null,
+      label: `$${discount.discountAmount} OFF`
+    };
+  }
+}
+
+const pageTitle = store ? `${store.name} Deals | Mint Cannabis` : 'Location Deals | Mint Cannabis';
+---
+
+<style>
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+  .video-background video {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5));
+  }
+  .product-card {
+    transition: all 0.3s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-4px);
+  }
+</style>
+
+<Layout title={pageTitle} description={store ? `Browse deals at ${store.name}` : 'Browse location deals'}>
+  <!-- Video Background -->
+  <div class="video-background">
+    <video autoplay loop muted playsinline>
+      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper min-h-screen">
+    {!store ? (
+      <div class="py-16">
+        <div class="max-w-md mx-auto p-8 bg-black/80 rounded-lg text-center">
+          <div class="text-6xl mb-4">📍</div>
+          <p class="text-white text-xl font-bold">Location not found</p>
+          <p class="text-gray-300 mt-2 mb-4">The location you're looking for doesn't exist.</p>
+          <a href="/locations-deals" class="text-yellow-400 hover:text-yellow-300">
+            ← Back to all locations
+          </a>
+        </div>
+      </div>
+    ) : (
+      <div>
+        <!-- Hero Section -->
+        <div class="text-white py-12 md:py-16">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="mb-6 text-sm">
+              <div class="flex items-center justify-center space-x-2">
+                <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
+                <span class="text-green-300">/</span>
+                <a href="/locations-deals" class="text-yellow-400 hover:text-yellow-300">Location Deals</a>
+                <span class="text-green-300">/</span>
+                <span class="text-white">{store.name}</span>
+              </div>
+            </nav>
+
+            <div class="text-center">
+              <h1 class="text-4xl md:text-6xl font-bold mb-4 uppercase" style="text-shadow: 0 4px 8px rgba(0,0,0,0.8);">
+                {store.name}
+              </h1>
+              {store.address?.city && (
+                <p class="text-lg text-green-300 mb-2">
+                  📍 {store.address.city}, {store.address.state}
+                </p>
+              )}
+              {store.phone && (
+                <p class="text-gray-300">
+                  📞 <a href={`tel:${store.phone}`} class="hover:text-yellow-400">{store.phone}</a>
+                </p>
+              )}
+              <p class="text-lg md:text-xl text-yellow-400 max-w-2xl mx-auto mt-4">
+                {discounts.length} {discounts.length === 1 ? 'deal' : 'deals'} available!
+              </p>
+            </div>
+
+            <!-- Stats -->
+            <div class="flex justify-center gap-8 mt-8">
+              <div class="text-center">
+                <div class="text-3xl font-bold text-green-400">{discounts.length}</div>
+                <div class="text-sm text-gray-300">Deals Available</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deals Grid -->
+        <div class="py-8 pb-16">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {discounts.length === 0 ? (
+              <div class="text-center py-16">
+                <div class="max-w-md mx-auto p-8 bg-black/80 rounded-lg">
+                  <div class="text-6xl mb-4">🏷️</div>
+                  <p class="text-white text-xl font-bold">No deals found</p>
+                  <p class="text-gray-300 mt-2">Check back soon for new deals at this location!</p>
+                  <a href="/locations-deals" class="inline-block mt-4 text-yellow-400 hover:text-yellow-300">
+                    ← Browse other locations
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {discounts.map((discount) => (
+                  <div class="product-card bg-black/80 rounded-lg overflow-hidden shadow-lg">
+                    {/* Discount Name Banner at Top */}
+                    <div class="bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold px-4 py-3 text-center uppercase tracking-wide">
+                      {discount.discountName || 'Special Offer'}
+                    </div>
+
+                    {/* Discount Info */}
+                    <div class="p-4">
+                      {/* Price Display */}
+                      <div class="text-center mb-4">
+                        {getDiscountDisplay(discount).retailPrice && (
+                          <div class="text-gray-400 text-lg line-through">
+                            ${getDiscountDisplay(discount).retailPrice}
+                          </div>
+                        )}
+                        {getDiscountDisplay(discount).discountPrice ? (
+                          <div class="text-3xl font-bold text-green-400">
+                            ${getDiscountDisplay(discount).discountPrice}
+                          </div>
+                        ) : (
+                          <div class="text-2xl font-bold text-yellow-400">
+                            {getDiscountDisplay(discount).label}
+                          </div>
+                        )}
+                        {getDiscountDisplay(discount).percentOff && (
+                          <div class="inline-block mt-2 px-3 py-1 bg-red-600 text-white text-sm font-bold rounded-full">
+                            {getDiscountDisplay(discount).percentOff}% OFF
+                          </div>
+                        )}
+                        <div class="text-gray-400 text-xs mt-2">
+                          {getDiscountDisplay(discount).label}
+                        </div>
+                      </div>
+
+                      {/* Requirements */}
+                      {(discount.minimumItemsRequired || discount.maximumItemsAllowed) && (
+                        <div class="text-center text-sm text-white bg-gray-800 rounded py-2 px-3 mt-2">
+                          {discount.minimumItemsRequired && `Buy ${discount.minimumItemsRequired}`}
+                          {discount.maximumItemsAllowed && discount.minimumItemsRequired && ' - '}
+                          {discount.maximumItemsAllowed && `Max ${discount.maximumItemsAllowed}`}
+                          {!discount.maximumItemsAllowed && discount.minimumItemsRequired && '+'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <!-- Back Link -->
+            <div class="mt-12 text-center">
+              <a href="/locations-deals" class="inline-block px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-lg transition-colors">
+                ← Back to All Locations
+              </a>
+            </div>
+
+            <!-- CTA -->
+            <div class="mt-8 bg-black/90 rounded-lg p-8 text-center">
+              <h2 class="text-2xl font-bold mb-4 text-white uppercase">
+                Browse All Deals
+              </h2>
+              <p class="text-green-300 mb-6 max-w-2xl mx-auto">
+                View deals from all Mint Cannabis locations
+              </p>
+              <a href="/deals" class="inline-block px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors">
+                All Deals
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+</Layout>

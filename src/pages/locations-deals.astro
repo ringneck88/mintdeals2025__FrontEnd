@@ -1,0 +1,213 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
+let stores = [];
+let discounts = [];
+
+// Fetch stores
+try {
+  const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
+  if (storesResponse.ok) {
+    const data = await storesResponse.json();
+    stores = (data?.data || []).map(store => ({
+      id: store.id,
+      documentId: store.documentId,
+      name: store.name || 'Unnamed Store',
+      slug: store.slug || store.documentId,
+      address: store.address || {},
+      phone: store.phone,
+      region: store.region?.name || store.region || 'Unknown',
+    })).filter(store => store.name);
+  }
+} catch (error) {
+  console.error('Error fetching stores:', error);
+}
+
+// Fetch active discounts with locations
+try {
+  const discountsResponse = await fetch(
+    `${API_BASE}/discounts?filters[isActive][$eq]=true&populate=appliesToLocations&pagination[pageSize]=1000`
+  );
+  if (discountsResponse.ok) {
+    const data = await discountsResponse.json();
+    discounts = data?.data || [];
+  }
+} catch (error) {
+  console.error('Error fetching discounts:', error);
+}
+
+// Count deals per location
+function getDealsCount(storeName) {
+  return discounts.filter(discount => {
+    if (!discount.appliesToLocations || discount.appliesToLocations.length === 0) {
+      return false;
+    }
+    return discount.appliesToLocations.some(loc =>
+      loc.locationName && loc.locationName.toLowerCase().includes(storeName.toLowerCase())
+    );
+  }).length;
+}
+
+// Group stores by region
+const storesByRegion = {};
+stores.forEach(store => {
+  const region = store.region || 'Other';
+  if (!storesByRegion[region]) {
+    storesByRegion[region] = [];
+  }
+  storesByRegion[region].push({
+    ...store,
+    dealsCount: getDealsCount(store.name)
+  });
+});
+
+// Sort regions alphabetically
+const sortedRegions = Object.keys(storesByRegion).sort();
+---
+
+<style>
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+  .video-background video {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+  }
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5));
+  }
+  .location-card {
+    transition: all 0.3s ease;
+  }
+  .location-card:hover {
+    transform: translateY(-4px);
+  }
+</style>
+
+<Layout title="Location Deals | Mint Cannabis" description="Browse deals by location at Mint Cannabis dispensaries.">
+  <!-- Video Background -->
+  <div class="video-background">
+    <video autoplay loop muted playsinline>
+      <source src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper min-h-screen">
+    <!-- Hero Section -->
+    <div class="text-white py-12 md:py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="mb-6 text-sm">
+          <div class="flex items-center justify-center space-x-2">
+            <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
+            <span class="text-green-300">/</span>
+            <span class="text-white">Location Deals</span>
+          </div>
+        </nav>
+
+        <div class="text-center">
+          <h1 class="text-4xl md:text-6xl font-bold mb-4 uppercase" style="text-shadow: 0 4px 8px rgba(0,0,0,0.8);">
+            Deals by Location
+          </h1>
+          <p class="text-lg md:text-xl text-yellow-400 max-w-2xl mx-auto">
+            Select a location to view available deals
+          </p>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex justify-center gap-8 mt-8">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-green-400">{stores.length}</div>
+            <div class="text-sm text-gray-300">Locations</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-400">{discounts.length}</div>
+            <div class="text-sm text-gray-300">Total Deals</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Locations Grid -->
+    <div class="py-8 pb-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {sortedRegions.length === 0 ? (
+          <div class="text-center py-16">
+            <div class="max-w-md mx-auto p-8 bg-black/80 rounded-lg">
+              <div class="text-6xl mb-4">📍</div>
+              <p class="text-white text-xl font-bold">No locations found</p>
+              <p class="text-gray-300 mt-2">Check back soon!</p>
+            </div>
+          </div>
+        ) : (
+          <div class="space-y-12">
+            {sortedRegions.map(region => (
+              <div>
+                <h2 class="text-2xl font-bold text-white mb-6 uppercase border-b border-green-600 pb-2">
+                  {region}
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {storesByRegion[region].map(store => (
+                    <a
+                      href={`/location-deals/${store.slug}`}
+                      class="location-card bg-black/80 rounded-lg overflow-hidden shadow-lg block hover:shadow-xl"
+                    >
+                      <div class="bg-gradient-to-r from-green-700 to-green-600 text-white px-4 py-3">
+                        <h3 class="font-bold text-lg">{store.name}</h3>
+                      </div>
+                      <div class="p-4">
+                        {store.address?.city && (
+                          <p class="text-gray-300 text-sm mb-2">
+                            <span class="text-green-400">📍</span> {store.address.city}, {store.address.state}
+                          </p>
+                        )}
+                        {store.phone && (
+                          <p class="text-gray-400 text-sm mb-3">
+                            <span class="text-green-400">📞</span> {store.phone}
+                          </p>
+                        )}
+                        <div class="flex items-center justify-between mt-4">
+                          <span class="text-yellow-400 font-bold">
+                            {store.dealsCount} {store.dealsCount === 1 ? 'Deal' : 'Deals'}
+                          </span>
+                          <span class="text-green-400 text-sm font-semibold">
+                            View Deals →
+                          </span>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <!-- CTA -->
+        <div class="mt-16 bg-black/90 rounded-lg p-8 text-center">
+          <h2 class="text-2xl font-bold mb-4 text-white uppercase">
+            View All Deals
+          </h2>
+          <p class="text-green-300 mb-6 max-w-2xl mx-auto">
+            Browse all active deals across all Mint Cannabis locations
+          </p>
+          <a href="/deals" class="inline-block px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors">
+            All Deals
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
