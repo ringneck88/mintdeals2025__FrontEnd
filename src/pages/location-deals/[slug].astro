@@ -29,27 +29,43 @@ try {
   console.error('Error fetching store:', error);
 }
 
-// Fetch non-expired discounts for this location
-const today = new Date().toISOString().split('T')[0];
-
+// Fetch discounts for this location (temporarily showing all dates for debugging)
 if (store) {
   try {
     const discountsResponse = await fetch(
-      `${API_BASE}/discounts?filters[validUntil][$gte]=${today}&populate=appliesToLocations&pagination[pageSize]=500&sort=createdAt:desc`
+      `${API_BASE}/discounts?populate=appliesToLocations&pagination[pageSize]=500&sort=createdAt:desc`
     );
     if (discountsResponse.ok) {
       const data = await discountsResponse.json();
       const allDiscounts = data?.data || [];
 
+      console.log(`Total discounts fetched: ${allDiscounts.length}`);
+      console.log(`Store name: ${store.name}`);
+
       // Filter discounts that apply to this store
+      // Try multiple matching strategies
       discounts = allDiscounts.filter(discount => {
         if (!discount.appliesToLocations || discount.appliesToLocations.length === 0) {
           return false;
         }
-        return discount.appliesToLocations.some(loc =>
-          loc.locationName && loc.locationName.toLowerCase().includes(store.name.toLowerCase())
-        );
+
+        const storeName = store.name.toLowerCase();
+        const storeSlug = store.slug.toLowerCase();
+
+        return discount.appliesToLocations.some(loc => {
+          if (!loc.locationName) return false;
+
+          const locationName = loc.locationName.toLowerCase();
+
+          // Try multiple matching strategies
+          return locationName.includes(storeName) ||
+                 storeName.includes(locationName) ||
+                 locationName.includes(storeSlug) ||
+                 storeSlug.includes(locationName);
+        });
       });
+
+      console.log(`Filtered discounts for ${store.name}: ${discounts.length}`);
 
       // Add price calculations
       discounts = discounts.map(discount => {
