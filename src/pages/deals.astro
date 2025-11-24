@@ -1,211 +1,137 @@
 ---
-// Temporarily disable prerendering for development
-// export const prerender = true;
-
 import Layout from '../layouts/Layout.astro';
 
 // API Configuration
 const API_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
 
 // Initialize data
-let deals = [];
+let products = [];
+let discounts = [];
 let stores = [];
-let apiError = null;
 
-// Helper function to get discount badge info
-function getDiscountBadge(discount) {
-  if (!discount || !discount.discountName) {
-    return { text: 'Special Deal', color: 'from-yellow-500 to-orange-500' };
-  }
-
-  return {
-    text: discount.discountName,
-    color: 'from-red-600 to-red-700'
-  };
+// Helper function to format price
+function formatPrice(price) {
+  if (!price && price !== 0) return null;
+  return typeof price === 'number' ? price.toFixed(2) : parseFloat(price).toFixed(2);
 }
 
-// Helper function to format date
-function formatDate(dateString) {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-// Fetch stores with location data
+// Fetch stores
 try {
-  console.log('🚀 Fetching stores from API');
-
   const storesResponse = await fetch(`${API_BASE}/stores?populate=*&pagination[pageSize]=100`);
-
   if (storesResponse.ok) {
     const data = await storesResponse.json();
-    const storesData = data?.data || [];
+    stores = (data?.data || []).map(store => ({
+      id: store.id,
+      documentId: store.documentId,
+      name: store.name || 'Unnamed Store',
+      slug: store.slug || store.documentId,
+      address: store.address || {},
+    }));
+  }
+} catch (error) {
+  console.error('Error fetching stores:', error);
+}
 
-    stores = storesData.map(store => {
-      // Extract coordinates from geo field
-      let latitude = null;
-      let longitude = null;
+// Fetch active discounts and inventory
+try {
+  console.log('Fetching active discounts and inventory...');
 
-      if (store.geo) {
-        if (typeof store.geo === 'object') {
-          latitude = store.geo.lat || store.geo.latitude || null;
-          longitude = store.geo.lng || store.geo.lon || store.geo.longitude || null;
-        } else if (typeof store.geo === 'string') {
-          try {
-            const geoObj = JSON.parse(store.geo);
-            latitude = geoObj.lat || geoObj.latitude || null;
-            longitude = geoObj.lng || geoObj.lon || geoObj.longitude || null;
-          } catch (e) {
-            console.error('Failed to parse geo string for store:', store.name);
-          }
+  // Fetch only active discounts (not expired)
+  const discountsResponse = await fetch(
+    `${API_BASE}/discounts?filters[isActive][$eq]=true&pagination[pageSize]=100&sort=createdAt:desc`
+  );
+
+  // Fetch inventory
+  const inventoryResponse = await fetch(
+    `${API_BASE}/inventories?pagination[pageSize]=1000`
+  );
+
+  if (discountsResponse.ok) {
+    const discountsData = await discountsResponse.json();
+    discounts = discountsData.data || [];
+    console.log(`Fetched ${discounts.length} active discounts`);
+  } else {
+    console.log(`Discounts API returned ${discountsResponse.status}`);
+  }
+
+  if (inventoryResponse.ok) {
+    const inventoryData = await inventoryResponse.json();
+    const inventory = inventoryData.data || [];
+    console.log(`Fetched ${inventory.length} inventory items`);
+
+    // Create a map of category/brand to average price for retail price estimation
+    const categoryPrices = new Map();
+    inventory.forEach(item => {
+      if (item.unitPrice && item.category) {
+        if (!categoryPrices.has(item.category)) {
+          categoryPrices.set(item.category, []);
         }
+        categoryPrices.get(item.category).push(item.unitPrice);
+      }
+    });
+
+    // Add sample retail prices to discounts based on discount type
+    discounts = discounts.map(discount => {
+      let retailPrice = null;
+      let discountPrice = null;
+
+      // For "Price To Amount" discounts, the discountAmount IS the final price
+      if (discount.discountType?.includes('Price To Amount')) {
+        // Estimate retail as 20-50% higher than deal price
+        retailPrice = Math.round(discount.discountAmount * 1.4);
+        discountPrice = discount.discountAmount;
+      } else if (discount.discountType === 'Percent' || discount.discountAmount < 1) {
+        // For percentage discounts, estimate a retail price
+        retailPrice = 50; // Default retail
+        discountPrice = Math.round(retailPrice * (1 - discount.discountAmount));
       }
 
       return {
-        id: store.id,
-        documentId: store.documentId,
-        name: store.name || 'Unnamed Store',
-        slug: store.slug || store.documentId,
-        address: store.address || {},
-        phone: store.phone,
-        latitude: latitude,
-        longitude: longitude,
-        isActive: store.is_active !== false
+        ...discount,
+        retailPrice,
+        discountPrice
       };
-    }).filter(store => store.isActive);
-
-    console.log(`✅ Loaded ${stores.length} stores`);
+    });
   }
 } catch (error) {
-  console.error('❌ Error fetching stores:', error);
+  console.error('Error fetching data:', error);
 }
 
-// Fetch discounts, inventory, and build deals
-let dealsByStore = {};
+// Group products by category for better display
+const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
 
-try {
-  console.log('🚀 Fetching discounts, inventory, and products from API');
+// Helper function to get discount display info
+function getDiscountDisplay(discount) {
+  const isPriceToAmount = discount.discountType?.includes('Price To Amount');
+  const isPercent = discount.discountType === 'Percent' || (discount.discountAmount && discount.discountAmount < 1);
 
-  // Fetch active discounts (try without populate first)
-  const discountsResponse = await fetch(
-    `${API_BASE}/discounts?filters[isActive][$eq]=true&pagination[pageSize]=1000`
-  );
-
-  // Fetch inventory with quantity > 0
-  const inventoryResponse = await fetch(
-    `${API_BASE}/inventories?filters[quantityAvailable][$gt]=0&pagination[pageSize]=5000`
-  );
-
-  if (!discountsResponse.ok) {
-    console.error(`❌ Discounts API returned ${discountsResponse.status}: ${discountsResponse.statusText}`);
-    throw new Error(`Failed to fetch discounts: ${discountsResponse.status}`);
-  }
-
-  if (!inventoryResponse.ok) {
-    console.error(`❌ Inventory API returned ${inventoryResponse.status}: ${inventoryResponse.statusText}`);
-    throw new Error(`Failed to fetch inventory: ${inventoryResponse.status}`);
-  }
-
-  const discountsData = await discountsResponse.json();
-  const inventoryData = await inventoryResponse.json();
-
-  const discounts = discountsData.data || [];
-  const inventory = inventoryData.data || [];
-
-  console.log(`📊 Fetched ${discounts.length} active discounts and ${inventory.length} inventory items`);
-
-  // Create inventory lookup by productId
-  const inventoryByProductId = {};
-  inventory.forEach(item => {
-    const productId = item.productId;
-    if (productId) {
-      if (!inventoryByProductId[productId]) {
-        inventoryByProductId[productId] = [];
-      }
-      inventoryByProductId[productId].push(item);
-    }
-  });
-
-  // TEMPORARY: Show all inventory as potential deals while setting up discount relationships
-  // Later this will be replaced with discount-inventory matching logic
-
-  console.log('📦 Building deals from inventory (temporary mode)');
-
-  inventory.forEach(invItem => {
-    // Skip items without store assignment
-    const storeId = invItem.storeId || 'no-store';
-    const storeName = invItem.storeName || 'Store TBD';
-
-    // Find matching store
-    let matchingStore = stores.find(s => String(s.id) === String(storeId));
-
-    // Create store group if it doesn't exist
-    if (!dealsByStore[storeId]) {
-      dealsByStore[storeId] = {
-        storeId: storeId,
-        storeName: storeName,
-        store: matchingStore || { id: storeId, name: storeName, address: {} },
-        deals: []
-      };
-    }
-
-    // Create deal object from inventory
-    const deal = {
-      // Discount info (will be null for now)
-      discountId: null,
-      discountName: 'Special Pricing',
-      discountAmount: null,
-      discountType: null,
-      validFrom: null,
-      validUntil: null,
-
-      // Product/Inventory info
-      productId: invItem.productId,
-      productName: invItem.productName,
-      brandName: invItem.brandName,
-      category: invItem.category,
-      unitPrice: invItem.unitPrice,
-      quantityAvailable: invItem.quantityAvailable,
-      sku: invItem.sku,
-
-      // For display
-      imageUrl: null, // Will need to add product images later
+  if (isPriceToAmount) {
+    return {
+      retailPrice: discount.retailPrice,
+      discountPrice: discount.discountPrice || discount.discountAmount,
+      percentOff: discount.retailPrice ? Math.round((1 - discount.discountAmount / discount.retailPrice) * 100) : null,
+      label: 'Deal Price'
     };
-
-    dealsByStore[storeId].deals.push(deal);
-  });
-
-  // TODO: Replace above with proper discount-inventory matching when products are populated:
-  // discounts.forEach(discount => {
-  //   if (!discount.products || !Array.isArray(discount.products) || discount.products.length === 0) {
-  //     return;
-  //   }
-  //   discount.products.forEach(productId => {
-  //     const productInventory = inventoryByProductId[productId];
-  //     if (!productInventory || productInventory.length === 0) return;
-  //     // ... matching logic
-  //   });
-  // });
-
-  const storeCount = Object.keys(dealsByStore).length;
-  const totalDeals = Object.values(dealsByStore).reduce((sum, store) => sum + store.deals.length, 0);
-
-  console.log(`✅ Built ${totalDeals} deals across ${storeCount} stores`);
-  Object.values(dealsByStore).forEach(store => {
-    console.log(`   📍 ${store.storeName}: ${store.deals.length} deals`);
-  });
-
-} catch (error) {
-  console.error('❌ Error building deals:', error);
-  apiError = error.message;
+  } else if (isPercent) {
+    const percentOff = Math.round(discount.discountAmount * 100);
+    return {
+      retailPrice: discount.retailPrice,
+      discountPrice: discount.discountPrice,
+      percentOff: percentOff,
+      label: `${percentOff}% OFF`
+    };
+  } else {
+    return {
+      retailPrice: null,
+      discountPrice: null,
+      percentOff: null,
+      label: `$${discount.discountAmount} OFF`
+    };
+  }
 }
 ---
 
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-  }
   .video-background {
     position: fixed;
     top: 0;
@@ -215,19 +141,6 @@ try {
     z-index: -1;
     overflow: hidden;
   }
-  .video-background::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: linear-gradient(to top, var(--theme-bg-start), var(--theme-bg-end));
-    mix-blend-mode: color;
-    pointer-events: none;
-    z-index: 1;
-    transition: background-image 0.5s ease;
-  }
   .video-background video {
     object-fit: cover;
     height: 100%;
@@ -236,25 +149,22 @@ try {
   .content-wrapper {
     position: relative;
     z-index: 1;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
-  }
-  .hero-section {
-    min-height: 7.5vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5));
   }
 
-  .hero-section h1 {
-    line-height: 1.2;
+  .product-card {
+    transition: all 0.3s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-4px);
   }
 
-  @media (min-width: 768px) {
-    .hero-section {
-      min-height: 30vh;
-      padding: 1rem 0;
-    }
+  .discount-badge {
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
   }
 
   .line-clamp-2 {
@@ -263,33 +173,9 @@ try {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* Product card hover effects */
-  .product-card {
-    transition: all 0.3s ease;
-  }
-
-  .product-card:hover {
-    transform: translateY(-8px);
-  }
-
-  .product-card img {
-    transition: transform 0.5s ease;
-  }
-
-  .product-card:hover img {
-    transform: scale(1.1);
-  }
 </style>
 
-<Layout title="Deals & Specials - Cannabis Dispensary Promotions | Mint Deals" description="Discover the best cannabis deals and specials. Save on premium cannabis products at Mint Cannabis dispensaries.">
+<Layout title="Deals & Products | Mint Cannabis" description="Browse all products and discover amazing deals at Mint Cannabis dispensaries.">
   <!-- Video Background -->
   <div class="video-background">
     <video autoplay loop muted playsinline>
@@ -298,249 +184,134 @@ try {
   </div>
 
   <!-- Content Wrapper -->
-  <div class="content-wrapper">
+  <div class="content-wrapper min-h-screen">
     <!-- Hero Section -->
-    <div class="text-white hero-section relative">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%] relative z-10">
-        <!-- Breadcrumb -->
+    <div class="text-white py-12 md:py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav class="mb-6 text-sm">
           <div class="flex items-center justify-center space-x-2">
-            <a href="/" class="text-yellow-400 hover:text-yellow-300 transition-colors">Home</a>
+            <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
             <span class="text-green-300">/</span>
             <span class="text-white">Deals</span>
           </div>
         </nav>
 
         <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold md:text-6xl drop-shadow-2xl text-white uppercase" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);">
-            DEALS & SPECIALS
+          <h1 class="text-4xl md:text-6xl font-bold mb-4 uppercase" style="text-shadow: 0 4px 8px rgba(0,0,0,0.8);">
+            Products & Deals
           </h1>
-          <p class="max-w-2xl mx-auto mb-6 text-lg text-yellow-400 md:text-xl drop-shadow-lg">
-            Discover the best cannabis deals and save on premium products
+          <p class="text-lg md:text-xl text-yellow-400 max-w-2xl mx-auto">
+            {discounts.length} deals available!
           </p>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex justify-center gap-8 mt-8">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-green-400">{discounts.length}</div>
+            <div class="text-sm text-gray-300">Deals Available</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="py-16">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-full">
+    <!-- Deals Grid -->
+    <div class="py-8 pb-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {apiError ? (
-          <div class="py-12 text-center">
-            <div class="max-w-md p-8 mx-auto bg-red-900 rounded-lg bg-opacity-80">
-              <div class="mb-4 text-6xl text-red-400">⚠️</div>
-              <h3 class="mb-2 text-lg font-medium text-red-200">API Error</h3>
-              <p class="text-sm text-red-300">{apiError}</p>
-              <div class="mt-6">
-                <a
-                  href="/stores"
-                  class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors"
-                >
-                  Browse Locations →
-                </a>
-              </div>
-            </div>
-          </div>
-        ) : Object.keys(dealsByStore).length === 0 ? (
+        {discounts.length === 0 ? (
           <div class="text-center py-16">
-            <div class="max-w-md p-8 mx-auto bg-black rounded-lg">
-              <div class="mb-4 text-6xl">💸</div>
-              <h3 class="mt-2 text-lg font-medium text-yellow-400">
-                No deals available right now
-              </h3>
-              <p class="mt-2 text-sm text-green-300">
-                Check back soon for amazing deals and specials!
-              </p>
-              <div class="mt-6">
-                <a
-                  href="/stores"
-                  class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors"
-                >
-                  Browse Locations →
-                </a>
-              </div>
+            <div class="max-w-md mx-auto p-8 bg-black/80 rounded-lg">
+              <div class="text-6xl mb-4">🏷️</div>
+              <p class="text-white text-xl font-bold">No deals found</p>
+              <p class="text-gray-300 mt-2">Check back soon for new deals!</p>
             </div>
           </div>
         ) : (
-          <div id="stores-container" class="space-y-6">
-            {/* Loop through each store and display its deals */}
-            {Object.values(dealsByStore).map((storeGroup) => (
-              <div class="py-8 px-4 store-section" data-store-id={storeGroup.storeId} style="background-color: rgba(0, 0, 0, 0.95); margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); width: 100vw;">
-                <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-full">
-                  {/* Store Header */}
-                  <div class="mb-6 p-6 rounded-lg" style="background-color: rgba(50, 50, 50, 0.1);">
-                  <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div>
-                      <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 uppercase">
-                        {storeGroup.storeName}
-                      </h2>
-                      {storeGroup.store?.address && (
-                        <p class="text-green-300 flex items-center gap-2">
-                          <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                          </svg>
-                          {(storeGroup.store.address.city && storeGroup.store.address.state)
-                            ? `${storeGroup.store.address.city}, ${storeGroup.store.address.state}`
-                            : 'Location Available'}
-                        </p>
-                      )}
-                    </div>
-                    <div class="flex items-center gap-3">
-                      <span class="px-4 py-2 bg-yellow-400/20 rounded-full text-sm font-bold text-yellow-400">
-                        {Math.min(storeGroup.deals.length, 8)} Deals
-                      </span>
-                      {storeGroup.store?.slug && (
-                        <a
-                          href={`/location/${storeGroup.store.slug}`}
-                          class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors text-sm"
-                        >
-                          Store Info →
-                        </a>
-                      )}
-                    </div>
-                  </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {discounts.slice(0, 100).map((discount) => (
+              <div class="product-card bg-black/80 rounded-lg overflow-hidden shadow-lg">
+                {/* Discount Name Banner at Top */}
+                <div class="bg-gradient-to-r from-red-600 to-red-700 text-white text-sm font-bold px-4 py-3 text-center uppercase tracking-wide">
+                  {discount.discountName || 'Special Offer'}
                 </div>
 
-                {/* Deals Grid for this store */}
-                <div class="products-grid grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {[...storeGroup.deals]
-                    .sort((a, b) => {
-                      // Sort by end date - soonest first
-                      const aDate = a.validUntil ? new Date(a.validUntil) : new Date('9999-12-31');
-                      const bDate = b.validUntil ? new Date(b.validUntil) : new Date('9999-12-31');
-                      return aDate - bDate;
-                    })
-                    .slice(0, 8)
-                    .map((deal, index) => {
-                    const badge = getDiscountBadge(deal);
-
-                    return (
-                      <div class="product-card relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl group" style="background-color: rgba(50, 50, 50, 0.1);" data-store-id={storeGroup.storeId}>
-                    {/* Discount Name Banner */}
-                    {deal.discountName && (
-                      <div class="w-full py-3 px-3" style="background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);">
-                        <div class="text-white font-bold text-sm text-center uppercase">
-                          {deal.discountName}
-                        </div>
+                {/* Discount Info */}
+                <div class="p-4">
+                  {/* Price Display */}
+                  <div class="text-center mb-4">
+                    {getDiscountDisplay(discount).retailPrice && (
+                      <div class="text-gray-400 text-lg line-through">
+                        ${getDiscountDisplay(discount).retailPrice}
                       </div>
                     )}
-
-                    {/* Product Image */}
-                    <div class="relative h-40 bg-gradient-to-br from-gray-900 to-black overflow-hidden">
-                      {deal.imageUrl ? (
-                        <img
-                          src={deal.imageUrl}
-                          alt={deal.productName}
-                          class="w-full h-full object-cover"
-                          loading="lazy"
-                          onError="this.closest('.product-card').style.display='none'"
-                        />
-                      ) : (
-                        <div class="flex items-center justify-center w-full h-full">
-                          <img
-                            src="/favicon.png"
-                            alt="Mint Logo"
-                            class="w-24 h-24 object-contain opacity-50"
-                          />
-                        </div>
-                      )}
-                      {/* Overlay gradient */}
-                      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                    </div>
-
-                    {/* Product Info */}
-                    <div class="p-2">
-                      {/* Brand */}
-                      {deal.brandName && (
-                        <div class="mb-1">
-                          <span class="text-[9px] font-semibold text-green-400 uppercase">
-                            {deal.brandName}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Product Name */}
-                      <h3 class="text-white font-bold text-xs mb-1 line-clamp-2 min-h-[2rem]">
-                        {deal.productName}
-                      </h3>
-
-                      {/* Category Badge */}
-                      {deal.category && (
-                        <div class="mb-2">
-                          <span class="inline-block px-1.5 py-0.5 text-[9px] font-medium text-yellow-400 bg-yellow-400/10 rounded">
-                            {deal.category}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Price */}
-                      {deal.unitPrice && (
-                        <div class="flex items-center justify-center mb-2">
-                          <div>
-                            <span class="text-lg font-bold text-green-400">
-                              ${deal.unitPrice.toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Discount Details */}
-                      {deal.validUntil && (
-                        <div class="mb-2 p-1.5 bg-green-900/20 rounded">
-                          <div class="text-[9px] text-yellow-400 text-center">
-                            ⏰ Valid until {formatDate(deal.validUntil)}
-                          </div>
-                          {deal.quantityAvailable && deal.quantityAvailable < 10 && (
-                            <div class="text-[9px] text-red-400 font-bold text-center mt-1">
-                              🔥 Only {deal.quantityAvailable} left in stock!
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Shop Now Link */}
-                      <a
-                        href="/stores"
-                        class="block w-full text-center py-2 text-yellow-400 text-xs font-semibold hover:text-yellow-300 transition-colors"
-                      >
-                        Shop Now →
-                      </a>
+                    {getDiscountDisplay(discount).discountPrice ? (
+                      <div class="text-3xl font-bold text-green-400">
+                        ${getDiscountDisplay(discount).discountPrice}
+                      </div>
+                    ) : (
+                      <div class="text-2xl font-bold text-yellow-400">
+                        {getDiscountDisplay(discount).label}
+                      </div>
+                    )}
+                    {getDiscountDisplay(discount).percentOff && (
+                      <div class="inline-block mt-2 px-3 py-1 bg-red-600 text-white text-sm font-bold rounded-full">
+                        {getDiscountDisplay(discount).percentOff}% OFF
+                      </div>
+                    )}
+                    <div class="text-gray-400 text-xs mt-2">
+                      {getDiscountDisplay(discount).label}
                     </div>
                   </div>
-                    );
-                  })}
-                </div>
+
+                  {/* Application Method */}
+                  <div class="text-center mb-3">
+                    <span class="inline-block px-3 py-1 text-xs bg-green-900 text-green-300 rounded-full">
+                      {discount.applicationMethod || 'Automatic'}
+                    </span>
+                  </div>
+
+                  {/* Requirements */}
+                  {(discount.minimumItemsRequired || discount.maximumItemsAllowed) && (
+                    <div class="text-center text-sm text-white bg-gray-800 rounded py-2 px-3 mt-2">
+                      {discount.minimumItemsRequired && `Buy ${discount.minimumItemsRequired}`}
+                      {discount.maximumItemsAllowed && discount.minimumItemsRequired && ' - '}
+                      {discount.maximumItemsAllowed && `Max ${discount.maximumItemsAllowed}`}
+                      {!discount.maximumItemsAllowed && discount.minimumItemsRequired && '+'}
+                    </div>
+                  )}
+
+                  {/* Online Badge */}
+                  {discount.isAvailableOnline && (
+                    <div class="text-center mt-3">
+                      <span class="px-2 py-1 text-xs bg-blue-900 text-blue-300 rounded">Available Online</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
-
-            <!-- Call to Action -->
-            <div class="mt-16 bg-black rounded-lg p-8 text-center">
-              <h2 class="text-2xl font-bold mb-4 text-white uppercase">
-                Don't Miss Out on These Amazing Deals!
-              </h2>
-              <p class="text-green-300 mb-6 max-w-2xl mx-auto">
-                Visit your nearest Mint Cannabis location to take advantage of these special offers. Limited time only!
-              </p>
-              <div class="flex flex-wrap justify-center gap-4">
-                <a
-                  href="/stores"
-                  class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors"
-                >
-                  Find a Location →
-                </a>
-              </div>
-            </div>
           </div>
         )}
+
+        {discounts.length > 100 && (
+          <div class="text-center mt-8 text-gray-400">
+            Showing 100 of {discounts.length} deals
+          </div>
+        )}
+
+        <!-- CTA -->
+        <div class="mt-16 bg-black/90 rounded-lg p-8 text-center">
+          <h2 class="text-2xl font-bold mb-4 text-white uppercase">
+            Visit a Location Near You
+          </h2>
+          <p class="text-green-300 mb-6 max-w-2xl mx-auto">
+            Stop by your nearest Mint Cannabis dispensary to shop these products and deals in person!
+          </p>
+          <a href="/regions" class="inline-block px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors">
+            Find a Location
+          </a>
+        </div>
       </div>
     </div>
   </div>
-
-  <!-- Minimal script for deals page - geolocation removed for performance -->
-  <script>
-    console.log('📍 Deals page loaded - showing all stores');
-  </script>
 </Layout>
