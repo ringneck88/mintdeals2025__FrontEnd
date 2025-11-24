@@ -198,8 +198,8 @@ function getCategoryIcon(slug: string) {
               </a>
 
               <!-- Dropdown Menu -->
-              <div id="locationsMenu" class="absolute left-0 mt-1 w-80 border border-black rounded-lg hidden z-50 overflow-hidden" style="background-color: rgba(25, 25, 25, 0.95); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 0, 0.2); max-height: 80vh;">
-                <div class="py-2 overflow-y-auto h-full" style="max-height: 80vh;">
+              <div id="locationsMenu" class="absolute left-0 mt-1 w-80 border border-black rounded-lg hidden z-50" style="background-color: rgba(25, 25, 25, 0.95); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 0, 0.2); max-height: 85vh; overflow-y: auto;">
+                <div class="py-2">
                   <div class="px-4 py-3">
                     <p class="text-yellow-400 font-bold text-base pb-1 leading-snug">Browse by State & Location</p>
                   </div>
@@ -235,9 +235,11 @@ function getCategoryIcon(slug: string) {
                       </div>
                     );
                   })}
-                  <a href="/regions" class="block px-4 py-3 text-base font-bold text-center text-white hover-mint-green transition-colors border-t border-gray-700">
-                    View All Locations →
-                  </a>
+                  <div class="pb-4">
+                    <a href="/regions" class="block px-4 py-3 text-base font-bold text-center text-white hover-mint-green transition-colors border-t border-gray-700">
+                      View All Locations →
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
