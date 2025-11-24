@@ -29,11 +29,13 @@ try {
   console.error('Error fetching store:', error);
 }
 
-// Fetch active discounts for this location
+// Fetch non-expired discounts for this location
+const today = new Date().toISOString().split('T')[0];
+
 if (store) {
   try {
     const discountsResponse = await fetch(
-      `${API_BASE}/discounts?filters[isActive][$eq]=true&populate=appliesToLocations&pagination[pageSize]=500&sort=createdAt:desc`
+      `${API_BASE}/discounts?filters[validUntil][$gte]=${today}&populate=appliesToLocations&pagination[pageSize]=500&sort=createdAt:desc`
     );
     if (discountsResponse.ok) {
       const data = await discountsResponse.json();

@@ -32,13 +32,15 @@ try {
   console.error('Error fetching stores:', error);
 }
 
-// Fetch active discounts and inventory
-try {
-  console.log('Fetching active discounts and inventory...');
+// Fetch non-expired discounts and inventory
+const today = new Date().toISOString().split('T')[0];
 
-  // Fetch only active discounts (not expired) with store locations
+try {
+  console.log('Fetching non-expired discounts and inventory...');
+
+  // Fetch discounts that haven't expired (validUntil >= today)
   const discountsResponse = await fetch(
-    `${API_BASE}/discounts?filters[isActive][$eq]=true&populate=appliesToLocations&pagination[pageSize]=100&sort=createdAt:desc`
+    `${API_BASE}/discounts?filters[validUntil][$gte]=${today}&populate=appliesToLocations&pagination[pageSize]=100&sort=createdAt:desc`
   );
 
   // Fetch inventory
