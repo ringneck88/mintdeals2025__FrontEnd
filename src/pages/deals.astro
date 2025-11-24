@@ -264,13 +264,6 @@ function getDiscountDisplay(discount) {
                     </div>
                   </div>
 
-                  {/* Application Method */}
-                  <div class="text-center mb-3">
-                    <span class="inline-block px-3 py-1 text-xs bg-green-900 text-green-300 rounded-full">
-                      {discount.applicationMethod || 'Automatic'}
-                    </span>
-                  </div>
-
                   {/* Requirements */}
                   {(discount.minimumItemsRequired || discount.maximumItemsAllowed) && (
                     <div class="text-center text-sm text-white bg-gray-800 rounded py-2 px-3 mt-2">
@@ -278,13 +271,6 @@ function getDiscountDisplay(discount) {
                       {discount.maximumItemsAllowed && discount.minimumItemsRequired && ' - '}
                       {discount.maximumItemsAllowed && `Max ${discount.maximumItemsAllowed}`}
                       {!discount.maximumItemsAllowed && discount.minimumItemsRequired && '+'}
-                    </div>
-                  )}
-
-                  {/* Online Badge */}
-                  {discount.isAvailableOnline && (
-                    <div class="text-center mt-3">
-                      <span class="px-2 py-1 text-xs bg-blue-900 text-blue-300 rounded">Available Online</span>
                     </div>
                   )}
                 </div>
