@@ -1,0 +1,559 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import {
+  getInventoryWithDiscounts,
+  getCategories,
+  getBrands,
+  type ProductWithDiscount
+} from '../../../lib/redis-api';
+
+export async function getStaticPaths() {
+  try {
+    const response = await fetch('https://mintdealsbackend-production.up.railway.app/api/stores?pagination[pageSize]=100');
+    const data = await response.json();
+
+    return data.data.map((store: any) => ({
+      params: { locationSlug: store.slug }
+    }));
+  } catch (error) {
+    console.error('Error fetching stores for static paths:', error);
+    return [];
+  }
+}
+
+const { locationSlug } = Astro.params;
+
+// API Configuration
+const STRAPI_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
+// Fetch the location/store details
+let store: any = null;
+let products: ProductWithDiscount[] = [];
+let error: string | null = null;
+let categories: string[] = [];
+let brands: string[] = [];
+
+try {
+  const storesResponse = await fetch(`${STRAPI_BASE}/stores?filters[slug][$eq]=${locationSlug}&populate=*`);
+  if (storesResponse.ok) {
+    const data = await storesResponse.json();
+    const storeData = data?.data?.[0];
+    if (storeData) {
+      store = {
+        id: storeData.id,
+        documentId: storeData.documentId,
+        name: storeData.name || 'Store',
+        slug: storeData.slug || locationSlug,
+        dutchieStoreId: storeData.DutchieStoreID || storeData.dutchieStoreId,
+        region: storeData.region?.name || storeData.region?.Name || '',
+      };
+    }
+  }
+} catch (err: any) {
+  error = `Error fetching store: ${err.message}`;
+  console.error(error);
+}
+
+// Fetch products with discounts from Redis cache API
+if (store?.dutchieStoreId) {
+  try {
+    // Fetch products, categories, and brands from Redis cache in parallel
+    const [productsData, categoriesData, brandsData] = await Promise.all([
+      getInventoryWithDiscounts(store.dutchieStoreId),
+      getCategories(store.dutchieStoreId).catch(() => ({ categories: [], masterCategories: [] })),
+      getBrands(store.dutchieStoreId).catch(() => [])
+    ]);
+
+    products = productsData;
+
+    // Filter to cannabis products only (is_active can be NULL, treat as true)
+    products = products.filter(p => p.is_cannabis === true && p.is_active !== false);
+
+    // Use categories/brands from Redis API, or extract from products as fallback
+    categories = categoriesData.categories.length > 0
+      ? categoriesData.categories
+      : [...new Set(products.map(p => p.category).filter(Boolean))] as string[];
+
+    brands = brandsData.length > 0
+      ? brandsData
+      : [...new Set(products.map(p => p.brand_name).filter(Boolean))] as string[];
+
+    categories.sort();
+    brands.sort();
+
+    console.log(`[Redis API] Fetched ${products.length} products for ${store.name}`);
+  } catch (err: any) {
+    error = `Error fetching products: ${err.message}`;
+    console.error(error);
+  }
+}
+
+// Helper function to format price
+function formatPrice(price: number | string | null | undefined): string | null {
+  if (price === null || price === undefined) return null;
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  if (isNaN(numPrice)) return null;
+  return numPrice.toFixed(2);
+}
+
+// Helper function to get primary image
+function getProductImage(product: ProductWithDiscount): string | null {
+  if (product.image_url) return product.image_url;
+  if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+    return product.images[0]?.url || null;
+  }
+  return null;
+}
+
+// Get the base price (unit_price, rec_unit_price, or price)
+function getBasePrice(product: ProductWithDiscount): number {
+  const priceValue = product.unit_price || product.rec_unit_price || product.price || 0;
+  const numPrice = typeof priceValue === 'string' ? parseFloat(priceValue) : Number(priceValue);
+  return isNaN(numPrice) ? 0 : numPrice;
+}
+
+// Helper function to calculate savings
+function calculateSavings(product: ProductWithDiscount): { percentOff: number; savings: number } | null {
+  const basePrice = getBasePrice(product);
+  if (!product.discounted_price || !basePrice) return null;
+
+  const discountedPrice = typeof product.discounted_price === 'string'
+    ? parseFloat(product.discounted_price)
+    : Number(product.discounted_price);
+
+  if (isNaN(discountedPrice)) return null;
+
+  const savings = basePrice - discountedPrice;
+  const percentOff = Math.round((savings / basePrice) * 100);
+
+  return { percentOff, savings };
+}
+
+// Count discounted products
+const discountedCount = products.filter(p => p.discount_name).length;
+---
+
+<style>
+  .logo-bg {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150vw;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero-logo-bg {
+    position: absolute;
+    top: 40%;
+    left: 65%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.08;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .product-card {
+    transition: all 0.3s ease;
+  }
+  .product-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .filter-btn {
+    transition: all 0.2s ease;
+    color: #e5e7eb; /* Light gray text for visibility */
+  }
+  .filter-btn:hover {
+    background-color: rgba(34, 197, 94, 0.4);
+    color: #ffffff;
+  }
+  .filter-btn.active {
+    background-color: rgba(34, 197, 94, 0.9);
+    color: #ffffff !important;
+    font-weight: 600;
+  }
+</style>
+
+<Layout title={`Products at ${store?.name || 'Location'} | Mint Cannabis`} description={`Browse all products at ${store?.name || 'this location'}.`}>
+  <!-- Static Logo Background -->
+  <img src="/assets/MintCannabis_CoinLogo_GreyScale_Grey%204.png" alt="" class="logo-bg" aria-hidden="true" />
+
+  <div class="min-h-screen bg-black">
+    <!-- Hero Section -->
+    <div class="text-white py-12 md:py-16 relative">
+      <!-- Hero Logo Background -->
+      <img src="/assets/MintCannabis_CoinLogo_GreyScale_Grey%204.png" alt="" class="hero-logo-bg" aria-hidden="true" />
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-1">
+        <!-- Breadcrumbs -->
+        <nav class="mb-6 text-sm">
+          <div class="flex items-center justify-center space-x-2">
+            <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
+            <span class="text-green-300">/</span>
+            <a href={`/location/${store?.slug || locationSlug}`} class="text-yellow-400 hover:text-yellow-300">{store?.name || 'Location'}</a>
+            <span class="text-green-300">/</span>
+            <span class="text-white">Products</span>
+          </div>
+        </nav>
+
+        <div class="text-center">
+          <h1 class="text-4xl md:text-6xl font-bold mb-4 uppercase" style="text-shadow: 0 4px 8px rgba(0,0,0,0.8);">
+            Products at {store?.name || 'Location'}
+          </h1>
+          {store?.region && (
+            <p class="text-lg text-gray-300 mb-2">{store.region}</p>
+          )}
+          <p class="text-lg md:text-xl text-yellow-400 max-w-2xl mx-auto">
+            {products.length} products available | {discountedCount} on sale!
+          </p>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex justify-center gap-8 mt-8">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-green-400">{products.length}</div>
+            <div class="text-sm text-gray-300">Products</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-red-400">{discountedCount}</div>
+            <div class="text-sm text-gray-300">On Sale</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-purple-400">{brands.length}</div>
+            <div class="text-sm text-gray-300">Brands</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    {error && (
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-red-900/80 border border-red-600 rounded-lg p-6 text-white">
+          <h2 class="text-xl font-bold mb-2">Error</h2>
+          <p class="text-sm">{error}</p>
+        </div>
+      </div>
+    )}
+
+    <!-- Filters -->
+    <div class="bg-gray-900/50 py-6 sticky top-0 z-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap gap-4 items-center justify-between">
+          <!-- Category Filter -->
+          <div class="flex flex-wrap gap-2 items-center">
+            <span class="text-white text-sm mr-2 font-medium">Category:</span>
+            <button
+              class="filter-btn active px-3 py-1 rounded-full text-sm bg-green-600 text-white font-semibold border border-green-500"
+              data-filter="category"
+              data-value="all"
+            >
+              All
+            </button>
+            {categories.slice(0, 8).map(cat => (
+              <button
+                class="filter-btn px-3 py-1 rounded-full text-sm bg-gray-700 text-white border border-gray-500"
+                data-filter="category"
+                data-value={cat}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <!-- Quick Filters -->
+          <div class="flex gap-2">
+            <button
+              class="filter-btn px-4 py-2 rounded-lg text-sm bg-red-900/50 text-red-300 border border-red-600"
+              data-filter="sale"
+              data-value="true"
+            >
+              On Sale Only
+            </button>
+            <button
+              class="filter-btn px-4 py-2 rounded-lg text-sm bg-purple-900/50 text-purple-300 border border-purple-600"
+              data-filter="staff-pick"
+              data-value="true"
+            >
+              Staff Picks
+            </button>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="mt-4">
+          <input
+            type="text"
+            id="product-search"
+            placeholder="Search products..."
+            class="w-full max-w-md px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:border-green-500 focus:outline-none"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="py-8 pb-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {products.length === 0 && !error ? (
+          <div class="text-center py-16">
+            <div class="max-w-md mx-auto p-8 bg-black/80 rounded-lg">
+              <div class="text-6xl mb-4">📦</div>
+              <p class="text-white text-xl font-bold">No products found</p>
+              <p class="text-gray-300 mt-2">Check back soon for new products!</p>
+            </div>
+          </div>
+        ) : (
+          <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {products.map((product) => {
+              const imageUrl = getProductImage(product);
+              const savings = calculateSavings(product);
+              const hasDiscount = !!product.discount_name;
+
+              return (
+                <div
+                  class="product-card bg-black/80 rounded-lg overflow-hidden shadow-lg relative"
+                  data-category={product.category || ''}
+                  data-brand={product.brand_name || ''}
+                  data-name={product.product_name?.toLowerCase() || ''}
+                  data-on-sale={hasDiscount ? 'true' : 'false'}
+                  data-staff-pick={product.staff_pick ? 'true' : 'false'}
+                >
+                  {/* Discount Badge */}
+                  {hasDiscount && savings && (
+                    <div class="absolute top-2 left-2 z-10 bg-red-600 text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
+                      {savings.percentOff}% OFF
+                    </div>
+                  )}
+
+                  {/* Staff Pick Badge */}
+                  {product.staff_pick && (
+                    <div class="absolute top-2 right-2 z-10 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-lg">
+                      Staff Pick
+                    </div>
+                  )}
+
+                  {/* Low Stock Badge */}
+                  {product.quantity_available && product.quantity_available > 0 && product.quantity_available < 10 && (
+                    <div class="absolute bottom-2 right-2 z-10 bg-orange-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                      Low Stock
+                    </div>
+                  )}
+
+                  {/* Product Image */}
+                  <div class="w-full h-40 bg-white flex items-center justify-center overflow-hidden">
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={product.product_name || 'Product'}
+                        class="w-full h-full object-contain"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div class="text-gray-400 text-4xl">📦</div>
+                    )}
+                  </div>
+
+                  {/* Product Info */}
+                  <div class="p-3">
+                    {/* Category */}
+                    <div class="text-green-400 text-xs uppercase tracking-wider mb-1">
+                      {product.category || 'Uncategorized'}
+                    </div>
+
+                    {/* Product Name */}
+                    <h3 class="text-white text-sm font-bold line-clamp-2 mb-1">
+                      {product.product_name || 'Product'}
+                    </h3>
+
+                    {/* Brand */}
+                    {product.brand_name && (
+                      <div class="text-gray-400 text-xs mb-2">
+                        {product.brand_name}
+                      </div>
+                    )}
+
+                    {/* Strain Type */}
+                    {(product.strain_type || (product.strain && product.strain !== 'No Strain')) && (
+                      <div class="inline-block px-2 py-0.5 rounded text-xs bg-purple-900/50 text-purple-300 mb-2">
+                        {product.strain_type || product.strain}
+                      </div>
+                    )}
+
+                    {/* THC/CBD/Potency */}
+                    <div class="flex flex-wrap gap-2 text-xs mb-2">
+                      {product.potency_thc_formatted && (
+                        <span class="px-2 py-0.5 bg-yellow-900/50 text-yellow-400 rounded">THC: {product.potency_thc_formatted}</span>
+                      )}
+                      {product.potency_cbd_formatted && (
+                        <span class="px-2 py-0.5 bg-blue-900/50 text-blue-400 rounded">CBD: {product.potency_cbd_formatted}</span>
+                      )}
+                      {!product.potency_thc_formatted && !product.potency_cbd_formatted && product.effective_potency_mg && parseFloat(String(product.effective_potency_mg)) > 0 && (
+                        <span class="px-2 py-0.5 bg-green-900/50 text-green-400 rounded">
+                          {parseFloat(String(product.effective_potency_mg)) >= 1000
+                            ? `${(parseFloat(String(product.effective_potency_mg)) / 1000).toFixed(1)}g`
+                            : `${parseFloat(String(product.effective_potency_mg)).toFixed(0)}mg`}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Discount Name */}
+                    {product.discount_name && (
+                      <div class="text-yellow-400 text-xs font-semibold mb-2 truncate">
+                        {product.discount_name}
+                      </div>
+                    )}
+
+                    {/* Pricing */}
+                    <div class="mt-auto pt-2 border-t border-gray-700">
+                      {hasDiscount && product.discounted_price ? (
+                        <div class="flex items-center gap-2">
+                          <span class="text-gray-400 text-sm line-through">${formatPrice(getBasePrice(product))}</span>
+                          <span class="text-green-400 text-lg font-bold">${formatPrice(product.discounted_price)}</span>
+                        </div>
+                      ) : (
+                        <span class="text-green-400 text-lg font-bold">${formatPrice(getBasePrice(product))}</span>
+                      )}
+
+                      {savings && (
+                        <div class="text-yellow-400 text-xs mt-1">
+                          Save ${formatPrice(savings.savings)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <!-- CTA -->
+        <div class="mt-16 bg-black/90 rounded-lg p-8 text-center">
+          <h2 class="text-2xl font-bold mb-4 text-white uppercase">
+            Visit {store?.name || 'This Location'}
+          </h2>
+          <p class="text-green-300 mb-6 max-w-2xl mx-auto">
+            Stop by to shop our full selection in person!
+          </p>
+          <div class="flex justify-center gap-4">
+            <a href={`/location/${store?.slug || locationSlug}`} class="inline-block px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors">
+              View Location Details
+            </a>
+            <a href={`/location/${store?.slug || locationSlug}/deals`} class="inline-block px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-colors">
+              View Deals
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Client-side filtering
+  document.addEventListener('DOMContentLoaded', () => {
+    const productsGrid = document.getElementById('products-grid');
+    const searchInput = document.getElementById('product-search') as HTMLInputElement;
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    if (!productsGrid) return;
+
+    const products = productsGrid.querySelectorAll('.product-card');
+
+    let activeFilters = {
+      category: 'all',
+      sale: false,
+      staffPick: false,
+      search: ''
+    };
+
+    function filterProducts() {
+      products.forEach((product) => {
+        const el = product as HTMLElement;
+        const category = el.dataset.category || '';
+        const name = el.dataset.name || '';
+        const onSale = el.dataset.onSale === 'true';
+        const staffPick = el.dataset.staffPick === 'true';
+
+        let show = true;
+
+        // Category filter
+        if (activeFilters.category !== 'all' && category !== activeFilters.category) {
+          show = false;
+        }
+
+        // Sale filter
+        if (activeFilters.sale && !onSale) {
+          show = false;
+        }
+
+        // Staff pick filter
+        if (activeFilters.staffPick && !staffPick) {
+          show = false;
+        }
+
+        // Search filter
+        if (activeFilters.search && !name.includes(activeFilters.search.toLowerCase())) {
+          show = false;
+        }
+
+        el.style.display = show ? '' : 'none';
+      });
+
+      // Update visible count
+      const visibleCount = Array.from(products).filter(p => (p as HTMLElement).style.display !== 'none').length;
+      console.log(`Showing ${visibleCount} products`);
+    }
+
+    // Filter button clicks
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = (btn as HTMLElement).dataset.filter;
+        const value = (btn as HTMLElement).dataset.value;
+
+        if (filter === 'category') {
+          // Update active state for category buttons
+          filterButtons.forEach(b => {
+            if ((b as HTMLElement).dataset.filter === 'category') {
+              b.classList.remove('active');
+            }
+          });
+          btn.classList.add('active');
+          activeFilters.category = value || 'all';
+        } else if (filter === 'sale') {
+          btn.classList.toggle('active');
+          activeFilters.sale = !activeFilters.sale;
+        } else if (filter === 'staff-pick') {
+          btn.classList.toggle('active');
+          activeFilters.staffPick = !activeFilters.staffPick;
+        }
+
+        filterProducts();
+      });
+    });
+
+    // Search input
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        activeFilters.search = searchInput.value;
+        filterProducts();
+      });
+    }
+  });
+</script>

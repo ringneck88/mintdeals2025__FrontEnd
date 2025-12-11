@@ -170,7 +170,7 @@ function getCategoryIcon(slug: string) {
   <body class="bg-gray-50 min-h-screen">
     <AgeGate />
 
-    <header class="bg-black shadow-lg">
+    <header class="bg-black shadow-lg sticky top-0 z-50">
       <div class="max-w-[95%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20">
         <div class="flex justify-between items-center py-6">
           <div class="flex items-center">
@@ -243,15 +243,31 @@ function getCategoryIcon(slug: string) {
                 </div>
               </div>
             </div>
-            <a href="/map" class="text-gray-200 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-semibold">
-              Map
-            </a>
-            <a href="/locations-deals" class="text-gray-200 hover:text-yellow-500 px-3 py-2 rounded-md text-sm font-semibold">
-              Location Deals
-            </a>
-            <a href="/deals" class="text-gray-200 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-semibold">
-              Deals
-            </a>
+            <div class="relative" id="dealsDropdown">
+              <a href="/deals-db" class="text-gray-200 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-1">
+                Deals
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </a>
+
+              <!-- Deals Dropdown Menu -->
+              <div id="dealsMenu" class="absolute right-0 mt-1 w-64 border border-black rounded-lg hidden z-50" style="background-color: rgba(25, 25, 25, 0.95); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 165, 0, 0.2);">
+                <div class="py-2">
+                  <div class="px-4 py-3">
+                    <p class="text-orange-400 font-bold text-base pb-1 leading-snug">Browse Deals</p>
+                  </div>
+                  {navRegions.map(region => (
+                    <a
+                      href={`/deals-db?state=${region.slug}`}
+                      class="block px-4 py-2 text-sm text-gray-300 hover:text-orange-400 transition-colors"
+                    >
+                      {region.name}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
           </nav>
         </div>
       </div>
@@ -260,19 +276,6 @@ function getCategoryIcon(slug: string) {
     <main>
       <slot />
     </main>
-
-    <!-- Back to Top Button -->
-    <div class="fixed bottom-24 right-8 z-50">
-      <button
-        id="backToTopBtn"
-        class="bg-green-600 hover:bg-green-500 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 invisible"
-        aria-label="Back to top"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-        </svg>
-      </button>
-    </div>
 
     <footer class="bg-gray-800 text-white">
       <div class="max-w-[95%] mx-auto px-8 sm:px-12 lg:px-16 xl:px-20 py-12">
@@ -330,13 +333,7 @@ function getCategoryIcon(slug: string) {
                 <a href="/regions" class="text-gray-400 hover-mint-green text-sm transition-colors">Locations</a>
               </li>
               <li>
-                <a href="/map" class="text-gray-400 hover:text-purple-400 text-sm transition-colors">Map</a>
-              </li>
-              <li>
-                <a href="/locations-deals" class="text-gray-400 hover:text-yellow-400 text-sm transition-colors">Location Deals</a>
-              </li>
-              <li>
-                <a href="/deals" class="text-gray-400 hover:text-orange-400 text-sm transition-colors">Deals</a>
+                <a href="/deals-db" class="text-gray-400 hover:text-orange-400 text-sm transition-colors">Deals</a>
               </li>
             </ul>
           </div>
@@ -489,6 +486,43 @@ function getCategoryIcon(slug: string) {
             }, 200);
           });
         }
+
+        // Deals dropdown functionality
+        const dealsDropdown = document.getElementById('dealsDropdown');
+        const dealsMenu = document.getElementById('dealsMenu');
+
+        if (dealsDropdown && dealsMenu) {
+          let isDealsOpen = false;
+          let dealsCloseTimeout: NodeJS.Timeout | null = null;
+
+          // Open dropdown on mouseenter
+          dealsDropdown.addEventListener('mouseenter', () => {
+            if (dealsCloseTimeout) clearTimeout(dealsCloseTimeout);
+            dealsMenu.classList.remove('hidden');
+            isDealsOpen = true;
+          });
+
+          // Keep open when hovering over menu
+          dealsMenu.addEventListener('mouseenter', () => {
+            if (dealsCloseTimeout) clearTimeout(dealsCloseTimeout);
+            isDealsOpen = true;
+          });
+
+          // Close dropdown with delay on mouseleave
+          dealsDropdown.addEventListener('mouseleave', () => {
+            dealsCloseTimeout = setTimeout(() => {
+              dealsMenu.classList.add('hidden');
+              isDealsOpen = false;
+            }, 200);
+          });
+
+          dealsMenu.addEventListener('mouseleave', () => {
+            dealsCloseTimeout = setTimeout(() => {
+              dealsMenu.classList.add('hidden');
+              isDealsOpen = false;
+            }, 200);
+          });
+        }
       }
 
       // Initialize on page load
@@ -502,31 +536,34 @@ function getCategoryIcon(slug: string) {
       // Back to Top Button functionality
       function initBackToTop() {
         const backToTopBtn = document.getElementById('backToTopBtn');
-        if (!backToTopBtn) return;
-
-        // Show button when user scrolls down 300px
-        function toggleButton() {
-          if (window.scrollY > 300) {
-            backToTopBtn.classList.remove('opacity-0', 'invisible');
-            backToTopBtn.classList.add('opacity-100', 'visible');
-          } else {
-            backToTopBtn.classList.add('opacity-0', 'invisible');
-            backToTopBtn.classList.remove('opacity-100', 'visible');
-          }
+        if (!backToTopBtn) {
+          console.log('Back to top button not found');
+          return;
         }
+
+        console.log('Back to top button initialized');
 
         // Scroll to top smoothly
         backToTopBtn.addEventListener('click', () => {
+          console.log('Back to top clicked');
           window.scrollTo({
             top: 0,
             behavior: 'smooth'
           });
         });
 
-        // Listen for scroll events
-        window.addEventListener('scroll', toggleButton);
+        // Show/hide based on scroll
+        function toggleButton() {
+          if (window.scrollY > 300) {
+            backToTopBtn.style.opacity = '1';
+            backToTopBtn.style.visibility = 'visible';
+          } else {
+            backToTopBtn.style.opacity = '0.5';
+            backToTopBtn.style.visibility = 'visible';
+          }
+        }
 
-        // Initial check
+        window.addEventListener('scroll', toggleButton);
         toggleButton();
       }
 
@@ -570,6 +607,83 @@ function getCategoryIcon(slug: string) {
       #locationsMenu ::-webkit-scrollbar-thumb:hover {
         background: #00b557;
       }
+
+      /* Back to Top Button - Match carousel navigation buttons */
+      #backToTopBtn {
+        position: fixed !important;
+        bottom: 100px !important;
+        right: 20px !important;
+        z-index: 999999 !important;
+        background: #16a34a !important; /* green-600 to match carousel */
+        color: white !important;
+        padding: 12px !important;
+        border-radius: 9999px !important; /* rounded-full */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; /* shadow-lg */
+        border: none !important;
+        cursor: pointer !important;
+        width: 48px !important;
+        height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transition: all 300ms !important;
+      }
+      #backToTopBtn:hover {
+        background: #15803d !important; /* green-700 to match carousel hover */
+        transform: translateY(-2px);
+      }
     </style>
+
+    <script is:inline>
+      // Create back to top button dynamically
+      (function() {
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', createButton);
+        } else {
+          createButton();
+        }
+
+        function createButton() {
+          // Remove any existing button
+          const existing = document.getElementById('backToTopBtn');
+          if (existing) existing.remove();
+
+          // Create button with SVG arrow icon to match carousel buttons
+          const btn = document.createElement('button');
+          btn.id = 'backToTopBtn';
+          btn.innerHTML = '<svg style="width:24px;height:24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
+          btn.style.cssText = 'position:fixed!important;bottom:80px!important;right:30px!important;width:48px!important;height:48px!important;background:#16a34a!important;color:white!important;border:none!important;border-radius:9999px!important;cursor:pointer!important;z-index:99999999!important;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05)!important;pointer-events:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;opacity:1!important;visibility:visible!important;transform:none!important;transition:all 300ms!important;';
+          btn.setAttribute('aria-label', 'Back to top');
+
+          // Add click handler
+          btn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            console.log('Back to top clicked!');
+          };
+
+          // Hover effects to match carousel buttons (green-600 -> green-700)
+          btn.addEventListener('mouseenter', function() {
+            this.style.background = '#15803d';
+          });
+          btn.addEventListener('mouseleave', function() {
+            this.style.background = '#16a34a';
+          });
+
+          // Add to page
+          document.body.appendChild(btn);
+          console.log('✅ Back to top button created and added to body');
+          console.log('Button element:', btn);
+          console.log('Button position:', btn.getBoundingClientRect());
+        }
+
+        // Re-create on Astro page transitions
+        document.addEventListener('astro:page-load', createButton);
+      })();
+    </script>
   </body>
 </html>

@@ -1,0 +1,447 @@
+{
+  "name": "Competitive Price Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "notes": "Runs every 6 hours. Adjust interval as needed."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Define your products and competitor URLs to monitor\n// Customize this array with your actual products and competitor pages\n\nconst productsToMonitor = [\n  {\n    sku: \"PROD-001\",\n    name: \"Example Product 1\",\n    yourPrice: 29.99,\n    competitors: [\n      {\n        name: \"Competitor A\",\n        url: \"https://competitor-a.com/product-1\",\n        priceSelector: \".price-value\",\n        nameSelector: \".product-title\"\n      },\n      {\n        name: \"Competitor B\",\n        url: \"https://competitor-b.com/items/product-1\",\n        priceSelector: \"[data-price]\",\n        nameSelector: \"h1.product-name\"\n      }\n    ]\n  },\n  {\n    sku: \"PROD-002\",\n    name: \"Example Product 2\",\n    yourPrice: 49.99,\n    competitors: [\n      {\n        name: \"Competitor A\",\n        url: \"https://competitor-a.com/product-2\",\n        priceSelector: \".price-value\",\n        nameSelector: \".product-title\"\n      }\n    ]\n  }\n];\n\n// Flatten to individual scrape tasks\nconst scrapeTasks = [];\nfor (const product of productsToMonitor) {\n  for (const competitor of product.competitors) {\n    scrapeTasks.push({\n      sku: product.sku,\n      productName: product.name,\n      yourPrice: product.yourPrice,\n      competitorName: competitor.name,\n      url: competitor.url,\n      priceSelector: competitor.priceSelector,\n      nameSelector: competitor.nameSelector\n    });\n  }\n}\n\nreturn scrapeTasks.map(task => ({ json: task }));"
+      },
+      "id": "define-products",
+      "name": "Define Products to Monitor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0],
+      "notes": "Configure your products and competitor URLs here"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "fetch-competitor-page",
+      "name": "Fetch Competitor Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 0],
+      "notes": "Fetches the competitor product page HTML",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract price from HTML using the configured selector\n// This uses regex-based extraction as a fallback\n\nconst html = $input.first().json.data || $input.first().json.body || '';\nconst priceSelector = $('Define Products to Monitor').item.json.priceSelector;\nconst productData = $('Define Products to Monitor').item.json;\n\n// Common price patterns to extract\nconst pricePatterns = [\n  /\\$([\\d,]+\\.\\d{2})/g,           // $29.99\n  /USD\\s*([\\d,]+\\.\\d{2})/gi,      // USD 29.99\n  /price[\"']?\\s*[:=]\\s*[\"']?\\$?([\\d,]+\\.?\\d*)/gi,  // price: 29.99\n  /([\\d,]+\\.\\d{2})\\s*(?:USD|\\$)/g  // 29.99 USD\n];\n\nlet extractedPrices = [];\n\n// Try to find prices in the HTML\nfor (const pattern of pricePatterns) {\n  const matches = [...html.matchAll(pattern)];\n  for (const match of matches) {\n    const price = parseFloat(match[1].replace(/,/g, ''));\n    if (price > 0 && price < 100000) { // Sanity check\n      extractedPrices.push(price);\n    }\n  }\n}\n\n// Remove duplicates and sort\nextractedPrices = [...new Set(extractedPrices)].sort((a, b) => a - b);\n\n// Use the most likely product price (often the first or most prominent)\nconst competitorPrice = extractedPrices.length > 0 ? extractedPrices[0] : null;\n\nreturn [{\n  json: {\n    ...productData,\n    competitorPrice: competitorPrice,\n    pricesFound: extractedPrices,\n    scrapedAt: new Date().toISOString(),\n    scrapeSuccess: competitorPrice !== null\n  }\n}];"
+      },
+      "id": "extract-price",
+      "name": "Extract Price from HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0],
+      "notes": "Parses HTML to extract competitor price"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compare your price with competitor price and calculate metrics\n\nconst data = $input.first().json;\n\nif (!data.scrapeSuccess || data.competitorPrice === null) {\n  return [{\n    json: {\n      ...data,\n      comparison: 'SCRAPE_FAILED',\n      priceDifference: null,\n      percentageDifference: null,\n      recommendation: 'Manual review required - could not extract competitor price',\n      alertLevel: 'warning'\n    }\n  }];\n}\n\nconst yourPrice = data.yourPrice;\nconst competitorPrice = data.competitorPrice;\nconst priceDifference = yourPrice - competitorPrice;\nconst percentageDifference = ((priceDifference / competitorPrice) * 100).toFixed(2);\n\nlet comparison, recommendation, alertLevel;\n\nif (priceDifference > 0) {\n  // You're more expensive\n  const percentHigher = Math.abs(percentageDifference);\n  if (percentHigher > 20) {\n    comparison = 'SIGNIFICANTLY_HIGHER';\n    recommendation = `Your price is ${percentHigher}% higher. Consider price reduction.`;\n    alertLevel = 'critical';\n  } else if (percentHigher > 10) {\n    comparison = 'HIGHER';\n    recommendation = `Your price is ${percentHigher}% higher. Monitor closely.`;\n    alertLevel = 'warning';\n  } else {\n    comparison = 'SLIGHTLY_HIGHER';\n    recommendation = `Your price is ${percentHigher}% higher. Within acceptable range.`;\n    alertLevel = 'info';\n  }\n} else if (priceDifference < 0) {\n  // You're cheaper\n  const percentLower = Math.abs(percentageDifference);\n  if (percentLower > 20) {\n    comparison = 'SIGNIFICANTLY_LOWER';\n    recommendation = `Your price is ${percentLower}% lower. Consider price increase for margin.`;\n    alertLevel = 'info';\n  } else {\n    comparison = 'LOWER';\n    recommendation = `Your price is ${percentLower}% lower. Competitive position good.`;\n    alertLevel: 'success';\n  }\n} else {\n  comparison = 'EQUAL';\n  recommendation = 'Prices are equal. Consider differentiation strategy.';\n  alertLevel = 'info';\n}\n\nreturn [{\n  json: {\n    ...data,\n    comparison,\n    priceDifference: priceDifference.toFixed(2),\n    percentageDifference: `${percentageDifference}%`,\n    recommendation,\n    alertLevel\n  }\n}];"
+      },
+      "id": "compare-prices",
+      "name": "Compare Prices",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 0],
+      "notes": "Compares your price vs competitor and generates recommendations"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "critical-alert",
+              "leftValue": "={{ $json.alertLevel }}",
+              "rightValue": "critical",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "filter-critical",
+      "name": "Filter Critical Alerts",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1100, -100],
+      "notes": "Routes critical price differences for immediate attention"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "warning-alert",
+              "leftValue": "={{ $json.alertLevel }}",
+              "rightValue": "warning",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "filter-warnings",
+      "name": "Filter Warnings",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1100, 100],
+      "notes": "Routes warning-level alerts"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Price Monitor Log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $json.scrapedAt }}",
+            "SKU": "={{ $json.sku }}",
+            "Product Name": "={{ $json.productName }}",
+            "Your Price": "={{ $json.yourPrice }}",
+            "Competitor": "={{ $json.competitorName }}",
+            "Competitor Price": "={{ $json.competitorPrice }}",
+            "Difference": "={{ $json.priceDifference }}",
+            "Difference %": "={{ $json.percentageDifference }}",
+            "Status": "={{ $json.comparison }}",
+            "Recommendation": "={{ $json.recommendation }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-to-sheets",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1100, 300],
+      "notes": "Logs all price comparisons to a Google Sheet for historical tracking",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "channel": "#price-alerts",
+        "text": ":rotating_light: *CRITICAL PRICE ALERT*\n\n*Product:* {{ $json.productName }} ({{ $json.sku }})\n*Your Price:* ${{ $json.yourPrice }}\n*{{ $json.competitorName }} Price:* ${{ $json.competitorPrice }}\n*Difference:* {{ $json.percentageDifference }}\n\n:point_right: {{ $json.recommendation }}\n\n_Scraped at: {{ $json.scrapedAt }}_",
+        "otherOptions": {}
+      },
+      "id": "slack-critical",
+      "name": "Slack Critical Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1320, -100],
+      "notes": "Sends critical alerts to Slack",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@example.com",
+        "subject": "Price Alert: {{ $json.productName }} - {{ $json.comparison }}",
+        "message": "Price Monitoring Alert\n\nProduct: {{ $json.productName }} ({{ $json.sku }})\nYour Price: ${{ $json.yourPrice }}\n{{ $json.competitorName }} Price: ${{ $json.competitorPrice }}\nDifference: {{ $json.percentageDifference }}\n\nRecommendation: {{ $json.recommendation }}\n\nScraped at: {{ $json.scrapedAt }}",
+        "options": {}
+      },
+      "id": "email-warning",
+      "name": "Email Warning Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1320, 100],
+      "notes": "Sends warning alerts via email",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://your-api.com/api/price-adjustments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"sku\": \"{{ $json.sku }}\",\n  \"currentPrice\": {{ $json.yourPrice }},\n  \"competitorPrice\": {{ $json.competitorPrice }},\n  \"suggestedPrice\": {{ $json.competitorPrice * 0.98 }},\n  \"competitor\": \"{{ $json.competitorName }}\",\n  \"autoAdjust\": false,\n  \"timestamp\": \"{{ $json.scrapedAt }}\"\n}",
+        "options": {}
+      },
+      "id": "api-price-update",
+      "name": "Send to Pricing API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, -100],
+      "notes": "Optional: Send price adjustment suggestion to your pricing system",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate all results for summary report\n\nconst allItems = $input.all();\n\nconst summary = {\n  totalChecks: allItems.length,\n  successful: allItems.filter(i => i.json.scrapeSuccess).length,\n  failed: allItems.filter(i => !i.json.scrapeSuccess).length,\n  critical: allItems.filter(i => i.json.alertLevel === 'critical').length,\n  warnings: allItems.filter(i => i.json.alertLevel === 'warning').length,\n  competitive: allItems.filter(i => ['LOWER', 'SIGNIFICANTLY_LOWER', 'EQUAL'].includes(i.json.comparison)).length,\n  timestamp: new Date().toISOString(),\n  details: allItems.map(i => ({\n    product: i.json.productName,\n    competitor: i.json.competitorName,\n    yourPrice: i.json.yourPrice,\n    competitorPrice: i.json.competitorPrice,\n    status: i.json.comparison,\n    alert: i.json.alertLevel\n  }))\n};\n\nreturn [{ json: summary }];"
+      },
+      "id": "aggregate-results",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 500],
+      "notes": "Creates a summary of all price checks"
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 200],
+      "notes": "Use this to manually run the workflow for testing"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.5"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "fetch-with-headers",
+      "name": "Fetch with Browser Headers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 200],
+      "notes": "Alternative fetch with browser-like headers to avoid blocks",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Handle scrape errors gracefully\n\nconst productData = $('Define Products to Monitor').item.json;\n\nreturn [{\n  json: {\n    ...productData,\n    competitorPrice: null,\n    pricesFound: [],\n    scrapedAt: new Date().toISOString(),\n    scrapeSuccess: false,\n    error: 'Failed to fetch competitor page'\n  }\n}];"
+      },
+      "id": "handle-error",
+      "name": "Handle Scrape Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 200],
+      "notes": "Handles cases where the HTTP request fails"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Define Products to Monitor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Define Products to Monitor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Products to Monitor": {
+      "main": [
+        [
+          {
+            "node": "Fetch Competitor Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Competitor Page": {
+      "main": [
+        [
+          {
+            "node": "Extract Price from HTML",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Scrape Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Scrape Error": {
+      "main": [
+        [
+          {
+            "node": "Compare Prices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Price from HTML": {
+      "main": [
+        [
+          {
+            "node": "Compare Prices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compare Prices": {
+      "main": [
+        [
+          {
+            "node": "Filter Critical Alerts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter Warnings",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Critical Alerts": {
+      "main": [
+        [
+          {
+            "node": "Slack Critical Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send to Pricing API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Warnings": {
+      "main": [
+        [
+          {
+            "node": "Email Warning Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "price-monitoring"
+    },
+    {
+      "name": "web-scraping"
+    },
+    {
+      "name": "automation"
+    }
+  ],
+  "pinData": {}
+}

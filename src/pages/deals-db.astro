@@ -1,0 +1,891 @@
+---
+import Layout from '../layouts/Layout.astro';
+import DutchieCarousel from '../components/DutchieCarousel.astro';
+
+// API Configuration
+const STRAPI_BASE = 'https://mintdealsbackend-production.up.railway.app/api';
+
+// Get state filter from URL
+const url = new URL(Astro.request.url);
+const stateFilter = url.searchParams.get('state');
+
+// Helper function to get image URL
+function getImageUrl(imageData: any) {
+  if (!imageData || imageData === null) return null;
+  if (imageData?.data?.attributes?.url) {
+    const url = imageData.data.attributes.url;
+    return url.startsWith('http') ? url : `${STRAPI_BASE.replace('/api', '')}${url}`;
+  }
+  if (typeof imageData === 'object' && imageData.formats) {
+    if (imageData.formats.large?.url) return imageData.formats.large.url;
+    if (imageData.formats.medium?.url) return imageData.formats.medium.url;
+    if (imageData.formats.small?.url) return imageData.formats.small.url;
+  }
+  if (typeof imageData === 'object' && imageData.url) {
+    const url = imageData.url;
+    return url.startsWith('http') ? url : `${STRAPI_BASE.replace('/api', '')}${url}`;
+  }
+  if (typeof imageData === 'string') {
+    return imageData.startsWith('http') ? imageData : `${STRAPI_BASE.replace('/api', '')}${imageData}`;
+  }
+  return null;
+}
+
+// Fetch product discounts from the database via local API endpoint
+let productDiscounts = [];
+let stores = [];
+let bannersByStore: Record<string, any[]> = {};
+let carouselsByStore: Record<string, any[]> = {};
+let regionInfo: any = null;
+let error = null;
+
+// Keep all stores for name lookup
+let allStores: any[] = [];
+
+try {
+  // Fetch stores with region info for filtering
+  const storesResponse = await fetch(`${STRAPI_BASE}/stores?populate=*&pagination[pageSize]=100`);
+  if (storesResponse.ok) {
+    const data = await storesResponse.json();
+    allStores = (data?.data || []).map(store => {
+      // Get region info
+      const region = store.region;
+      const regionName = region?.name || '';
+      const regionSlug = regionName ? regionName.toLowerCase().replace(/\s+/g, '-') : '';
+
+      return {
+        id: store.id,
+        documentId: store.documentId,
+        name: store.name || 'Unnamed Store',
+        slug: store.slug || store.documentId,
+        // DutchieStoreID is used for Dutchie API (carousels, etc)
+        dutchieStoreId: store.DutchieStoreID || store.dutchieStoreId,
+        regionName,
+        regionSlug,
+      };
+    });
+
+    // Copy all stores for filtering
+    stores = [...allStores];
+
+    // Filter stores by state if state filter is provided
+    if (stateFilter) {
+      stores = stores.filter(store => store.regionSlug === stateFilter);
+      if (stores.length > 0) {
+        regionInfo = { name: stores[0].regionName, slug: stateFilter };
+      }
+    }
+  }
+
+  // Fetch banners for all stores
+  const bannersResponse = await fetch(`${STRAPI_BASE}/store-banners?populate=*&pagination[pageSize]=100`);
+  if (bannersResponse.ok) {
+    const bannersData = await bannersResponse.json();
+    const allBanners = bannersData?.data || [];
+    const today = new Date();
+    
+    allBanners.forEach((bannerItem: any) => {
+      // Check date validity
+      const startDate = bannerItem.startDate ? new Date(bannerItem.startDate) : null;
+      const endDate = bannerItem.endDate ? new Date(bannerItem.endDate) : null;
+
+      
+      if (startDate && today < startDate) {
+                return;
+      }
+      if (endDate && today > endDate) {
+                return;
+      }
+
+      // Get assigned stores
+      const assignedStores = bannerItem.stores || [];
+      
+      assignedStores.forEach((s: any) => {
+        const storeKey = s.documentId || s.id;
+                if (!bannersByStore[storeKey]) {
+          bannersByStore[storeKey] = [];
+        }
+        // Banner image is in bannerLeaderboard3019X900 (not banner)
+        const bannerImageData = bannerItem.bannerLeaderboard3019X900 || bannerItem.banner;
+                const imageUrl = getImageUrl(bannerImageData);
+                if (imageUrl) {
+          bannersByStore[storeKey].push({
+            image: imageUrl,
+            link: bannerItem.link || null,
+            title: bannerItem.Name || null
+          });
+        }
+      });
+    });
+
+      }
+
+  // Fetch carousels for all stores
+  const carouselsResponse = await fetch(`${STRAPI_BASE}/store-carousels?populate=*&filters[is_active][$eq]=true&sort=order:asc&pagination[pageSize]=100`);
+  if (carouselsResponse.ok) {
+    const carouselsData = await carouselsResponse.json();
+    const allCarousels = carouselsData?.data || [];
+
+    allCarousels.forEach((carousel: any) => {
+      const store = carousel.store;
+      const storeDocId = store?.documentId || store?.id;
+      if (!storeDocId) return;
+
+      if (!carouselsByStore[storeDocId]) {
+        carouselsByStore[storeDocId] = [];
+      }
+
+      const carouselData = {
+        name: carousel.name || carousel.Name || 'Featured Products',
+        dutchie_carousel_id: carousel.dutchie_carousel_id || carousel.dutchieCarouselId,
+        full_embed_script: carousel.full_embed_script || carousel.fullEmbedScript,
+        order: carousel.order || 0
+      };
+
+      if (carouselData.dutchie_carousel_id || carouselData.full_embed_script) {
+        carouselsByStore[storeDocId].push(carouselData);
+      }
+    });
+  }
+
+  // Fetch product discounts from Strapi backend endpoint
+  const discountsResponse = await fetch(`${STRAPI_BASE}/product-discounts`);
+
+  if (discountsResponse.ok) {
+    const data = await discountsResponse.json();
+    const allDiscounts = data?.data || [];
+
+    // Date filtering
+    const now = new Date();
+    const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
+    const sevenDaysFromNow = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+
+    // Filter out accessory category, samples, only show cannabis products, and apply date filters
+    productDiscounts = allDiscounts.filter(discount => {
+      const category = (discount.category || '').toLowerCase();
+      const isCannabis = discount.is_cannabis === true;
+      const productName = (discount.product_name || '').toLowerCase();
+
+      // Check category and cannabis filter
+      if (!isCannabis || category === 'accessory' || category === 'accessories') {
+        return false;
+      }
+
+      // Filter out samples
+      if (productName.includes('sample')) {
+        return false;
+      }
+
+      // Check valid_from: should not be more than 3 days in the past
+      if (discount.valid_from) {
+        const validFrom = new Date(discount.valid_from);
+        if (validFrom < threeDaysAgo) {
+          return false;
+        }
+      }
+
+      // Check valid_until: should not be more than 7 days in the future
+      if (discount.valid_until) {
+        const validUntil = new Date(discount.valid_until);
+        if (validUntil > sevenDaysFromNow) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    console.log(`Fetched ${allDiscounts.length} product discounts, showing ${productDiscounts.length} (filtered by category, cannabis type, and date range)`);
+  } else {
+    error = `Failed to fetch discounts: ${discountsResponse.status} ${discountsResponse.statusText}`;
+    console.error(error);
+  }
+} catch (err) {
+  error = `Error fetching data: ${err.message}`;
+  console.error(error);
+}
+
+// Create a Set of allowed store IDs for state filtering
+// The dutchie_store_id in discounts matches DutchieStoreID in stores
+const allowedStoreIds = stateFilter
+  ? new Set(stores.map(s => s.dutchieStoreId).filter(Boolean))
+  : null;
+
+// Group discounts by store and limit to deals per store
+// Filter by state if stateFilter is set
+let discountsByStore = productDiscounts.reduce((acc, discount) => {
+  const storeId = discount.dutchie_store_id || discount.dutchieStoreId || 'unknown';
+
+  // If state filter is active, only include discounts from stores in that state
+  if (allowedStoreIds && !allowedStoreIds.has(storeId)) {
+    return acc;
+  }
+
+  if (!acc[storeId]) {
+    acc[storeId] = [];
+  }
+  acc[storeId].push(discount);
+  return acc;
+}, {});
+
+// Limit each store to 8 deals
+Object.keys(discountsByStore).forEach(storeId => {
+  discountsByStore[storeId] = discountsByStore[storeId].slice(0, 8);
+});
+
+// Calculate filtered deals count (for display)
+const filteredDealsCount = Object.values(discountsByStore).reduce((acc, deals) => acc + deals.length, 0);
+
+// Build a list of stores to display (stores with deals + stores with carousels in the state)
+// This ensures stores with carousels show even if they don't have deals
+let storesToDisplay: { store: any; deals: any[]; banners: any[]; carousels: any[] }[] = [];
+
+
+if (stateFilter) {
+  // When filtering by state, include all stores in that state that have carousels OR deals
+  const storesWithDealsIds = new Set(Object.keys(discountsByStore));
+
+  stores.forEach(store => {
+                const storeDeals = store.dutchieStoreId ? (discountsByStore[store.dutchieStoreId] || []) : [];
+    const storeHasCarousels = store.documentId && carouselsByStore[store.documentId]?.length > 0;
+
+    // Get banners for this store (by documentId or numeric id)
+    const storeBanners = [
+      ...(store.documentId ? (bannersByStore[store.documentId] || []) : []),
+      ...(store.id ? (bannersByStore[store.id] || []) : [])
+    ];
+
+    // Get carousels for this store
+    const storeCarousels = store.documentId ? (carouselsByStore[store.documentId] || []) : [];
+
+    // Include all stores in the filtered state
+    storesToDisplay.push({ store, deals: storeDeals, banners: storeBanners, carousels: storeCarousels });
+  });
+} else {
+  // When not filtering by state, show stores that have deals (original behavior)
+  Object.entries(discountsByStore).forEach(([storeId, storeDeals]) => {
+    const store = allStores.find(s => s.dutchieStoreId === storeId);
+
+    // Get banners for this store (by documentId or numeric id)
+    const storeBanners = store ? [
+      ...(store.documentId ? (bannersByStore[store.documentId] || []) : []),
+      ...(store.id ? (bannersByStore[store.id] || []) : [])
+    ] : [];
+
+    // Get carousels for this store
+    const storeCarousels = store?.documentId ? (carouselsByStore[store.documentId] || []) : [];
+
+    storesToDisplay.push({ store, deals: storeDeals, banners: storeBanners, carousels: storeCarousels });
+  });
+}
+
+// Debug: log storesToDisplay banner counts
+
+// Helper function to format price
+function formatPrice(price) {
+  if (!price && price !== 0) return null;
+  return typeof price === 'number' ? price.toFixed(2) : parseFloat(price).toFixed(2);
+}
+
+// Helper function to generate Dutchie product slug
+function generateDutchieSlug(deal) {
+  const parts = [];
+  if (deal.brand) parts.push(deal.brand);
+  if (deal.product_name) parts.push(deal.product_name);
+
+  return parts.join(' ')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .trim();
+}
+
+// Helper function to calculate discounted price
+function calculateDiscountedPrice(deal) {
+  const inventoryPrice = parseFloat(deal.inventory_unit_price || deal.unit_price || 0);
+  const discountAmount = parseFloat(deal.discount_amount || 0);
+  const discountType = deal.discount_type || '';
+
+  let discountedPrice = null;
+
+  // If discount type is Percent
+  if (discountType.toLowerCase().includes('percent')) {
+    discountedPrice = inventoryPrice * (1 - discountAmount);
+  }
+  // If discount type is "Price To Amount - Total Amount"
+  else if (discountType.toLowerCase().includes('price to amount')) {
+    discountedPrice = discountAmount;
+  }
+
+  return {
+    originalPrice: inventoryPrice,
+    discountedPrice: discountedPrice,
+    savings: inventoryPrice - discountedPrice,
+    percentOff: inventoryPrice > 0 ? Math.round(((inventoryPrice - discountedPrice) / inventoryPrice) * 100) : 0
+  };
+}
+---
+
+<style>
+  .logo-bg {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150vw;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero-logo-bg {
+    position: absolute;
+    top: 40%;
+    left: 65%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.08;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .deal-card {
+    transition: all 0.3s ease;
+  }
+  .deal-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .section-logo {
+    position: absolute;
+    width: 300px;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+  }
+</style>
+
+<Layout title={regionInfo ? `${regionInfo.name} Deals | Mint Cannabis` : "Product Deals | Mint Cannabis"} description={regionInfo ? `Browse cannabis deals in ${regionInfo.name} at Mint Cannabis dispensaries.` : "Browse all product deals from our database at Mint Cannabis dispensaries."}>
+  <!-- Static Logo Background -->
+  <img src="/assets/MintCannabis_CoinLogo_GreyScale_Grey%204.png" alt="" class="logo-bg" aria-hidden="true" />
+
+  <div class="min-h-screen bg-black relative z-10">
+    <!-- Hero Section -->
+    <div class="text-white py-6 md:py-8 relative">
+      <!-- Hero Logo Background -->
+      <img src="/assets/MintCannabis_CoinLogo_GreyScale_Grey%204.png" alt="" class="hero-logo-bg" aria-hidden="true" />
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-1">
+        <!-- Breadcrumbs -->
+        <nav class="mb-6 text-sm">
+          <div class="flex items-center justify-center space-x-2">
+            <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
+            <span class="text-green-300">/</span>
+            {regionInfo ? (
+              <>
+                <a href="/deals-db" class="text-yellow-400 hover:text-yellow-300">Deals</a>
+                <span class="text-green-300">/</span>
+                <span class="text-white">{regionInfo.name}</span>
+              </>
+            ) : (
+              <span class="text-white">Deals</span>
+            )}
+          </div>
+        </nav>
+
+        <div class="text-center">
+          <h1 class="text-4xl md:text-6xl font-bold mb-4 uppercase" style="text-shadow: 0 4px 8px rgba(0,0,0,0.8);">
+            {regionInfo ? `${regionInfo.name} Deals` : 'Product Deals'}
+          </h1>
+          <p class="text-lg md:text-xl text-yellow-400 max-w-2xl mx-auto">
+            {filteredDealsCount > 0
+              ? `${filteredDealsCount} deals ${regionInfo ? `in ${regionInfo.name}` : 'available'}!`
+              : `Browse our stores ${regionInfo ? `in ${regionInfo.name}` : ''}`}
+          </p>
+        </div>
+
+        <!-- Stats -->
+        {filteredDealsCount > 0 && (
+          <div class="flex justify-center gap-8 mt-8">
+            <div class="text-center">
+              <div class="text-3xl font-bold text-green-400">{filteredDealsCount}</div>
+              <div class="text-sm text-gray-300">Total Deals</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    {error && (
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-red-900/80 border border-red-600 rounded-lg p-6 text-white">
+          <h2 class="text-xl font-bold mb-2">⚠️ API Error</h2>
+          <p class="text-sm">{error}</p>
+          <p class="text-xs mt-4 text-gray-300">
+            Note: You need to create a custom Strapi endpoint at <code class="bg-black/40 px-2 py-1 rounded">/api/product-discounts</code> that queries the product_discounts table.
+          </p>
+        </div>
+      </div>
+    )}
+
+    <!-- Deals Grid by Store -->
+    <div class="py-8 pb-16">
+        {storesToDisplay.length === 0 && !error ? (
+          <div class="text-center py-16">
+            <div class="max-w-md mx-auto p-8 bg-black/80 rounded-lg">
+              <div class="text-6xl mb-4">🏷️</div>
+              <p class="text-white text-xl font-bold">No product deals found</p>
+              <p class="text-gray-300 mt-2">Check back soon for new deals!</p>
+            </div>
+          </div>
+        ) : (
+          storesToDisplay.map(({ store, deals: storeDeals, banners: storeBanners, carousels: storeCarousels }, storeIndex) => {
+            const storeName = store?.name || 'Mint Cannabis';
+
+            // Cycle through different gray shades
+            const grayShades = [
+              'bg-gray-900/50',
+              'bg-gray-800/50',
+              'bg-gray-700/50',
+              'bg-gray-600/50',
+              'bg-slate-800/50',
+              'bg-zinc-800/50'
+            ];
+            const bgShade = grayShades[storeIndex % grayShades.length];
+
+            // Random-ish positions for section logos based on index
+            const logoPositions = [
+              { top: '10%', left: '5%' },
+              { top: '20%', right: '8%' },
+              { bottom: '15%', left: '10%' },
+              { top: '30%', right: '5%' },
+              { bottom: '20%', right: '12%' },
+              { top: '15%', left: '8%' },
+            ];
+            const pos1 = logoPositions[storeIndex % logoPositions.length];
+            const pos2 = logoPositions[(storeIndex + 3) % logoPositions.length];
+
+            // Banners and carousels are now pre-computed in storesToDisplay
+            
+            return (
+              <div class={`mb-12 pb-8 ${bgShade} w-full relative overflow-hidden`}>
+                {/* Section Background Logos */}
+                <img
+                  src="/assets/MintCannabis_CoinLogo_GreyScale_Grey%204.png"
+                  alt=""
+                  class="section-logo"
+                  style={`top: ${pos1.top || 'auto'}; bottom: ${pos1.bottom || 'auto'}; left: ${pos1.left || 'auto'}; right: ${pos1.right || 'auto'};`}
+                  aria-hidden="true"
+                />
+                <img
+                  src="/assets/MintCannabis_CoinLogo_GreyScale_Grey%204.png"
+                  alt=""
+                  class="section-logo"
+                  style={`top: ${pos2.top || 'auto'}; bottom: ${pos2.bottom || 'auto'}; left: ${pos2.left || 'auto'}; right: ${pos2.right || 'auto'};`}
+                  aria-hidden="true"
+                />
+
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                {/* Store Header */}
+                <div class="mb-6 pt-4">
+                  <h2 class="text-2xl font-bold text-white uppercase flex items-center gap-3">
+                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    {storeName}
+                  </h2>
+                  <p class="text-gray-400 mt-1">
+                    {storeDeals.length > 0 ? `${storeDeals.length} deals available` : 'Featured products'}
+                  </p>
+                </div>
+                </div>
+
+                {/* Store Banner Carousel - 75% Width */}
+                {storeBanners.length > 0 && (
+                  <div class="w-3/4 mx-auto mb-6 relative overflow-hidden banner-carousel-container" data-store-index={storeIndex}>
+                    <div class="banner-carousel-track flex transition-transform duration-500 ease-in-out" data-carousel-track={storeIndex}>
+                      {storeBanners.map((banner, bannerIndex) => (
+                        <div class="banner-slide flex-shrink-0 w-full" data-banner-index={bannerIndex}>
+                          {banner.link ? (
+                            <a href={banner.link} class="block">
+                              <img
+                                src={banner.image}
+                                alt={banner.title || storeName}
+                                class="w-full h-auto hidden md:block"
+                              />
+                              <img
+                                src={banner.image}
+                                alt={banner.title || storeName}
+                                class="w-full h-auto md:hidden"
+                              />
+                            </a>
+                          ) : (
+                            <>
+                              <img
+                                src={banner.image}
+                                alt={banner.title || storeName}
+                                class="w-full h-auto hidden md:block"
+                              />
+                              <img
+                                src={banner.image}
+                                alt={banner.title || storeName}
+                                class="w-full h-auto md:hidden"
+                              />
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {/* Carousel Navigation Dots */}
+                    {storeBanners.length > 1 && (
+                      <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+                        {storeBanners.map((_, dotIndex) => (
+                          <button
+                            class={`banner-dot w-3 h-3 rounded-full transition-all duration-300 ${dotIndex === 0 ? 'bg-green-400 scale-125' : 'bg-white/50 hover:bg-white/80'}`}
+                            data-store={storeIndex}
+                            data-dot={dotIndex}
+                            aria-label={`Go to banner ${dotIndex + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {/* Carousel Arrow Navigation */}
+                    {storeBanners.length > 1 && (
+                      <>
+                        <button
+                          class="banner-prev absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all z-10"
+                          data-store={storeIndex}
+                          aria-label="Previous banner"
+                        >
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <button
+                          class="banner-next absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all z-10"
+                          data-store={storeIndex}
+                          aria-label="Next banner"
+                        >
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Store Carousels - Full Width (no titles) */}
+                {storeCarousels.length > 0 && storeCarousels.map((carousel, carouselIndex) => (
+                  <div class="mb-8 w-full">
+                    {carousel.full_embed_script ? (
+                      <Fragment set:html={carousel.full_embed_script} />
+                    ) : carousel.dutchie_carousel_id && store?.dutchieStoreId ? (
+                      <DutchieCarousel
+                        retailerId={store.dutchieStoreId}
+                        carouselId={carousel.dutchie_carousel_id}
+                        routeRoot={`/location/${store.slug}`}
+                      />
+                    ) : null}
+                  </div>
+                ))}
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+                {/* Deals Grid */}
+                {storeDeals.length > 0 && (
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {storeDeals.map((deal) => {
+                    const pricing = calculateDiscountedPrice(deal);
+                    const productSlug = generateDutchieSlug(deal);
+                    const productUrl = store?.slug ? `/location/${store.slug}?dtche[product]=${productSlug}` : '#';
+
+                    return (
+                    <a href={productUrl} class="deal-card bg-black/80 rounded-lg overflow-hidden shadow-lg relative block cursor-pointer">
+                      {/* Discount Name Banner (for non-percent discounts) */}
+                      {deal.discount_type && !deal.discount_type.toLowerCase().includes('percent') && deal.discount_name && (
+                        <div class="absolute top-0 left-0 right-0 z-10 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs font-bold px-4 py-2 text-center">
+                          {deal.discount_name}
+                        </div>
+                      )}
+
+                      {/* BOGO Badge */}
+                      {deal.discount_name && deal.discount_name.toLowerCase().includes('bogo') && (
+                        <div class="absolute top-2 left-2 z-10 bg-purple-600 text-white text-sm font-bold px-3 py-2 rounded-lg shadow-lg">
+                          BOGO
+                        </div>
+                      )}
+
+                      {/* Percent Off Badge */}
+                      {!deal.discount_name?.toLowerCase().includes('bogo') && deal.discount_type && deal.discount_type.toLowerCase().includes('percent') && (
+                        <div class="absolute top-2 left-2 z-10 bg-red-600 text-white text-sm font-bold px-3 py-2 rounded-lg shadow-lg">
+                          {Math.round(parseFloat(deal.discount_amount || 0) * 100)}% OFF
+                        </div>
+                      )}
+
+                      {/* Low Stock Badge */}
+                      {deal.quantity_available && deal.quantity_available < 10 && (
+                        <div class="absolute bottom-2 right-2 z-10 bg-orange-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                          ⏰ Going Quick!
+                        </div>
+                      )}
+
+                      {/* Product Image */}
+                      {deal.image_url && (
+                        <div class="w-full h-48 bg-white flex items-center justify-center overflow-hidden">
+                          <img
+                            src={deal.image_url}
+                            alt={deal.product_name || 'Product'}
+                            class="w-full h-full object-contain"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+
+                      {/* Product Name (matches the image) */}
+                      <div class="text-white text-sm font-bold px-4 py-3 text-center uppercase tracking-wide line-clamp-2">
+                        {deal.product_name || deal.productName || 'Product Deal'}
+                      </div>
+
+                      {/* Brand Name */}
+                      {deal.brand && (
+                        <div class="text-green-400 text-xs font-semibold px-4 pb-1 text-center uppercase tracking-wider">
+                          {deal.brand}
+                        </div>
+                      )}
+
+                      {/* Strain */}
+                      {deal.strain && deal.strain !== 'No Strain' && (
+                        <div class="text-purple-400 text-xs px-4 pb-2 text-center italic">
+                          {deal.strain}
+                        </div>
+                      )}
+
+                      {/* Discount/Promotion Name */}
+                      {deal.discount_name && deal.discount_name !== deal.product_name && (
+                        <div class="text-yellow-400 text-xs font-semibold px-3 py-2 text-center">
+                          🎉 {deal.discount_name}
+                        </div>
+                      )}
+
+                      {/* Deal Info */}
+                      <div class="p-4">
+                        {/* Price Display */}
+                        {pricing.discountedPrice && (
+                          <div class="text-center mb-4">
+                            {/* Original Price - Crossed Out (only for percent discounts) */}
+                            {pricing.originalPrice > 0 && deal.discount_type?.toLowerCase().includes('percent') && (
+                              <div class="text-gray-400 text-lg line-through mb-1">
+                                ${formatPrice(pricing.originalPrice)}
+                              </div>
+                            )}
+
+                            {/* Discounted Price */}
+                            <div class="text-3xl font-bold text-green-400">
+                              ${formatPrice(pricing.discountedPrice)}
+                            </div>
+
+                            {/* Savings Amount (only for percent discounts) */}
+                            {pricing.savings > 0 && deal.discount_type?.toLowerCase().includes('percent') && (
+                              <div class="text-yellow-400 text-xs mt-2">
+                                Save ${formatPrice(pricing.savings)}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Product Details */}
+                        <div class="text-sm space-y-2">
+                          {(deal.unit_weight || deal.weight) && (
+                            <div class="text-gray-300">
+                              <span class="text-yellow-400">THC: </span>{deal.unit_weight || deal.weight}{deal.unit_weight_unit ? ` ${deal.unit_weight_unit}` : ''}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Valid Dates */}
+                        {(deal.valid_from || deal.valid_until) && (
+                          <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">
+                            {deal.valid_from && <div>From: {new Date(deal.valid_from).toLocaleDateString()}</div>}
+                            {deal.valid_until && <div>Until: {new Date(deal.valid_until).toLocaleDateString()}</div>}
+                          </div>
+                        )}
+                      </div>
+                    </a>
+                    );
+                  })}
+                </div>
+                )}
+
+                {/* See More Link */}
+                {store && store.slug && storeDeals.length > 0 && (
+                  <div class="mt-6 text-right">
+                    <a
+                      href={`/location/${store.slug}/deals`}
+                      class="text-green-400 hover:text-green-300 font-semibold transition-colors"
+                    >
+                      See all deals at {storeName} →
+                    </a>
+                  </div>
+                )}
+                </div>
+              </div>
+            );
+          })
+        )}
+
+        <!-- CTA -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mt-16 bg-black/90 rounded-lg p-8 text-center">
+          <h2 class="text-2xl font-bold mb-4 text-white uppercase">
+            Visit a Location Near You
+          </h2>
+          <p class="text-green-300 mb-6 max-w-2xl mx-auto">
+            Stop by your nearest Mint Cannabis dispensary to shop these deals in person!
+          </p>
+          <a href="/regions" class="inline-block px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-colors">
+            Find a Location
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Banner Carousel functionality
+  function initBannerCarousels() {
+    const carousels = document.querySelectorAll('.banner-carousel-container');
+
+    carousels.forEach((carousel) => {
+      const storeIndex = carousel.getAttribute('data-store-index');
+      const track = carousel.querySelector('.banner-carousel-track');
+      const slides = carousel.querySelectorAll('.banner-slide');
+      const dots = carousel.querySelectorAll('.banner-dot');
+      const prevBtn = carousel.querySelector('.banner-prev');
+      const nextBtn = carousel.querySelector('.banner-next');
+
+      if (!track || slides.length <= 1) return;
+
+      let currentIndex = 0;
+      const totalSlides = slides.length;
+      let autoPlayInterval: ReturnType<typeof setInterval> | null = null;
+
+      function goToSlide(index: number) {
+        if (index < 0) index = totalSlides - 1;
+        if (index >= totalSlides) index = 0;
+
+        currentIndex = index;
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+        // Update dots
+        dots.forEach((dot, i) => {
+          if (i === currentIndex) {
+            dot.classList.remove('bg-white/50', 'hover:bg-white/80');
+            dot.classList.add('bg-green-400', 'scale-125');
+          } else {
+            dot.classList.remove('bg-green-400', 'scale-125');
+            dot.classList.add('bg-white/50', 'hover:bg-white/80');
+          }
+        });
+      }
+
+      function nextSlide() {
+        goToSlide(currentIndex + 1);
+      }
+
+      function prevSlide() {
+        goToSlide(currentIndex - 1);
+      }
+
+      function startAutoPlay() {
+        stopAutoPlay();
+        autoPlayInterval = setInterval(nextSlide, 5000); // Auto-advance every 5 seconds
+      }
+
+      function stopAutoPlay() {
+        if (autoPlayInterval) {
+          clearInterval(autoPlayInterval);
+          autoPlayInterval = null;
+        }
+      }
+
+      // Event listeners
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          prevSlide();
+          startAutoPlay(); // Reset autoplay timer
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          nextSlide();
+          startAutoPlay(); // Reset autoplay timer
+        });
+      }
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          goToSlide(index);
+          startAutoPlay(); // Reset autoplay timer
+        });
+      });
+
+      // Pause autoplay on hover
+      carousel.addEventListener('mouseenter', stopAutoPlay);
+      carousel.addEventListener('mouseleave', startAutoPlay);
+
+      // Touch/swipe support
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      carousel.addEventListener('touchstart', (e: TouchEvent) => {
+        touchStartX = e.changedTouches[0].screenX;
+        stopAutoPlay();
+      }, { passive: true });
+
+      carousel.addEventListener('touchend', (e: TouchEvent) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) > 50) { // Minimum swipe distance
+          if (diff > 0) {
+            nextSlide();
+          } else {
+            prevSlide();
+          }
+        }
+        startAutoPlay();
+      }, { passive: true });
+
+      // Start autoplay
+      startAutoPlay();
+    });
+  }
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBannerCarousels);
+  } else {
+    initBannerCarousels();
+  }
+
+  // Support for Astro View Transitions
+  document.addEventListener('astro:page-load', initBannerCarousels);
+</script>

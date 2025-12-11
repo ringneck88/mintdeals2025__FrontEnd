@@ -2,6 +2,15 @@
 export const prerender = true;
 
 import Layout from '../layouts/Layout.astro';
+import Spinner from '../components/Spinner.astro';
+
+// Map center (approximate center of USA)
+const mapCenter = {
+  lat: 39.8283,
+  lng: -98.5795
+};
+
+const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
 
 // Fetch stores and regions from Railway backend
 let storesData = [];
@@ -200,11 +209,9 @@ try {
     background: rgba(30, 30, 30, 0.5);
   }
   .hero-section {
-    min-height: 7.5vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 0;
+    min-height: 50vh;
+    position: relative;
+    padding: 0;
   }
 
   .hero-section h1 {
@@ -213,16 +220,29 @@ try {
 
   @media (min-width: 768px) {
     .hero-section {
-      min-height: 30vh;
-      padding: 1rem 0;
+      min-height: 60vh;
     }
   }
 
   @media (min-width: 1024px) {
     .hero-section {
-      min-height: 40vh;
-      padding: 2rem 0;
+      min-height: 70vh;
     }
+  }
+
+  .map-container-hero {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .map-container-hero #regions-map {
+    width: 100%;
+    height: 100%;
   }
 
   /* Gradient heading class with better browser support */
@@ -234,6 +254,102 @@ try {
     text-fill-color: transparent;
     display: inline-block;
   }
+
+  /* Map Styles */
+  #regions-map {
+    width: 100%;
+    height: 50vh;
+    border-radius: 0.5rem;
+    border: 1px solid black;
+    z-index: 1;
+  }
+
+  .map-container {
+    position: relative;
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 0.5rem;
+  }
+
+  /* Google Maps Info Window Custom Styling */
+  .gm-style .gm-style-iw-c {
+    padding: 0;
+    border-radius: 8px;
+    max-width: 320px !important;
+  }
+
+  .gm-style .gm-style-iw-d {
+    overflow: auto !important;
+  }
+
+  .store-info-window {
+    padding: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: white;
+    color: #000000 !important;
+  }
+
+  .store-info-window * {
+    color: inherit;
+  }
+
+  .store-info-window h3 {
+    margin: 0 0 8px 0;
+    color: #16a34a !important;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .store-info-window .address {
+    margin-bottom: 12px;
+    color: #000000 !important;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .store-info-window .address div {
+    color: #000000 !important;
+  }
+
+  .store-info-window .buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .store-info-window .btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    color: white;
+    transition: transform 0.2s;
+  }
+
+  .store-info-window .btn:hover {
+    transform: scale(1.05);
+  }
+
+  .store-info-window .btn-view {
+    background: linear-gradient(to right, rgb(251, 191, 36), rgb(249, 115, 22));
+  }
+
+  .store-info-window .btn-directions {
+    background: rgb(34, 197, 94);
+  }
 </style>
 
 <Layout title="Regions - Mint Cannabis" description="Browse cannabis dispensaries by region and area">
@@ -242,42 +358,35 @@ try {
 
   <!-- Content Wrapper -->
   <div class="content-wrapper">
-    <!-- Hero Section -->
+    <!-- Hero Section with Full-Width Map -->
     <div class="text-white hero-section relative">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%] relative z-10">
-        <!-- Breadcrumb -->
-        <nav class="mb-6 text-sm">
+      <!-- Breadcrumb Overlay -->
+      <div class="absolute top-0 left-0 right-0 z-20 px-8 py-4">
+        <nav class="text-sm">
           <div class="flex items-center justify-center space-x-2">
             <a href="/" class="text-yellow-400 hover:text-yellow-300">Home</a>
             <span class="text-white">/</span>
             <span class="text-white">Regions</span>
           </div>
         </nav>
+      </div>
 
-        <div class="text-center">
-          <h1 class="mb-4 text-4xl font-bold md:text-6xl text-white uppercase drop-shadow-2xl" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9);">
-            EXPLORE MINT LOCATIONS
-          </h1>
-          <p class="max-w-2xl mx-auto mb-6 text-lg text-white md:text-xl drop-shadow-lg">
-            Discover premium cannabis dispensaries across multiple states
-          </p>
-
-          <!-- Navigation Links -->
-          <div class="relative z-10 flex flex-wrap justify-center gap-6 mt-6">
-            <a href="/stores" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
-              All Stores →
-            </a>
-            <a href="/categories" class="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors">
-              Browse Categories →
-            </a>
-          </div>
+      <!-- Full-Width Map -->
+      <div class="map-container-hero">
+        <div id="regions-map"></div>
+        <div class="loading-overlay" id="mapLoadingOverlay">
+          <Spinner size="lg" text="Loading map..." />
+        </div>
+        <!-- Mint Logo -->
+        <div class="absolute bottom-4 left-4 z-20">
+          <img src="/assets/MintCannabis_CoinLogo_GreyScale_Grey 2.png" alt="Mint Cannabis" class="opacity-50" style="width: 150px; height: 150px;" />
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
     <div class="py-12 bg-black">
-      <div class="px-8 mx-auto sm:px-12 lg:px-16 xl:px-20 max-w-[90%]">
+      <div class="px-4 sm:px-6 lg:px-8">
         {regionsData.length === 0 ? (
           <div class="py-16 text-center">
             <div class="max-w-md p-8 mx-auto bg-black rounded-lg">
@@ -411,17 +520,12 @@ try {
                             />
                           ) : (
                             <div class="w-full h-32 bg-gray-800 flex items-center justify-center relative">
-                              <span class="text-4xl" title={store.Is24Hour ? '24 Hour' : ''}>
-                                {store.Is24Hour ? '🏪' : '🏣'}
-                              </span>
-                              {/* Mint coin logo overlay on building emoji */}
-                              {!store.Is24Hour && (
-                                <img
-                                  src="/favicon.png"
-                                  alt="Mint"
-                                  class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 object-contain opacity-90"
-                                  style="margin-top: -6px;"
-                                />
+                              {/* Green store icon */}
+                              <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" title={store.Is24Hour ? '24 Hour' : ''}>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                              </svg>
+                              {store.Is24Hour && (
+                                <span class="absolute top-2 right-2 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded">24hr</span>
                               )}
                             </div>
                           )}
@@ -429,8 +533,11 @@ try {
                           {/* Cafe Badge */}
                           {store.HasCafe && (
                             <div class="absolute bottom-1 right-1">
-                              <div class="bg-orange-900/90 border border-orange-500 text-orange-300 px-1.5 py-0.5 rounded text-lg shadow-lg" title="Cafe on Site">
-                                🍔
+                              <div class="bg-green-900/90 border border-green-500 text-green-400 px-1.5 py-0.5 rounded shadow-lg flex items-center gap-1" title="Cafe on Site">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-xs font-bold">Cafe</span>
                               </div>
                             </div>
                           )}
@@ -443,7 +550,7 @@ try {
                             <div class="mb-2">
                               {storeAddress && (
                                 <p class="flex items-start text-white text-sm">
-                                  <svg class="w-4 h-4 mr-1.5 mt-0.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg class="w-4 h-4 mr-1.5 mt-0.5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                   </svg>
@@ -462,10 +569,6 @@ try {
                                   rel="noopener noreferrer"
                                   class="text-yellow-400 hover:text-yellow-300 text-xs ml-5.5 inline-flex items-center mt-0.5"
                                 >
-                                  <svg class="w-3.5 h-3.5 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                  </svg>
                                   Get Driving Directions →
                                 </a>
                               )}
@@ -724,4 +827,214 @@ try {
   }
 
   document.addEventListener('astro:page-load', loadGoogleRatings);
+</script>
+
+<!-- Regions Map Script -->
+<script is:inline define:vars={{ center: mapCenter, apiBase: API_BASE }}>
+  let regionsMap;
+  let mapMarkers = [];
+
+  async function initRegionsMap() {
+    console.log('🗺️ Initializing Regions Map...');
+
+    try {
+      if (typeof google === 'undefined') {
+        console.log('Waiting for Google Maps API...');
+        setTimeout(initRegionsMap, 500);
+        return;
+      }
+
+      const mapElement = document.getElementById('regions-map');
+      if (!mapElement) {
+        console.error('Map element not found');
+        return;
+      }
+
+      // Create map
+      regionsMap = new google.maps.Map(mapElement, {
+        center: { lat: center.lat, lng: center.lng },
+        zoom: 4,
+        styles: [
+          { "featureType": "all", "elementType": "geometry.fill", "stylers": [{ "weight": "2.00" }] },
+          { "featureType": "all", "elementType": "geometry.stroke", "stylers": [{ "color": "#9c9c9c" }] },
+          { "featureType": "all", "elementType": "labels.text", "stylers": [{ "visibility": "on" }] },
+          { "featureType": "landscape", "elementType": "all", "stylers": [{ "color": "#f2f2f2" }] },
+          { "featureType": "landscape", "elementType": "geometry.fill", "stylers": [{ "color": "#ffffff" }] },
+          { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+          { "featureType": "road", "elementType": "all", "stylers": [{ "saturation": -100 }, { "lightness": 45 }] },
+          { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#eeeeee" }] },
+          { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "simplified" }] },
+          { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] },
+          { "featureType": "water", "elementType": "all", "stylers": [{ "color": "#46bcec" }, { "visibility": "on" }] },
+          { "featureType": "water", "elementType": "geometry.fill", "stylers": [{ "color": "#b5dae1" }] }
+        ]
+      });
+
+      // Fetch stores and add markers
+      await fetchStoresForMap();
+
+      // Hide loading overlay
+      const loadingOverlay = document.getElementById('mapLoadingOverlay');
+      if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+      }
+
+      console.log('✅ Regions Map initialized');
+    } catch (error) {
+      console.error('Error initializing map:', error);
+    }
+  }
+
+  async function fetchStoresForMap() {
+    try {
+      console.log('📍 Fetching stores for map...');
+      const response = await fetch(`${apiBase}/stores?populate=*&pagination[pageSize]=500`);
+
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}`);
+      }
+
+      const data = await response.json();
+      const rawStores = data?.data || [];
+      console.log(`✅ Fetched ${rawStores.length} stores for map`);
+
+      const stores = rawStores.map(store => {
+        const locationSlug = store.slug || store.location_slug ||
+                            (store.name ? store.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : '');
+
+        const address = store.address || {};
+        const street = address.street || store.street || '';
+        const city = address.city || store.city || '';
+        const state = address.state || store.state || '';
+        const zip = address.zip || store.zip || '';
+
+        let latitude = null;
+        let longitude = null;
+
+        if (store.geo) {
+          if (typeof store.geo === 'object') {
+            latitude = store.geo.lat || store.geo.latitude || null;
+            longitude = store.geo.lng || store.geo.lon || store.geo.longitude || null;
+          } else if (typeof store.geo === 'string') {
+            try {
+              const geoObj = JSON.parse(store.geo);
+              latitude = geoObj.lat || geoObj.latitude || null;
+              longitude = geoObj.lng || geoObj.lon || geoObj.longitude || null;
+            } catch (e) {
+              console.error('Failed to parse geo string for store:', store.name);
+            }
+          }
+        }
+
+        return {
+          id: store.id || store.documentId,
+          name: store.name || 'Mint Cannabis',
+          slug: locationSlug,
+          street,
+          city,
+          state,
+          zip,
+          latitude,
+          longitude
+        };
+      }).filter(store => store.latitude && store.longitude);
+
+      console.log(`✅ ${stores.length} stores have coordinates`);
+
+      // Add markers
+      addMapMarkers(stores);
+
+      // Fit bounds to show all markers with padding
+      if (stores.length > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        stores.forEach(store => {
+          bounds.extend({ lat: store.latitude, lng: store.longitude });
+        });
+        regionsMap.fitBounds(bounds, { top: 100, right: 50, bottom: 50, left: 50 });
+
+        // After fitBounds, ensure minimum zoom level for better visibility
+        google.maps.event.addListenerOnce(regionsMap, 'bounds_changed', function() {
+          if (regionsMap.getZoom() < 5) {
+            regionsMap.setZoom(5);
+          }
+        });
+      }
+
+    } catch (error) {
+      console.error('Error fetching stores for map:', error);
+    }
+  }
+
+  function addMapMarkers(stores) {
+    // Clear existing markers
+    mapMarkers.forEach(marker => marker.setMap(null));
+    mapMarkers = [];
+
+    stores.forEach((store, index) => {
+      const markerNumber = index + 1;
+      const marker = new google.maps.Marker({
+        position: { lat: store.latitude, lng: store.longitude },
+        map: regionsMap,
+        title: `${markerNumber}. ${store.name}`,
+        icon: {
+          url: '/favicon.png',
+          scaledSize: new google.maps.Size(25, 25),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(12.5, 12.5)
+        },
+        animation: google.maps.Animation.DROP,
+        label: {
+          text: markerNumber.toString(),
+          color: 'rgba(255, 255, 255, 0.7)',
+          fontSize: '9px',
+          fontWeight: 'bold'
+        }
+      });
+
+      // Info window content with inline styles for visibility
+      const infoContent = `
+        <div style="padding: 16px; background: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          <h3 style="margin: 0 0 8px 0; color: #16a34a; font-size: 18px; font-weight: bold;">${store.name}</h3>
+          <div style="margin-bottom: 12px; color: #000000; font-size: 14px; line-height: 1.4;">
+            ${store.street ? `<div style="color: #000000;">${store.street}</div>` : ''}
+            ${store.city || store.state ? `<div style="color: #000000;">${store.city}${store.city && store.state ? ', ' : ''}${store.state} ${store.zip}</div>` : ''}
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <a href="/location/${store.slug}" style="flex: 1; text-align: center; padding: 10px 14px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px; color: white; background: linear-gradient(to right, rgb(251, 191, 36), rgb(249, 115, 22));">View Store</a>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${store.latitude},${store.longitude}" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; padding: 10px 14px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px; color: white; background: rgb(34, 197, 94);">Directions</a>
+          </div>
+        </div>
+      `;
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: infoContent
+      });
+
+      marker.addListener('click', () => {
+        // Close other info windows
+        mapMarkers.forEach(m => {
+          if (m.infoWindow) m.infoWindow.close();
+        });
+        infoWindow.open(regionsMap, marker);
+      });
+
+      marker.infoWindow = infoWindow;
+      mapMarkers.push(marker);
+    });
+
+    console.log(`✅ Added ${mapMarkers.length} markers to map`);
+  }
+
+  // Initialize map when Google Maps is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(initRegionsMap, 1000);
+    });
+  } else {
+    setTimeout(initRegionsMap, 1000);
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    setTimeout(initRegionsMap, 1000);
+  });
 </script>

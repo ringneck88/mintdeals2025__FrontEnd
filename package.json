@@ -12,8 +12,10 @@
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^12.6.10",
+		"@neondatabase/serverless": "^0.10.3",
 		"@tailwindcss/vite": "^4.1.13",
 		"astro": "^5.13.8",
+		"postgres": "^3.4.7",
 		"tailwindcss": "^4.1.13"
 	},
 	"devDependencies": {
