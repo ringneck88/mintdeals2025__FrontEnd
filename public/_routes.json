@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "include": [
+    "/*"
+  ],
+  "exclude": [
+    "/_astro/*",
+    "/assets/*",
+    "/videos/*",
+    "/*.jpg",
+    "/*.png",
+    "/*.gif",
+    "/*.svg",
+    "/*.mp4",
+    "/favicon.gif",
+    "/favicon.png",
+    "/favicon.svg",
+    "/game.html"
+  ]
+}

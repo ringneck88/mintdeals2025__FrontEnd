@@ -13,7 +13,7 @@ export default defineConfig({
     mode: 'directory',
     //imageService: "cloudflare"
     routes: {
-      strategy: 'auto'
+      strategy: 'exclude'
     }
   }),
 
