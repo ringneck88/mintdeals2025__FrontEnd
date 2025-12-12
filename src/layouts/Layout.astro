@@ -183,6 +183,16 @@ function getCategoryIcon(slug: string) {
             </a>
           </div>
 
+          <!-- Mobile Hamburger Button -->
+          <button id="mobileMenuBtn" class="md:hidden text-white p-2 focus:outline-none" aria-label="Toggle menu">
+            <svg id="hamburgerIcon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+            <svg id="closeIcon" class="w-8 h-8 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+
           <nav class="hidden md:flex space-x-8 items-center uppercase">
             <a href="/" class="text-gray-200 hover:text-yellow-600 px-3 py-2 rounded-md text-sm font-semibold">
               Home
@@ -203,6 +213,12 @@ function getCategoryIcon(slug: string) {
                   <div class="px-4 py-3">
                     <p class="text-yellow-400 font-bold text-base pb-1 leading-snug">Browse by State & Location</p>
                   </div>
+                  <a href="/regions" class="block px-4 py-2 text-sm text-gray-300 hover-mint-green transition-colors flex items-center gap-2 border-b border-gray-700 mb-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                    </svg>
+                    Map
+                  </a>
                   {navRegions.map(region => {
                     const storesInRegion = storesByRegion[region.name] || [];
                     return (
@@ -235,8 +251,8 @@ function getCategoryIcon(slug: string) {
                       </div>
                     );
                   })}
-                  <div class="pb-4">
-                    <a href="/regions" class="block px-4 py-3 text-base font-bold text-center text-white hover-mint-green transition-colors border-t border-gray-700">
+                  <div class="pb-4 border-t border-gray-700">
+                    <a href="/regions" class="block px-4 py-3 text-base font-bold text-center text-white hover-mint-green transition-colors">
                       View All Locations →
                     </a>
                   </div>
@@ -269,6 +285,56 @@ function getCategoryIcon(slug: string) {
               </div>
             </div>
           </nav>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobileMenu" class="md:hidden hidden bg-black border-t border-gray-800">
+        <div class="px-4 py-4 space-y-2 max-h-[80vh] overflow-y-auto">
+          <a href="/" class="block px-4 py-3 text-white font-semibold hover:bg-gray-800 rounded-lg uppercase">
+            Home
+          </a>
+
+          <!-- Mobile Locations Section -->
+          <div class="border-t border-gray-800 pt-2">
+            <button id="mobileLocationsToggle" class="w-full flex items-center justify-between px-4 py-3 text-white font-semibold hover:bg-gray-800 rounded-lg uppercase">
+              <span>Locations</span>
+              <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div id="mobileLocationsMenu" class="hidden pl-4 space-y-1">
+              <a href="/regions" class="block px-4 py-2 text-gray-300 hover:text-green-400 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                </svg>
+                Map
+              </a>
+              {navRegions.map(region => (
+                <a href={`/region/${region.slug}`} class="block px-4 py-2 text-gray-300 hover:text-green-400">
+                  {region.name}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- Mobile Deals Section -->
+          <div class="border-t border-gray-800 pt-2">
+            <button id="mobileDealsToggle" class="w-full flex items-center justify-between px-4 py-3 text-white font-semibold hover:bg-gray-800 rounded-lg uppercase">
+              <span>Deals</span>
+              <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div id="mobileDealsMenu" class="hidden pl-4 space-y-1">
+              <a href="/deals-db" class="block px-4 py-2 text-orange-400 font-semibold">All Deals</a>
+              {navRegions.map(region => (
+                <a href={`/deals-db?state=${region.slug}`} class="block px-4 py-2 text-gray-300 hover:text-orange-400">
+                  {region.name}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -447,6 +513,40 @@ function getCategoryIcon(slug: string) {
               categoriesMenu.classList.add('hidden');
               isOpen = false;
             }, 200);
+          });
+        }
+
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const hamburgerIcon = document.getElementById('hamburgerIcon');
+        const closeIcon = document.getElementById('closeIcon');
+        const mobileLocationsToggle = document.getElementById('mobileLocationsToggle');
+        const mobileLocationsMenu = document.getElementById('mobileLocationsMenu');
+        const mobileDealsToggle = document.getElementById('mobileDealsToggle');
+        const mobileDealsMenu = document.getElementById('mobileDealsMenu');
+
+        if (mobileMenuBtn && mobileMenu) {
+          mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            hamburgerIcon?.classList.toggle('hidden');
+            closeIcon?.classList.toggle('hidden');
+          });
+        }
+
+        if (mobileLocationsToggle && mobileLocationsMenu) {
+          mobileLocationsToggle.addEventListener('click', () => {
+            mobileLocationsMenu.classList.toggle('hidden');
+            const arrow = mobileLocationsToggle.querySelector('svg');
+            arrow?.classList.toggle('rotate-180');
+          });
+        }
+
+        if (mobileDealsToggle && mobileDealsMenu) {
+          mobileDealsToggle.addEventListener('click', () => {
+            mobileDealsMenu.classList.toggle('hidden');
+            const arrow = mobileDealsToggle.querySelector('svg');
+            arrow?.classList.toggle('rotate-180');
           });
         }
 

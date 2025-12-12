@@ -209,7 +209,7 @@ try {
     background: rgba(30, 30, 30, 0.5);
   }
   .hero-section {
-    min-height: 50vh;
+    min-height: 35vh;
     position: relative;
     padding: 0;
   }
@@ -220,13 +220,13 @@ try {
 
   @media (min-width: 768px) {
     .hero-section {
-      min-height: 60vh;
+      min-height: 50vh;
     }
   }
 
   @media (min-width: 1024px) {
     .hero-section {
-      min-height: 70vh;
+      min-height: 60vh;
     }
   }
 
@@ -286,7 +286,13 @@ try {
   .gm-style .gm-style-iw-c {
     padding: 0;
     border-radius: 8px;
-    max-width: 320px !important;
+    max-width: 280px !important;
+  }
+
+  @media (min-width: 768px) {
+    .gm-style .gm-style-iw-c {
+      max-width: 320px !important;
+    }
   }
 
   .gm-style .gm-style-iw-d {
@@ -358,8 +364,8 @@ try {
 
   <!-- Content Wrapper -->
   <div class="content-wrapper">
-    <!-- Hero Section with Full-Width Map -->
-    <div class="text-white hero-section relative">
+    <!-- Hero Section with Full-Width Map - hidden on mobile -->
+    <div class="text-white hero-section relative hidden md:block">
       <!-- Breadcrumb Overlay -->
       <div class="absolute top-0 left-0 right-0 z-20 px-8 py-4">
         <nav class="text-sm">
@@ -377,8 +383,8 @@ try {
         <div class="loading-overlay" id="mapLoadingOverlay">
           <Spinner size="lg" text="Loading map..." />
         </div>
-        <!-- Mint Logo -->
-        <div class="absolute bottom-4 left-4 z-20">
+        <!-- Mint Logo - hidden on mobile -->
+        <div class="absolute bottom-4 left-4 z-20 hidden md:block">
           <img src="/assets/MintCannabis_CoinLogo_GreyScale_Grey 2.png" alt="Mint Cannabis" class="opacity-50" style="width: 150px; height: 150px;" />
         </div>
       </div>
